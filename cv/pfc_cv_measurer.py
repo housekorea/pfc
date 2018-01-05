@@ -48,10 +48,9 @@ class pfc_cv_measurer:
 		self.PX_MM_RATIO = self.calc_PxForMmRatio(self.COIN_PX,self.COIN_MM)
 
 
-
 		self.transition_images()
 		self.find_contours()
-		self.save_images()
+		self.save_images(debug_save=True)
 
 	# CV에 의해 식별된 Contour의 각 좌표를 순회하며, 해당 좌표가 대표하는 위치를 찾는다. 아래의 4개 위치 식별.
 	# 1.TOP LEFT
@@ -84,8 +83,8 @@ class pfc_cv_measurer:
 		self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
 		self.IMAGES['CV_IMG'] = self.IMAGES['ORIGINAL'].copy()
 		self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['ORIGINAL'], cv2.COLOR_BGR2GRAY)
-		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (1,1),0)
-		self.IMAGES['CANNY_IMG'] = cv2.Canny(self.IMAGES['GAUSSIAN_IMG'],30,40)
+		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (17,17),0)
+		self.IMAGES['CANNY_IMG'] = cv2.Canny(self.IMAGES['GAUSSIAN_IMG'],50,80)
 		self.IMAGES['DILATE_IMG'] = cv2.dilate(self.IMAGES['CANNY_IMG'],None,iterations=2)
 		self.IMAGES['ERODE_IMG'] = cv2.erode(self.IMAGES['DILATE_IMG'],None,iterations=1)
 
@@ -93,7 +92,9 @@ class pfc_cv_measurer:
 
 	# 주어진 PX(픽셀)과 MM(밀리미터)의 비율을 반환한다.
 	def calc_PxForMmRatio(self,px, mm):
-		return round(mm/px,7)
+		mm = float(mm)
+		px = float(px)
+		return mm/px
 
 	# 이미지의 Contour 를 찾는다.
 	def find_contours(self):
@@ -102,7 +103,6 @@ class pfc_cv_measurer:
 
 		f_contours = f_contours[0] if imutils.is_cv2() else f_contours[1]
 		(f_contours,_) = contours.sort_contours(f_contours)
-
 
 		for (i,c) in enumerate(f_contours):
 			box = cv2.minAreaRect(c)
@@ -117,7 +117,7 @@ class pfc_cv_measurer:
 
 
 			# 주어진 조건을 통과한 Contour 이미지 삽입
-			cv2.drawContours(self.IMAGES['CV_IMG'], [box.astype("int")], -1, (144,43,120),8)
+			cv2.drawContours(self.IMAGES['CV_IMG'], [box.astype("int")], -1, (144,43,120),2)
 			# 박스의 각 모서리 위치의 좌표에 원형 이미지 삽입
 			for i, (x,y) in enumerate(box):
 				cv2.circle(self.IMAGES['CV_IMG'],(int(x), int(y)), 2, (0,0,255), -1)
@@ -128,33 +128,43 @@ class pfc_cv_measurer:
 			(tlblX, tlblY) = self.get_midpoint(tl,bl)
 			(trbrX, trbrY) = self.get_midpoint(tr,br)
 
-			cv2.circle(self.IMAGES['CV_IMG'], (int(tltrX), int(tltrY)),10,(255,0,0),-1)
-			cv2.circle(self.IMAGES['CV_IMG'], (int(blbrX), int(blbrY)),10,(255,0,0),-1)
-			cv2.circle(self.IMAGES['CV_IMG'], (int(tlblX), int(tlblY)),10,(255,0,0),-1)
-			cv2.circle(self.IMAGES['CV_IMG'], (int(trbrX), int(trbrY)),10,(255,0,0),-1)
+			cv2.circle(self.IMAGES['CV_IMG'], (int(tltrX), int(tltrY)),3,(255,0,0),-1)
+			cv2.circle(self.IMAGES['CV_IMG'], (int(blbrX), int(blbrY)),3,(255,0,0),-1)
+			cv2.circle(self.IMAGES['CV_IMG'], (int(tlblX), int(tlblY)),3,(255,0,0),-1)
+			cv2.circle(self.IMAGES['CV_IMG'], (int(trbrX), int(trbrY)),3,(255,0,0),-1)
 
-			cv2.line(self.IMAGES['CV_IMG'], (int(tltrX),int(tltrY)), (int(blbrX),int(blbrY) ), (255,0,0),8)
-			cv2.line(self.IMAGES['CV_IMG'], (int(tlblX), int(tlblY)),(int(trbrX), int(trbrY)), (255,0,0),8)
+			cv2.line(self.IMAGES['CV_IMG'], (int(tltrX),int(tltrY)), (int(blbrX),int(blbrY) ), (255,0,0),2)
+			cv2.line(self.IMAGES['CV_IMG'], (int(tlblX), int(tlblY)),(int(trbrX), int(trbrY)), (255,0,0),2)
 
 			# 측정된 PX 길이 측정 및 mm(밀리미터) 단위 변환
 			dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
 			dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
 
+			# print(dA)
+			# print(dB)
+			# print('=========')
 			mid_point_dot = tuple(map(lambda x: int(x), self.get_midpoint((tlblX, tlblY), (trbrX, trbrY))))
 
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,2)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,3, (102,255,255),5)
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,2)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60),cv2.FONT_HERSHEY_SIMPLEX,3, (102,255,255),5)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,2)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,2)) + "mm", (mid_point_dot[0]+30,mid_point_dot[1]+30),cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
 
+			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dA,2)) + "px", (mid_point_dot[0]-40,mid_point_dot[1]-40), cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
+			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dB,2)) + "px", (mid_point_dot[0]+40,mid_point_dot[1]+40),cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
 
 
 	# 최종작업을 완료하고 모든 이미지들을 저장한다.
-	def save_images(self):
+	def save_images(self,debug_save=False):
+
 		splt_image_file_name = self.ORIGINAL_FILE_PATH.split('.')
-		cv2.imwrite(splt_image_file_name[0] + "_cv." + splt_image_file_name[1], self.IMAGES['CV_IMG'])
+		if debug_save == False :
+			cv2.imwrite(splt_image_file_name[0] + "_cv." + splt_image_file_name[1], self.IMAGES['CV_IMG'])
+		elif debug_save == True :
+			for (i,k) in enumerate(list(self.IMAGES)):
+				cv2.imwrite(splt_image_file_name[0] + "_" + str(i)+"_"+str(k) + "." + splt_image_file_name[1], self.IMAGES[k])
 
 
 if __name__ == '__main__':
-	pfc_cv_measurer = pfc_cv_measurer(coin_px=225.79, coin_mm=24, max_contours=20, opath="/Users/house/DEV/PYTHON/openag/images/OG_PHOTO_20171101_141941.jpg",carea=200, min_side=30)
+	pfc_cv_measurer = pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath="/var/og/cam_imgs/20180105_204257.jpg",carea=600, min_side=50)
 
 
 
