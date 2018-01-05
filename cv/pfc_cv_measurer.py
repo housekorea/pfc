@@ -17,31 +17,125 @@ class pfc_cv_measurer:
 	MAX_CONTOURS = None
 	ORIGINAL_FILE_PATH = None
 	IMAGES = {
-							'GRAY_IMG':None,
+							'ORIGINAL' : None,
+							'GRAY_IMG': None,
 							'GAUSSIAN_IMG' : None,
 							'CANNY_IMG' : None,
 							'DILATE_IMG' : None,
 							'ERODE_IMG' : None,
+							'CV_IMG' : None
 						}
 	THRESHOLD_CONTOUR_AREA = 200
 	THRESHOLD_MINIMUM_SIDE = 30
+	PX_MM_RATIO = 0
 
+	# 클래스 인스턴스시에 이미 CV 프로세스를 진행할 이미지가 접근가능하다.
+	# CV 간에 참조해야하는 수치를 인스턴스시에 생성자의 매개변수로 전달받는다.
 	def __init__(self,coin_px=10,coin_mm=10,max_contours=20,opath=None,carea=200,min_side=30):
-		None
+
+		if opath == None:
+			return False
+			sys.exit()
+
+		self.COIN_PX = coin_px
+		self.COIN_MM = comin_mm
+		self.MAX_CONTOURS = max_contours
+		self.ORIGINAL_FILE_PATH = opath
+		self.THRESHOLD_CONTOUR_AREA = carea
+		self.THRESHOLD_MINIMUM_SIDE = THRESHOLD_MINIMUM_SIDE
+
+		self.PX_MM_RATIO = self.calc_PxForMmRatio(self.COIN_PX,self.COIN_MM)
+
+
+
+		self.transition_images()
+		self.find_Contours()
+		self.save_images()
+
+	# CV에 의해 식별된 Contour의 각 좌표를 순회하며, 해당 좌표가 대표하는 위치를 찾는다. 아래의 4개 위치 식별.
+	# 1.TOP LEFT
+	# 2.TOP RIGHT
+	# 3.BOTTOM LEFT
+	# 4.BOTTOM RIGHT
+	# 위 식별된 4개의 점을 기준으로 관측된 식물의 Height / Widht 의 위치를 추론한다.
 	def get_order_points(self,pts):
-		None
+		xSorted = pts[np.argsort(pts[:,0]),:]
+		leftMost = xSorted[:2,:]
+		rightMost = xSorted[2:,:]
+
+		leftMost = leftMost[np.argsort(leftMost[:,1]),:]
+		(tl,bl) = leftMost
+
+		D = dist.cdist(tl[np.newaxis], rightMost, "euclidean")[0]
+		(br,tr) = rightMost[np.argsort(D)[::-1],:]
+
+		return np.array([tl,tr,br,bl], dtype="float32")
+
+
+	# 주어진 두 점의 좌표의 가운데 좌표를 반환한다.(좌표평면 기준)
 	def get_midpoint(self,ptA,ptB):
-		None
+		return ((ptA[0] + ptB[0]) * 0.5, (ptA[1] + ptB[1]) * 0.5)
+
+	# 주어진 이미지의 GRAY/GAUSSIAN/CANNY/DILATE/ERODE 의 각 전처리를 수행한다.
+	def transition_images(self):
+
+		# 프로세싱처리가 필요한 오리지널 이미지 읽기
+		self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
+		self.IMAGES['CV_IMG'] = self.IMAGES['ORIGINAL'].copy()
+		self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['ORIGINAL'], cv2.COLOR_BGR2GRAY)
+		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (1,1),0)
+		self.IMAGES['CANNY_IMG'] = cv2.Canny(self.IMAGES['GAUSSIAN_IMG'],30,40)
+		self.IMAGES['DILATE_IMG'] = cv2.dilate(self.IMAGES['CANNY_IMG'],None,iteration=2)
+		self.IMAGES['ERODE_IMG'] = cv2.erode(self.IMAGES['DILATE_IMG'],None,iteration=1)
+
+
+
+	# 주어진 PX(픽셀)과 MM(밀리미터)의 비율을 반환한다.
 	def calc_PxForMmRatio(self,px, mm):
-		None
+		return round(mm/px,7)
+
+	# 이미지의 Contour 를 찾는다.
 	def find_contours(self):
-		None
+		copy_image = self.IMAGES['EROD_IMG'].copy()
+		f_contours = cv2.findContours(copy_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+		f_contours = f_contours[0] if imutils.is_cv2() else f_contours[1]
+		(f_contours,_) = f_contours.sort_contours(f_contours)
+
+		for (i,c) in enumerate(f_contours):
+			box = cv2.minAreaRect(c)
+			box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
+			box = order_points(box)
+
+			(tl,tr,br,bl) = box
+			if dist.euclidean(tl,tr) < self.THRESHOLD_MINIMUM_SIDE or dist.euclidean(tl,bl) < self.THRESHOLD_MINIMUM_SIDE:
+				continue
+			if cv2.contourArea(c) < self.THRESHOLD_CONTOUR_AREA :
+				continue
+
+		cv2.drawContours()
+
+
+	# 최종작업을 완료하고 모든 이미지들을 저장한다.
 	def save_images(self):
 		None
 
 
 if __name__ == '__main__':
 	pfc_cv_measurer = pfc_cv_measurer()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
