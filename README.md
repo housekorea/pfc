@@ -6,15 +6,19 @@ It is different some hardware/software between my personal PFC prototype and MIT
 
 This repository have a four types of directory.(Probably It would expanding now, whenever i have a time to writing about the more detail guide for PFC makers, i will summarize about the PFC and their philosophy and mechanism(with Vision too). 
 
-first, Sensor directory.
-second, Actuator directory.
-thrid, Computer Vision directory.
-fourth, Arduino Code directory.
+<hr>
 
+first, Sensor directory.
+
+second, Actuator directory.
+
+thrid, Computer Vision directory.
+
+fourth, Arduino Code directory.
 
 Any question or suggestion welcomed on my repository.
 
-
+<hr>
 #NerdFarmer KgwangHee Han(House)
 E-mail : house9737@gmail.com
 
