@@ -6,7 +6,7 @@ It is different some hardware/software between my personal PFC prototype and MIT
 
 This repository have a four types of directory.(Probably It would expanding now, whenever i have a time to writing about the more detail guide for PFC makers, i will summarize about the PFC and their philosophy and mechanism(with Vision too). 
 
-I believe that PFC project is one of stepping stones for solving problem which we are facing about rapdly urbanziation and food. Our NerdFarmer, Farming using with a Information Technology than shoval and pick.
+I believe that PFC project is one of stepping stones for solving problem which we are facing about rapidly urbanziation and food. Our NerdFarmer, Farming using with a Information Technology than shoval and pick.
 
 <hr>
 
