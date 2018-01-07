@@ -62,6 +62,10 @@ Computer Vision Thread on openAG forum : http://forum.openag.media.mit.edu/t/cv-
 
 ### fifth, Database ERD
 
+Data is key of PFC project, what kind of any version or custom of your PFC, absoltuely next stage(we are headed) is Machine Learning through "Data". For desing of Database, i have to consider some chracteristic about this project. It mean that, i have to aussme that parrell multiple PFC operate at the same time. But remote database server have a one address which other Prototype can be reach to this address, and it have a flexible and scalibility(i intended to make a "Meta Table of each sensor/actuator/particpant/models ...), this meta table have a key/value architecture, it would give us to flexsible but hard to using a wild joinning or exploring between meta tables.(I hope that a new "Search Technology" solving this problem. Such as ElasticSearch,Titan DB graph ...) 
+
+**This ERD not finished for archiving PFC sensor data, it is continuing now, i would welcome any idea or suggestion!**
+
 ![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/pfc_erd.svg) 
 
 Any question or suggestion welcomed on my repository.
