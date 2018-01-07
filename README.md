@@ -57,7 +57,9 @@ Computer Vision Thread on openAG forum : http://forum.openag.media.mit.edu/t/cv-
  
  After that, I would write about the electronics design circuit about my PFC codes : ). Absolutely i have to fight my inner laziness too!
 
+### fifth, Database ERD
 
+![Initial Database Schema ERD](https://github.com/housekorea/pfc/doc/ERD.svg) 
 
 Any question or suggestion welcomed on my repository.
 
