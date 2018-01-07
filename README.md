@@ -12,9 +12,29 @@ I believe that PFC project is one of stepping stones for solving problem which w
 
 first, Sensor directory.
 
+ This directory have a sourcecode to commnuicate with Rapsberry PI ans Arduion through Serial Communication. It means that, this codes more familiar with ordering to the arudino.(It is not include any directely relate code for arduino sensors. If you want check a code which relate in Arduino, check the Arduino Directory. 
+ 
+**Sensor List**
+
+1.DHT11 (Air temperature, Air Humidity)
+
+2.DS18B20 Water Proof sensor
+
+3.CO2 Sensor
+
+4.PhotoResistor(LDR)
+
+5.EC(Electricity Conductivity) Sensor
+
+6.PH Probe
+
+
+
 second, Actuator directory.
 
+
 thrid, Computer Vision directory.
+
 
 fourth, Arduino Code directory.
 
