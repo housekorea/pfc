@@ -46,9 +46,18 @@ I believe that PFC project is one of stepping stones for solving problem which w
 
 ### thrid, Computer Vision directory.
 
- I have a great expectation about the role of **"Computer Vision"**, it is give a opportunity on the various ragne from  recognize about the any symptom for disease to measuring crops size,status too. In this time i used openCV3 library with python2 programing language. You can check my sourcecode relate this image processing for detecting plant and measuring their size using openCV library. at the same time, our openAG forum specific thread discussed for how to making this image processing to important role of our PFC model. You can check various and great ideas of usecase "Computer Vision".
+ I have a great expectation about the role of **"Computer Vision"**, it is give a opportunity on the various ragne from  recognize about the any symptom for disease to measuring crops size,status too. In this time i used openCV3 library with python2 programing language. You can check my sourcecode relate this image processing for detecting plant and measuring their size using openCV library. At the same time, our openAG forum opend a specific thread to discuss for how to making this image processing to important role of our PFC model. You can check various and great ideas of usecase "Computer Vision". 
+ Probably, on my PFC's computer vision headed to the next stage for Machine Learning more specialize Image Processing. I hope that a number of smart guys joined this Computer Vision thread, and sharing their knowledge and experience through cooperate.
+
+Computer Vision Thread on openAG forum : http://forum.openag.media.mit.edu/t/cv-and-image-processing-for-the-pfc/273/18
 
 ### fourth, Arduino Code directory.
+
+ If you want find arduino codes for making PFC? Exploring this "Arduino" Directory, this directory is only space for mananging Arduino Sourcecodes. I warned to you about the hardcode on my sourcodes. Until now, i used "Arduino Mega 2560" microcontroller board Model, this sourcode only specialized this specific microcontroller board. A number of GPIO(General Purpose Input/Output Pin) managed by "Constant Variable" on my Arduino Sourcecode. 
+ 
+ After that, I would write about the electronics design circuit about my PFC codes : ). Absolutely i have to fight my inner laziness too!
+
+
 
 Any question or suggestion welcomed on my repository.
 
