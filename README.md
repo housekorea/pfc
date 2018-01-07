@@ -16,22 +16,33 @@ first, Sensor directory.
  
 **Sensor List**
 
-1.DHT11 (Air temperature, Air Humidity)
-
-2.DS18B20 Water Proof sensor
-
-3.CO2 Sensor
-
-4.PhotoResistor(LDR)
-
-5.EC(Electricity Conductivity) Sensor
-
-6.PH Probe
-
-
+1. DHT11 (Air temperature, Air Humidity)
+2. DS18B20 Water Proof sensor
+3. CO2 Sensor
+4. PhotoResistor(LDR)
+5. EC(Electricity Conductivity) Sensor
+6. PH Probe
+7. Samsung USB camera
+8. Water level sensor
+9. Water Flow sensor
 
 second, Actuator directory.
+ 
+ This directory have a sourcecode related in "Actuators", In the my PFC project context, this word "Actuators" means machine or any instrument for making Enviroment of growing plants. Let me give an example, PFC simulate natural wind to using FAN cooler, and for giving light like a sun light, we usually using LED bulb. We can call this, "Actuators" for FAN,LED or anything which verifying purpose i mentioned. 
+ 
+**Acutator List**
 
+1. LED
+2. Air circulration FAN
+3. Ventilation FAN
+4. Air pump
+5. Peristaltic Pump For Solution A
+6. Peristaltic Pump For Solution B
+7. Peristaltic Pump For Water
+8. Peristaltic Pump For PH(-)
+9. Peristaltic Pump For PH(+)
+10. Solenoid Valve for each Peristaltic Pump
+11. Chiler Unit
 
 thrid, Computer Vision directory.
 
