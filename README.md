@@ -21,8 +21,8 @@ fourth, Arduino Code directory.
 Any question or suggestion welcomed on my repository.
 
 <hr>
-#NerdFarmer KgwangHee Han(House)
-E-mail : house9737@gmail.com
+>#NerdFarmer, KgwangHee Han(House)
+>E-mail : house9737@gmail.com
 
 Enjoying Farming guys!
 
