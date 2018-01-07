@@ -10,7 +10,7 @@ I believe that PFC project is one of stepping stones for solving problem which w
 
 <hr>
 
-first, Sensor directory.
+### first, Sensor directory.
 
  This directory have a sourcecode to commnuicate with Rapsberry PI ans Arduion through Serial Communication. It means that, this codes more familiar with ordering to the arudino.(It is not include any directely relate code for arduino sensors. If you want check a code which relate in Arduino, check the Arduino Directory. 
  
@@ -23,10 +23,10 @@ first, Sensor directory.
 5. EC(Electricity Conductivity) Sensor
 6. PH Probe
 7. Samsung USB camera
-8. Water level sensor
-9. Water Flow sensor
+8. Water level sensor (Comming Soon)
+9. Water Flow sensor (Comming Soon)
 
-second, Actuator directory.
+### second, Actuator directory.
  
  This directory have a sourcecode related in "Actuators", In the my PFC project context, this word "Actuators" means machine or any instrument for making Enviroment of growing plants. Let me give an example, PFC simulate natural wind to using FAN cooler, and for giving light like a sun light, we usually using LED bulb. We can call this, "Actuators" for FAN,LED or anything which verifying purpose i mentioned. 
  
@@ -39,20 +39,21 @@ second, Actuator directory.
 5. Peristaltic Pump For Solution A
 6. Peristaltic Pump For Solution B
 7. Peristaltic Pump For Water
-8. Peristaltic Pump For PH(-)
-9. Peristaltic Pump For PH(+)
-10. Solenoid Valve for each Peristaltic Pump
-11. Chiler Unit
+8. Peristaltic Pump For PH(-) (Comming Soon)
+9. Peristaltic Pump For PH(+) (Comming Soon)
+10. Solenoid Valve for each Peristaltic Pump (Considerable)
+11. Chiler Unit (Considerable)
 
-thrid, Computer Vision directory.
+### thrid, Computer Vision directory.
 
+ I have a great expectation about the role of **"Computer Vision"**, it is give a opportunity on the various ragne from  recognize about the any symptom for disease to measuring crops size,status too. In this time i used openCV3 library with python2 programing language. You can check my sourcecode relate this image processing for detecting plant and measuring their size using openCV library. at the same time, our openAG forum specific thread discussed for how to making this image processing to important role of our PFC model. You can check various and great ideas of usecase "Computer Vision".
 
-fourth, Arduino Code directory.
+### fourth, Arduino Code directory.
 
 Any question or suggestion welcomed on my repository.
 
 <hr>
-**#NerdFarmer**, 
+#NerdFarmer,
 
 > KgwangHee Han(House)
 
