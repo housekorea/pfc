@@ -70,15 +70,17 @@ Any question or suggestion welcomed on my repository.
 
 Enjoying Farming guys!
 
-P.s If you are live in S.Korea, and you have a intereset in making a PFC in S.korea. Join Us through this Thread. I want contribute with others about the belows issue on our location(South Korea.)
+**P.s 
+If you are live in S.Korea, and you have a intereset in making a PFC in S.korea. Join Us through this Thread. I want contribute with others about the belows issue on our location(South Korea.)**
 
 1. How to sourcing alternative parts in S.kora local market.
 2. How to break the language barrier of the documentation of MIT PFC's repository and fourm.(Until now, about any PFC documentation not translated in Korean language. Probably it is one of the valuable activity for our Elementary,Middle schoole students to joining PFC project.)
 3. Solving problem origined by Local issue which such as "Government Rule", "Local Traditional Culture", "Recogintion of Farmers". 
 
-Doesn't matter any issue which we are facing i have a optimistic about the "We can solving this issue, and developing our agriculture on S.korea! Absoltuely, we can helping others on the global too".
+Doesn't matter any issue which we are facing, i have a optimistic about the "We can solving this issue, and developing our agriculture on S.korea! Absolutely, we can helping others on the global too".
 
 
 http://forum.openag.media.mit.edu/t/openag-in-south-korea/2801/16
 
 (Above, Url link is a S.Korea Thread to talking about the any issue or communication in the S.Korea)
+
