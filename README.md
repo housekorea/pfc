@@ -59,7 +59,7 @@ Computer Vision Thread on openAG forum : http://forum.openag.media.mit.edu/t/cv-
 
 ### fifth, Database ERD
 
-![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/ERD.svg) 
+![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/pfc_erd.svg) 
 
 Any question or suggestion welcomed on my repository.
 
