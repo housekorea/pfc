@@ -21,10 +21,41 @@ Table List
 """
 import time
 import sys
+import os
+import MySQLdb
+
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from configure import pfc_conf
 
 class DB_DDL:
-
-	def __init__(self):
+	TABLE_LSIT=(
+		'PFC_model',
+		'model_meta',
+		'system_status',
+		'order',
+		'order_result',
+		'participant',
+		'participant_meta',
+		'actuator',
+		'actuator_activity',
+		'actuator_meta',
+		'sensor',
+		'sensor_meta',
+		'sensor_data',
+		'sensor_data_meta',
+		'image',
+		'image_process'
+	)
+	def __init__(
+			self,
+			model_id=None,
+			mac_addr=None,
+			db_host=None,
+			db_port=None,
+			db_id=None,
+			db_pw=None
+		):
 		None
 
 	def create_PFC_model(self):
@@ -221,14 +252,33 @@ CREATE TABLE IF NOT EXISTS `image_process`
 	FOREIGN KEY(image_id) REFERENCES image(image_id)
 )
 		"""
+	def check_exists_table(self):
+		None
+	def create_all_db(self):
+		None
+
+	def create_dummy_db(self):
+		None
 
 
+if __name__ == '__main__':
+	PFC_MODEL_ID = pfc_conf.PFC_MODEL_ID
+	PFC_MAC_ADDR = pfc_conf.PFC_MAC_ADDR
+	PFC_DB_HOST = pfc_conf.PFC_DB_HOST
+	PFC_DB_PORT = pfc_conf.PFC_DB_PORT
+	PFC_DB_ID = pfc_conf.PFC_DB_ID
+	PFC_DB_PW = pfc_conf.PFC_DB_PW
 
-
-
-
-
-
+	DB_DDL = DB_DDL(
+										model_id=PFC_MODEL_ID,
+										mac_addr=PFC_MAC_ADDR,
+										db_host=PFC_DB_HOST,
+										db_port=PFC_DB_PORT,
+										db_id =PFC_DB_ID,
+										db_pw =PFC_DB_PW
+									)
+	DB_DDL.check_exists_table()
+	DB_DDL.create_all_db()
 
 
 
