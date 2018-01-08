@@ -1,5 +1,8 @@
 # PFC(Personal Food Computer) by KgwangHee Han.
 
+
+![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/s_capture_4.jpeg) 
+
 This repository for purpose distribute to others who have a interests about the PFC. It first developed by MIT Media Lab Open Inititiative.Thanks to their efforts, i can started this exciting projects(Along with i believe that we have a possibility to beacame #NerdFarmer!).If you want make a PFC, absolutely you can fork this repsitory.(I hope that this repository helpful!) 
 
 It is different some hardware/software between my personal PFC prototype and MIT original prototype. But it is challengable work to localizing in S.Korea for generalizng on here(S.Korea) 
@@ -57,7 +60,13 @@ Computer Vision Thread on openAG forum : http://forum.openag.media.mit.edu/t/cv-
  
  After that, I would write about the electronics design circuit about my PFC codes : ). Absolutely i have to fight my inner laziness too!
 
+### fifth, Database ERD
 
+Data is key of PFC project, what kind of any version or custom of your PFC, absoltuely next stage(we are headed) is Machine Learning through "Data". For desing of Database, i have to consider some chracteristic about this project. It mean that, i have to aussme that parrell multiple PFC operate at the same time. But remote database server have a one address which other Prototype can be reach to this address, and it have a flexible and scalibility(i intended to make a "Meta Table of each sensor/actuator/particpant/models ...), this meta table have a key/value architecture, it would give us to flexsible but hard to using a wild joinning or exploring between meta tables.(I hope that a new "Search Technology" solving this problem. Such as ElasticSearch,Titan DB graph ...) 
+
+**This ERD not finished for archiving PFC sensor data, it is continuing now, i would welcome any idea or suggestion!**
+
+![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/pfc_erd.svg) 
 
 Any question or suggestion welcomed on my repository.
 
@@ -70,8 +79,17 @@ Any question or suggestion welcomed on my repository.
 
 Enjoying Farming guys!
 
-P.s If you are live in S.Korea, and you have a intereset in making a PFC in S.korea. Join Us through this Thread.
+**P.s 
+If you are live in S.Korea, and you have a intereset in making a PFC in S.korea. Join Us through this Thread. I want contribute with others about the belows issue on our location(South Korea.)**
+
+1. How to sourcing alternative parts in S.kora local market.
+2. How to break the language barrier of the documentation of MIT PFC's repository and fourm.(Until now, about any PFC documentation not translated in Korean language. Probably it is one of the valuable activity for our Elementary,Middle schoole students to joining PFC project.)
+3. Solving problem origined by Local issue which such as "Government Rule", "Local Traditional Culture", "Recogintion of Farmers". 
+
+Doesn't matter any issue which we are facing, i have a optimistic about the "We can solving this issue, and developing our agriculture on S.korea! Absolutely, we can helping others on the global too".
+
 
 http://forum.openag.media.mit.edu/t/openag-in-south-korea/2801/16
 
 (Above, Url link is a S.Korea Thread to talking about the any issue or communication in the S.Korea)
+
