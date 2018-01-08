@@ -1,3 +1,4 @@
 .DS_store
 .sftp-config.json
 log.log
+__pycache__
