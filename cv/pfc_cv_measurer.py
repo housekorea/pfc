@@ -10,7 +10,8 @@ from matplotlib import pyplot as plt
 from pprint import pprint
 import time
 from scipy.spatial import distance as dist
-
+import numpy as np
+from pprint import pprint
 
 class pfc_cv_measurer:
 	COIN_PX = None
@@ -19,6 +20,7 @@ class pfc_cv_measurer:
 	ORIGINAL_FILE_PATH = None
 	IMAGES = {
 							'ORIGINAL' : None,
+							'COLOR' : None,
 							'GRAY_IMG': None,
 							'GAUSSIAN_IMG' : None,
 							'CANNY_IMG' : None,
@@ -30,6 +32,8 @@ class pfc_cv_measurer:
 	THRESHOLD_MINIMUM_SIDE = 30
 	PX_MM_RATIO = 0
 
+	BOUNDARIES = []
+
 	# 클래스 인스턴스시에 이미 CV 프로세스를 진행할 이미지가 접근가능하다.
 	# CV 간에 참조해야하는 수치를 인스턴스시에 생성자의 매개변수로 전달받는다.
 	def __init__(self,coin_px=10,coin_mm=10,max_contours=20,opath=None,carea=200,min_side=30):
@@ -37,6 +41,12 @@ class pfc_cv_measurer:
 		if opath == None:
 			return False
 			sys.exit()
+
+		self.BOUNDARIES = [
+			(self.color_rgb_to_gbr(84,141,21),self.color_rgb_to_gbr(195,250,145))
+			]
+
+
 
 		self.COIN_PX = coin_px
 		self.COIN_MM = coin_mm
@@ -47,10 +57,12 @@ class pfc_cv_measurer:
 
 		self.PX_MM_RATIO = self.calc_PxForMmRatio(self.COIN_PX,self.COIN_MM)
 
-
+		self.color_detection()
 		self.transition_images()
 		self.find_contours()
-		self.save_images(debug_save=True)
+		self.color_detection()
+		# If you want save all of image on the transition process, set debug_save = True
+		self.save_images(debug_save=False)
 
 	# CV에 의해 식별된 Contour의 각 좌표를 순회하며, 해당 좌표가 대표하는 위치를 찾는다. 아래의 4개 위치 식별.
 	# 1.TOP LEFT
@@ -76,14 +88,42 @@ class pfc_cv_measurer:
 	def get_midpoint(self,ptA,ptB):
 		return ((ptA[0] + ptB[0]) * 0.5, (ptA[1] + ptB[1]) * 0.5)
 
+	def color_rgb_to_gbr(self,r,g,b):
+		return [b,g,r]
+	def color_detection(self):
+		self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
+
+
+		(lower, upper) = self.BOUNDARIES[0]
+		# create NumPy arrays from the boundaries
+		lower = np.array(lower, dtype = "uint8")
+		upper = np.array(upper, dtype = "uint8")
+
+
+		# find the colors within the specified boundaries and apply
+		# the mask
+		mask = cv2.inRange(self.IMAGES['ORIGINAL'], lower, upper)
+
+
+		# output = cv2.bitwise_and(self.IMAGES['ORIGINAL'], self.IMAGES['ORIGINAL'] , mask = mask)
+		output = cv2.bitwise_and(self.IMAGES['ORIGINAL'], self.IMAGES['ORIGINAL'] , mask = mask)
+		self.IMAGES['COLOR'] = output
+		# show the images
+		# cv2.imshow("images", np.hstack([self.IMAGES['ORIGINAL'],output]))
+		# cv2.waitKey(0)
+
+
+
+
 	# 주어진 이미지의 GRAY/GAUSSIAN/CANNY/DILATE/ERODE 의 각 전처리를 수행한다.
 	def transition_images(self):
 
 		# 프로세싱처리가 필요한 오리지널 이미지 읽기
-		self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
+		# self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
 		self.IMAGES['CV_IMG'] = self.IMAGES['ORIGINAL'].copy()
-		self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['ORIGINAL'], cv2.COLOR_BGR2GRAY)
-		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (17,17),0)
+		# self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['ORIGINAL'], cv2.COLOR_BGR2GRAY)
+		self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['COLOR'], cv2.COLOR_BGR2GRAY)
+		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (5,5),0)
 		self.IMAGES['CANNY_IMG'] = cv2.Canny(self.IMAGES['GAUSSIAN_IMG'],50,80)
 		self.IMAGES['DILATE_IMG'] = cv2.dilate(self.IMAGES['CANNY_IMG'],None,iterations=2)
 		self.IMAGES['ERODE_IMG'] = cv2.erode(self.IMAGES['DILATE_IMG'],None,iterations=1)
@@ -145,8 +185,8 @@ class pfc_cv_measurer:
 			# print('=========')
 			mid_point_dot = tuple(map(lambda x: int(x), self.get_midpoint((tlblX, tlblY), (trbrX, trbrY))))
 
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,2)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,2)) + "mm", (mid_point_dot[0]+30,mid_point_dot[1]+30),cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,2)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,2)) + "mm", (mid_point_dot[0]+30,mid_point_dot[1]+30),cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
 
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dA,2)) + "px", (mid_point_dot[0]-40,mid_point_dot[1]-40), cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dB,2)) + "px", (mid_point_dot[0]+40,mid_point_dot[1]+40),cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
@@ -164,7 +204,7 @@ class pfc_cv_measurer:
 
 
 if __name__ == '__main__':
-	pfc_cv_measurer = pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath="/var/og/cam_imgs/20180105_204257.jpg",carea=600, min_side=50)
+	pfc_cv_measurer = pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180105_174607.jpg",carea=600, min_side=100)
 
 
 
