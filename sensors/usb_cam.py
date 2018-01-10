@@ -22,7 +22,7 @@ class usb_cam:
 		fc_name = datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg'
 		os.system("fswebcam -r 640x480 --no-banner %s/%s --skip %d " % (self.PATH, fc_name, skip_num))
 
-		exist_file = self.is_exist_file(self.PATH + '/' + fc_name);
+		exist_file = self.is_exist_file(self.PATH + fc_name);
 
 		if exist_file == False:
 			print("Capture file not created")
