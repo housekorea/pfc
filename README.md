@@ -66,7 +66,7 @@ Data is key of PFC project, what kind of any version or custom of your PFC, abso
 
 **This ERD not finished for archiving PFC sensor data, it is continuing now, i would welcome any idea or suggestion!**
 
-![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/pfc_erd.svg) 
+![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/house_PFC_v2%20cmap.svg) 
 
 Any question or suggestion welcomed on my repository.
 
