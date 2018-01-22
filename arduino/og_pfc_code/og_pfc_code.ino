@@ -89,20 +89,17 @@ void loop() {
     pfc_order = Serial.readString();
     const char *pfc_order_arr = pfc_order.c_str();
 
+    Serial.print("order=");
+    Serial.print(pfc_order);
+    Serial.print("/");
 
-
+    Serial.print("result=");
     //Sensors
     if ( !strcmp(pfc_order_arr, "get_temp"))
     {
       float *dht_data = getDHT(DHT_IN);
       Serial.println(dht_data[1]);
-     
-      
-      String val = floatToChar(dht_data[1]);
-      Serial.println(val);
-      
-      
-      
+  
       return dht_data[1];
 
     }
@@ -173,14 +170,9 @@ void loop() {
       csv_res +=String(ds18_temp) + ",";
       csv_res +=String(ec_cms) + ",";
       csv_res +=String(ph_val);
-      csv_res += "\n";
-
-
+      //csv_res += "\n";
       Serial.println(csv_res);
 
-
-
-      
     }
 
 
@@ -196,67 +188,67 @@ void loop() {
     else if ( !strcmp(pfc_order_arr, "on_air_fan"))
     {
       digitalWrite(ch8_relay[AIR_FAN],LOW);
-      Serial.println("on_air_fan");
+      Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_air_fan"))
     {
       digitalWrite(ch8_relay[AIR_FAN],HIGH);
-      Serial.println("off_air_fan");
+      Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_led"))
     {
       digitalWrite(ch8_relay[LED],LOW);
-      Serial.println("on_led");
+      Serial.println("on");
     } 
     else if ( !strcmp(pfc_order_arr, "off_led"))
     {
       digitalWrite(ch8_relay[LED],HIGH);
-      Serial.println("off_led");
+      Serial.println("off");
     } 
     else if ( !strcmp(pfc_order_arr, "on_air_pump"))
     {
       digitalWrite(ch8_relay[AIR_PUMP],LOW);
-      Serial.println("on_air_pump");
+      Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_air_pump"))
     {
       digitalWrite(ch8_relay[AIR_PUMP],HIGH);
-      Serial.println("off_air_pump");
+      Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_ph_a_pump"))
     {
       digitalWrite(ch8_relay[PH_A_PUMP],LOW);
-      Serial.println("on_ph_a_pump");
+      Serial.println("on");
 
     }
     else if ( !strcmp(pfc_order_arr, "off_ph_a_pump"))
     {
       digitalWrite(ch8_relay[PH_A_PUMP],HIGH);
-      Serial.println("off_ph_a_pump");
+      Serial.println("off");
 
     }
     else if ( !strcmp(pfc_order_arr, "on_ph_b_pump"))
     {
       digitalWrite(ch8_relay[PH_B_PUMP],LOW);
-      Serial.println("on_ph_b_pump");
+      Serial.println("on");
 
     }
     else if ( !strcmp(pfc_order_arr, "off_ph_b_pump"))
     {
       digitalWrite(ch8_relay[PH_B_PUMP],HIGH);
-      Serial.println("off_ph_b_pump");
+      Serial.println("off");
 
     }
     else if ( !strcmp(pfc_order_arr, "on_water_pump"))
     {
       digitalWrite(ch8_relay[WATER_PUMP],LOW);
-      Serial.println("on_water_pump");
+      Serial.println("on");
 
     }
     else if ( !strcmp(pfc_order_arr, "off_water_pump"))
     {
       digitalWrite(ch8_relay[WATER_PUMP],HIGH);
-      Serial.println("off_water_pump");
+      Serial.println("off");
 
     }
     // LCD PANEL
@@ -267,6 +259,7 @@ void loop() {
       lcd.write("PFC STATUS : " );
       lcd.setCursor(8,1);
       lcd.write("Healthy");
+      Serial.println("display_status");
     }
     else if ( !strcmp(pfc_order_arr, "display_internet_disconnet"))
     {
@@ -275,14 +268,14 @@ void loop() {
       lcd.write("Internet");
       lcd.setCursor(0,1);
       lcd.write("Disconneted");
-      
+      Serial.println("display_internet_disconnect");      
     }
     else if ( !strcmp(pfc_order_arr, "display_ip_address"))
     {
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.write("display_ip_address : " );
-      
+      Serial.println("display_ip_address"); 
     }
     else if ( !strcmp(pfc_order_arr, "display_pfc_ver"))
     {
@@ -291,12 +284,12 @@ void loop() {
       lcd.write("PFC v2.0" );
       lcd.setCursor(0,1);
       lcd.write("#NerdFarmers");
-      
+       Serial.println("display_pfc_ver");
     }
 
     else
     {
-      Serial.println("it is not executable order.");
+      Serial.println("non-order");
     }
 
 
@@ -495,7 +488,7 @@ int getCo2ppm(int co2_in)
 {
   int sensorValue = analogRead(co2_in);
 
-  float voltage = sensorValue * (5000 / 1024.0);
+  float voltage = sensorValue * (4600 / 1024.0);
   if (voltage == 0)
   {
 //    Serial.println("Fault");
@@ -512,7 +505,13 @@ int getCo2ppm(int co2_in)
     float concentration = voltage_diference * 50.0 / 16.0;
 
 
-
+//    Serial.print("voltage : ");
+//    Serial.print(voltage);
+//    Serial.print("mv/");
+//    Serial.print("concentration : ");
+//    Serial.print(concentration);
+//    Serial.println("ppm");
+    
     return concentration;
   }
 }

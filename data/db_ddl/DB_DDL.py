@@ -63,6 +63,8 @@ class DB_DDL:
 		self.DBC = self.DB.cursor()
 		print("Connection Info : " + str(self.DB))
 		print("Connection Cusor : " + str(self.DBC))
+
+
 	def create_PFC_model(self):
 		create_sql="""
 CREATE TABLE IF NOT EXISTS `PFC_model`
@@ -98,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `system_status`
 	cron_status VARCHAR(255),
 	ros_avail VARCHAR(255),
 	brain_status VARCHAR(255),
-	datetime DATETIME NOT NULL DEFAULT 0,
+	datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(status_id),
 	FOREIGN KEY(model_id) REFERENCES PFC_model(model_id)
 )
@@ -113,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `order`
 	order_message VARCHAR(500) NOT NULL,
 	order_type VARCHAR(255),
 	participant_id INT(10) UNSIGNED,
-	datetime DATETIME DEFAULT 0,
+	datetime DATETIME DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(order_id),
 	FOREIGN KEY(model_id) REFERENCES PFC_model(model_id),
 	FOREIGN KEY(participant_id) REFERENCES participant(participant_id)
@@ -126,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `order_result`
 (
 	order_id INT(15) UNSIGNED NOT NULL,
 	result VARCHAR(255),
-	datetime DATETIME DEFAULT 0,
+	datetime DATETIME DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY(order_id) REFERENCES `order`(order_id)
 )
 		"""
@@ -186,7 +188,7 @@ CREATE TABLE IF NOT EXISTS `actuator_activity`
 	actuator_id INT(15) UNSIGNED NOT NULL,
 	order_id INT(15) UNSIGNED NOT NULL,
 	status VARCHAR(255),
-	datetime DATETIME NOT NULL DEFAULT 0,
+	datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(activity_id),
 	FOREIGN KEY(actuator_id) REFERENCES actuator(actuator_id),
 	FOREIGN KEY(order_id) REFERENCES `order`(order_id)
@@ -226,7 +228,7 @@ CREATE TABLE IF NOT EXISTS `sensor_data`
 	order_id INT(15) UNSIGNED NOT NULL,
 	data_key VARCHAR(255) NOT NULL,
 	data_value VARCHAR(255),
-	datetime DATETIME NOT NULL DEFAULT 0,
+	datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(data_id),
 	FOREIGN KEY(sensor_id) REFERENCES sensor(sensor_id),
 	FOREIGN KEY(order_id) REFERENCES `order`(order_id)
@@ -253,7 +255,7 @@ CREATE TABLE IF NOT EXISTS `image`
 	image_id INT(15) UNSIGNED NOT NULL AUTO_INCREMENT,
 	sensor_id INT(15) UNSIGNED NOT NULL,
 	file_path VARCHAR(255) NOT NULL,
-	datetime DATETIME NOT NULL DEFAULT 0,
+	datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(image_id),
 	FOREIGN KEY(sensor_id) REFERENCES sensor(sensor_id)
 )
@@ -267,7 +269,7 @@ CREATE TABLE IF NOT EXISTS `image_process`
 	image_id INT(15) UNSIGNED NOT NULL,
 	process_type VARCHAR(55) NOT NULL,
 	file_path VARCHAR(255) NOT NULL,
-	datetime DATETIME NOT NULL DEFAULT 0,
+	datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(process_image_id),
 	FOREIGN KEY(image_id) REFERENCES image(image_id)
 )
@@ -276,16 +278,18 @@ CREATE TABLE IF NOT EXISTS `image_process`
 	def check_exists_table(self):
 		None
 	def create_all_db(self):
-		None
-
-	def create_dummy_db(self):
 		for table_name in self.TABLE_LIST:
 			class_method_to_call = getattr(self, 'create_' + table_name)
 			create_sql = class_method_to_call()
 			print(create_sql)
 			res = self.DBC.execute(create_sql)
-			print(res)
-			print('\n\n')
+
+
+	# def create_dummy_db(self):
+	# 	for table_name in self.TABLE_LIST:
+	# 		class_method_to_call = getattr(self, 'create_' + table_name)
+	# 		create_sql = class_method_to_call()
+	# 		res = self.DBC.execute(create_sql)
 
 
 
@@ -311,24 +315,8 @@ if __name__ == '__main__':
 										db_name =PFC_DB_NAME
 									)
 
-	DB_DDL.create_dummy_db()
 	DB_DDL.check_exists_table()
 	DB_DDL.create_all_db()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
