@@ -1,42 +1,44 @@
 #include <DHT.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <LiquidCrystal.h>
 
 //SENSORS
 #define DHT_IN 22
 #define LDR_IN A0
 #define DS18_IN 24
 #define CO2_IN 26
-#define EC_IN A1
-#define PH_IN A2
+
+//#define EC_IN A1
+//#define PH_IN A2
 //ACUTATORS
-#define PH_A_PUMP 0
-#define PH_B_PUMP 1
-#define WATER_PUMP 2
-#define AIR_FAN 3
-#define LED 4
-#define AIR_PUMP 5
-#define VENTIL_FAN 6
+//#define PH_A_PUMP 0
+//#define PH_B_PUMP 1
+//#define WATER_PUMP 2
+//#define AIR_FAN 3
+//#define AIR_PUMP 5
+#define AIR_FAN_IN 1
+#define AIR_FAN_OUT 2
+#define LED 8
+
 //LCD KEYPAD
-#define btnRIGHT 0
-#define btnUP 1
-#define btnDOWN 2
-#define btnLEFT 3
-#define btnSELECT 4
-#define btnNONE 5
+//#define btnRIGHT 0
+//#define btnUP 1
+//#define btnDOWN 2
+//#define btnLEFT 3
+//#define btnSELECT 4
+//#define btnNONE 5
 
 // LCD KEYPAD
-LiquidCrystal lcd(12,13,8,9,10,11);
-int lcd_key = 3;
-int adc_key_in = 0;
-int flag_index = 0;
-int flag_arr[8] = {"temp","hum","co2","ph","ec","dstemp","LDR","nerdfarmers"};
-unsigned long last_millis = 0;
-int lcd_interval = 30000;
+//LiquidCrystal lcd(12,13,8,9,10,11);
+//int lcd_key = 3;
+//int adc_key_in = 0;
+//int flag_index = 0;
+//int flag_arr[8] = {"temp","hum","co2","ph","ec","dstemp","LDR","nerdfarmers"};
+//unsigned long last_millis = 0;
+//int lcd_interval = 30000;
 
 // 8Channel Relay
-int ch8_relay[8] = {39,41,43,45,47,49,51,53};
+int ch8_relay[8] = {53,51,49,47,45,43,41,39};
 
 
 int dtime = 0.5; // Delay Time
@@ -72,13 +74,13 @@ void setup() {
     pinMode(ch8_relay[i], OUTPUT);
     digitalWrite(ch8_relay[i],HIGH);
   }
-
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("PFC V2");
-  lcd.setCursor(0,1);
-  lcd.print("#NERDFARMERS");
-  last_millis = millis(); 
+//
+//  lcd.begin(16,2);
+//  lcd.setCursor(0,0);
+//  lcd.print("PFC V2");
+//  lcd.setCursor(0,1);
+//  lcd.print("#NERDFARMERS");
+//  last_millis = millis(); 
 }
 
 
@@ -129,19 +131,19 @@ void loop() {
       Serial.println(co2_ppm);
       return co2_ppm;
     }
-    else if ( !strcmp(pfc_order_arr, "get_ec"))
-    {
-      int ds18temp = getDS18temp(DS18_IN);
-      float ec_cms = getEC(EC_IN, ds18temp);
-      Serial.println(ec_cms);
-      return ec_cms;
-    }
-    else if ( !strcmp(pfc_order_arr, "get_ph"))
-    {
-      double ph_val = getPH(PH_IN);
-      Serial.println(ph_val);
-      return ph_val;
-    }
+//    else if ( !strcmp(pfc_order_arr, "get_ec"))
+//    {
+//      int ds18temp = getDS18temp(DS18_IN);
+//      float ec_cms = getEC(EC_IN, ds18temp);
+//      Serial.println(ec_cms);
+//      return ec_cms;
+//    }
+//    else if ( !strcmp(pfc_order_arr, "get_ph"))
+//    {
+//      double ph_val = getPH(PH_IN);
+//      Serial.println(ph_val);
+//      return ph_val;
+//    }
     else if( !strcmp(pfc_order_arr, "get_all_sensors"))
     {
       // RESULT for CSV format( Comma Seperator)
@@ -168,10 +170,10 @@ void loop() {
       csv_res +=String(air_hum) + ",";
       csv_res +=String(ldr_val) + ",";
       csv_res +=String(co2_ppm) + ",";
-      csv_res +=String(ds18_temp) + ",";
-      csv_res +=String(ec_cms) + ",";
-      csv_res +=String(ph_val);
-      //csv_res += "\n";
+      csv_res +=String(ds18_temp);
+//      csv_res +=String(ec_cms) + ",";
+//      csv_res +=String(ph_val);
+      csv_res += "\n";
       Serial.println(csv_res);
 
     }
@@ -180,22 +182,23 @@ void loop() {
     //Actuators
     else if ( !strcmp(pfc_order_arr, "on_ventil_fan"))
     {
-      digitalWrite(ch8_relay[VENTIL_FAN],LOW);
+      digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
       Serial.println("on");
+
     }
     else if ( !strcmp(pfc_order_arr, "off_ventil_fan"))
     {
-      digitalWrite(ch8_relay[VENTIL_FAN],HIGH);
+      digitalWrite(ch8_realy[AIR_FAN_OUT],HIGH);
       Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_air_fan"))
     {
-      digitalWrite(ch8_relay[AIR_FAN],LOW);
+      digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
       Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_air_fan"))
     {
-      digitalWrite(ch8_relay[AIR_FAN],HIGH);
+      digitalWrite(ch8_relay[AIR_FAN_IN],HIGH);
       Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_led"))
@@ -255,40 +258,40 @@ void loop() {
 
     }
     // LCD PANEL
-    else if ( !strcmp(pfc_order_arr, "display_status"))
-    {
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.write("PFC STATUS : " );
-      lcd.setCursor(8,1);
-      lcd.write("Healthy");
-      Serial.println("display_status");
-    }
-    else if ( !strcmp(pfc_order_arr, "display_internet_disconnet"))
-    {
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.write("Internet");
-      lcd.setCursor(0,1);
-      lcd.write("Disconneted");
-      Serial.println("display_internet_disconnect");      
-    }
-    else if ( !strcmp(pfc_order_arr, "display_ip_address"))
-    {
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.write("display_ip_address : " );
-      Serial.println("display_ip_address"); 
-    }
-    else if ( !strcmp(pfc_order_arr, "display_pfc_ver"))
-    {
-      lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.write("PFC v2.0" );
-      lcd.setCursor(0,1);
-      lcd.write("#NerdFarmers");
-       Serial.println("display_pfc_ver");
-    }
+//    else if ( !strcmp(pfc_order_arr, "display_status"))
+//    {
+//      lcd.clear();
+//      lcd.setCursor(0,0);
+//      lcd.write("PFC STATUS : " );
+//      lcd.setCursor(8,1);
+//      lcd.write("Healthy");
+//      Serial.println("display_status");
+//    }
+//    else if ( !strcmp(pfc_order_arr, "display_internet_disconnet"))
+//    {
+//      lcd.clear();
+//      lcd.setCursor(0,0);
+//      lcd.write("Internet");
+//      lcd.setCursor(0,1);
+//      lcd.write("Disconneted");
+//      Serial.println("display_internet_disconnect");      
+//    }
+//    else if ( !strcmp(pfc_order_arr, "display_ip_address"))
+//    {
+//      lcd.clear();
+//      lcd.setCursor(0,0);
+//      lcd.write("display_ip_address : " );
+//      Serial.println("display_ip_address"); 
+//    }
+//    else if ( !strcmp(pfc_order_arr, "display_pfc_ver"))
+//    {
+//      lcd.clear();
+//      lcd.setCursor(0,0);
+//      lcd.write("PFC v2.0" );
+//      lcd.setCursor(0,1);
+//      lcd.write("#NerdFarmers");
+//       Serial.println("display_pfc_ver");
+//    }
 
     else
     {
