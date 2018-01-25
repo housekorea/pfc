@@ -15,14 +15,14 @@ class ventil_fan:
 		self.connect()
 
 	def connect(self):
-		cont_ad = pfc_Connection_arduino()
+		cont_ad = pfc_connection_arduino()
 		port = cont_ad.get_USB_PORT()
 		f = open(port)
 		attrs = termios.tcgetattr(f)
 		attrs[2] = attrs[2] & ~termios.HUPCL
 		termios.tcsetattr(f, termios.TCSAFLUSH, attrs)
 		f.close()
-
+		self.SERIAL = serial.Serial(port,cont_ad.get_BAUD_RATE());
 	def on(self):
 		time.sleep(0.5)
 		self.SERIAL.write("on_ventil_fan")
