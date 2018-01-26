@@ -43,7 +43,7 @@ class pfc_cv_measurer:
 			sys.exit()
 
 		self.BOUNDARIES = [
-			(self.color_rgb_to_gbr(84,141,21),self.color_rgb_to_gbr(195,250,145))
+			(self.color_rgb_to_gbr(84,141,21),self.color_rgb_to_gbr(205,250,155))
 			]
 
 
@@ -62,7 +62,7 @@ class pfc_cv_measurer:
 		self.find_contours()
 		self.color_detection()
 		# If you want save all of image on the transition process, set debug_save = True
-		self.save_images(debug_save=False)
+		self.save_images(debug_save=True)
 
 	# CV에 의해 식별된 Contour의 각 좌표를 순회하며, 해당 좌표가 대표하는 위치를 찾는다. 아래의 4개 위치 식별.
 	# 1.TOP LEFT
@@ -123,7 +123,7 @@ class pfc_cv_measurer:
 		self.IMAGES['CV_IMG'] = self.IMAGES['ORIGINAL'].copy()
 		# self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['ORIGINAL'], cv2.COLOR_BGR2GRAY)
 		self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['COLOR'], cv2.COLOR_BGR2GRAY)
-		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (5,5),0)
+		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (1,1),0)
 		self.IMAGES['CANNY_IMG'] = cv2.Canny(self.IMAGES['GAUSSIAN_IMG'],50,80)
 		self.IMAGES['DILATE_IMG'] = cv2.dilate(self.IMAGES['CANNY_IMG'],None,iterations=2)
 		self.IMAGES['ERODE_IMG'] = cv2.erode(self.IMAGES['DILATE_IMG'],None,iterations=1)
@@ -205,25 +205,5 @@ class pfc_cv_measurer:
 
 if __name__ == '__main__':
 	pfc_cv_measurer = pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180105_174607.jpg",carea=600, min_side=100)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
