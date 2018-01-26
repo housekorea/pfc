@@ -3,9 +3,9 @@
 #include <DallasTemperature.h>
 
 //SENSORS
-#define DHT_IN 22
+#define DHT_IN 50
 #define LDR_IN A0
-#define DS18_IN 24
+#define DS18_IN 52
 #define CO2_IN 26
 
 //#define EC_IN A1
@@ -16,9 +16,9 @@
 //#define WATER_PUMP 2
 //#define AIR_FAN 3
 //#define AIR_PUMP 5
-#define AIR_FAN_IN 1
-#define AIR_FAN_OUT 2
-#define LED 8
+#define AIR_FAN_IN 6
+#define AIR_FAN_OUT 5
+#define LED 7
 
 //LCD KEYPAD
 //#define btnRIGHT 0
@@ -156,51 +156,74 @@ void loop() {
       // LDR
       unsigned int ldr_val = getLDR(LDR_IN);
       // CO2
-      int co2_ppm = getCo2ppm(CO2_IN);
+//      int co2_ppm = getCo2ppm(CO2_IN);
       // DS18B20
-       int ds18_temp = getDS18temp(DS18_IN);
+      int ds18_temp = getDS18temp(DS18_IN);
       // EC
-      float ec_cms = getEC(EC_IN, ds18_temp);
+//      float ec_cms = getEC(EC_IN, ds18_temp);
       // PH
-      double ph_val = getPH(PH_IN);
+//      double ph_val = getPH(PH_IN);
 
 
 
       csv_res +=String(air_temp) + ",";
       csv_res +=String(air_hum) + ",";
       csv_res +=String(ldr_val) + ",";
-      csv_res +=String(co2_ppm) + ",";
+//      csv_res +=String(co2_ppm) + ",";
       csv_res +=String(ds18_temp);
 //      csv_res +=String(ec_cms) + ",";
 //      csv_res +=String(ph_val);
-      csv_res += "\n";
+//      csv_res += "\n";
       Serial.println(csv_res);
 
     }
 
 
     //Actuators
-    else if ( !strcmp(pfc_order_arr, "on_ventil_fan"))
+    else if ( !strcmp(pfc_order_arr, "on_air_fan_in"))
+    {
+      digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
+      Serial.println("on");    
+    }
+    else if ( !strcmp(pfc_order_arr, "off_in_air_fan_in"))
+    {
+      digitalWrite(ch8_relay[AIR_FAN_IN],HIGH);
+      Serial.println("off");      
+    }
+    else if ( !strcmp(pfc_order_arr, "on_air_fan_out"))
     {
       digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
       Serial.println("on");
+    }
+    else if ( !strcmp(pfc_order_arr, "off_air_fan_out"))
+    {
+      digitalWrite(ch8_relay[AIR_FAN_OUT],HIGH);
+      Serial.println("off");
+      
+    }
+    
 
-    }
-    else if ( !strcmp(pfc_order_arr, "off_ventil_fan"))
-    {
-      digitalWrite(ch8_realy[AIR_FAN_OUT],HIGH);
-      Serial.println("off");
-    }
-    else if ( !strcmp(pfc_order_arr, "on_air_fan"))
-    {
-      digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
-      Serial.println("on");
-    }
-    else if ( !strcmp(pfc_order_arr, "off_air_fan"))
-    {
-      digitalWrite(ch8_relay[AIR_FAN_IN],HIGH);
-      Serial.println("off");
-    }
+//    else if ( !strcmp(pfc_order_arr, "on_ventil_fan"))
+//    {
+//      digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
+//      Serial.println("on");
+//
+//    }
+//    else if ( !strcmp(pfc_order_arr, "off_ventil_fan"))
+//    {
+//      digitalWrite(ch8_relay[AIR_FAN_OUT],HIGH);
+//      Serial.println("off");
+//    }
+//    else if ( !strcmp(pfc_order_arr, "on_air_fan"))
+//    {
+//      digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
+//      Serial.println("on");
+//    }
+//    else if ( !strcmp(pfc_order_arr, "off_air_fan"))
+//    {
+//      digitalWrite(ch8_relay[AIR_FAN_IN],HIGH);
+//      Serial.println("off");
+//    }
     else if ( !strcmp(pfc_order_arr, "on_led"))
     {
       digitalWrite(ch8_relay[LED],LOW);
@@ -211,52 +234,52 @@ void loop() {
       digitalWrite(ch8_relay[LED],HIGH);
       Serial.println("off");
     } 
-    else if ( !strcmp(pfc_order_arr, "on_air_pump"))
-    {
-      digitalWrite(ch8_relay[AIR_PUMP],LOW);
-      Serial.println("on");
-    }
-    else if ( !strcmp(pfc_order_arr, "off_air_pump"))
-    {
-      digitalWrite(ch8_relay[AIR_PUMP],HIGH);
-      Serial.println("off");
-    }
-    else if ( !strcmp(pfc_order_arr, "on_ph_a_pump"))
-    {
-      digitalWrite(ch8_relay[PH_A_PUMP],LOW);
-      Serial.println("on");
-
-    }
-    else if ( !strcmp(pfc_order_arr, "off_ph_a_pump"))
-    {
-      digitalWrite(ch8_relay[PH_A_PUMP],HIGH);
-      Serial.println("off");
-
-    }
-    else if ( !strcmp(pfc_order_arr, "on_ph_b_pump"))
-    {
-      digitalWrite(ch8_relay[PH_B_PUMP],LOW);
-      Serial.println("on");
-
-    }
-    else if ( !strcmp(pfc_order_arr, "off_ph_b_pump"))
-    {
-      digitalWrite(ch8_relay[PH_B_PUMP],HIGH);
-      Serial.println("off");
-
-    }
-    else if ( !strcmp(pfc_order_arr, "on_water_pump"))
-    {
-      digitalWrite(ch8_relay[WATER_PUMP],LOW);
-      Serial.println("on");
-
-    }
-    else if ( !strcmp(pfc_order_arr, "off_water_pump"))
-    {
-      digitalWrite(ch8_relay[WATER_PUMP],HIGH);
-      Serial.println("off");
-
-    }
+//    else if ( !strcmp(pfc_order_arr, "on_air_pump"))
+//    {
+//      digitalWrite(ch8_relay[AIR_PUMP],LOW);
+//      Serial.println("on");
+//    }
+//    else if ( !strcmp(pfc_order_arr, "off_air_pump"))
+//    {
+//      digitalWrite(ch8_relay[AIR_PUMP],HIGH);
+//      Serial.println("off");
+//    }
+//    else if ( !strcmp(pfc_order_arr, "on_ph_a_pump"))
+//    {
+//      digitalWrite(ch8_relay[PH_A_PUMP],LOW);
+//      Serial.println("on");
+//
+//    }
+//    else if ( !strcmp(pfc_order_arr, "off_ph_a_pump"))
+//    {
+//      digitalWrite(ch8_relay[PH_A_PUMP],HIGH);
+//      Serial.println("off");
+//
+//    }
+//    else if ( !strcmp(pfc_order_arr, "on_ph_b_pump"))
+//    {
+//      digitalWrite(ch8_relay[PH_B_PUMP],LOW);
+//      Serial.println("on");
+//
+//    }
+//    else if ( !strcmp(pfc_order_arr, "off_ph_b_pump"))
+//    {
+//      digitalWrite(ch8_relay[PH_B_PUMP],HIGH);
+//      Serial.println("off");
+//
+//    }
+//    else if ( !strcmp(pfc_order_arr, "on_water_pump"))
+//    {
+//      digitalWrite(ch8_relay[WATER_PUMP],LOW);
+//      Serial.println("on");
+//
+//    }
+//    else if ( !strcmp(pfc_order_arr, "off_water_pump"))
+//    {
+//      digitalWrite(ch8_relay[WATER_PUMP],HIGH);
+//      Serial.println("off");
+//
+//    }
     // LCD PANEL
 //    else if ( !strcmp(pfc_order_arr, "display_status"))
 //    {
@@ -300,106 +323,106 @@ void loop() {
 
 
 
-  }//
-  
-
-  if((millis() - last_millis) > lcd_interval)
-  {
-
-    
-    if(flag_index == 8)
-    {
-      flag_index =0;
-    }
-
-    lcd.clear();
-    
-    switch(flag_index){
-      case 0:{
-          float *dht_data = getDHT(DHT_IN);
-          float air_temp = dht_data[1];
-          lcd.setCursor(0,0);
-          lcd.print("AIR TEMP:");
-          lcd.setCursor(7,1);
-          lcd.print(String(air_temp));
-          lcd.print(" `c");
-          break;
-      }
-      case 1:{
-          float *dht_data = getDHT(DHT_IN);
-          float air_hum = dht_data[0];
-          lcd.setCursor(0,0);
-          lcd.print("AIR HUMIDITY:");
-          lcd.setCursor(7,1);
-          lcd.print(String(air_hum));
-          lcd.print(" %");
-          break;
-      }
-      case 2:{
-          int co2_ppm = getCo2ppm(CO2_IN);
-          lcd.setCursor(0,0);
-          lcd.print("CO2 PPM:");
-          lcd.setCursor(5,1);
-          lcd.print(String(co2_ppm));
-          lcd.print(" ppm");
-          break;
-      }
-      case 3:{
-          double ph_val = getPH(PH_IN);
-          lcd.setCursor(0,0);
-          lcd.print("PH:");
-          lcd.setCursor(5,1);
-          lcd.print(String(ph_val));
-          lcd.print(" PH");
-          break;
-      }        
-      case 4:{
-          // DS18B20
-          int ds18_temp = getDS18temp(DS18_IN);
-          // EC
-          float ec_cms = getEC(EC_IN, ds18_temp);
-         
-          lcd.setCursor(0,0);
-          lcd.print("EC:");
-          lcd.setCursor(5,1);
-          lcd.print(String(ec_cms));
-          lcd.print(" S/cm");
-          break;
-      }     
-      case 5:{
-          // DS18B20
-          int ds18_temp = getDS18temp(DS18_IN);    
-          lcd.setCursor(0,0);
-          lcd.print("WATER TEMP:");
-          lcd.setCursor(10,1);
-          lcd.print(String(ds18_temp));
-          lcd.print(" `c");
-          break;
-      }
-      case 6:{
-          unsigned int ldr_val = getLDR(LDR_IN);
-          lcd.setCursor(0,0);
-          lcd.print("PHOTOCELL :");
-          lcd.setCursor(10,1);
-          lcd.print(String(ldr_val));
-          lcd.print("");
-          break;
-      }
-      case 7:{
-        lcd.setCursor(0,0);
-        lcd.print("PFC V2");
-        lcd.setCursor(0,1);
-        lcd.print("#NERDFARMERS");
-        break;
-      }
-            
-    }
-
-
-    flag_index++;
-    last_millis = millis(); 
-    
   }
+  
+//
+//  if((millis() - last_millis) > lcd_interval)
+//  {
+//
+//    
+//    if(flag_index == 8)
+//    {
+//      flag_index =0;
+//    }
+//
+//    lcd.clear();
+//    
+//    switch(flag_index){
+//      case 0:{
+//          float *dht_data = getDHT(DHT_IN);
+//          float air_temp = dht_data[1];
+//          lcd.setCursor(0,0);
+//          lcd.print("AIR TEMP:");
+//          lcd.setCursor(7,1);
+//          lcd.print(String(air_temp));
+//          lcd.print(" `c");
+//          break;
+//      }
+//      case 1:{
+//          float *dht_data = getDHT(DHT_IN);
+//          float air_hum = dht_data[0];
+//          lcd.setCursor(0,0);
+//          lcd.print("AIR HUMIDITY:");
+//          lcd.setCursor(7,1);
+//          lcd.print(String(air_hum));
+//          lcd.print(" %");
+//          break;
+//      }
+//      case 2:{
+//          int co2_ppm = getCo2ppm(CO2_IN);
+//          lcd.setCursor(0,0);
+//          lcd.print("CO2 PPM:");
+//          lcd.setCursor(5,1);
+//          lcd.print(String(co2_ppm));
+//          lcd.print(" ppm");
+//          break;
+//      }
+//      case 3:{
+//          double ph_val = getPH(PH_IN);
+//          lcd.setCursor(0,0);
+//          lcd.print("PH:");
+//          lcd.setCursor(5,1);
+//          lcd.print(String(ph_val));
+//          lcd.print(" PH");
+//          break;
+//      }        
+//      case 4:{
+//          // DS18B20
+//          int ds18_temp = getDS18temp(DS18_IN);
+//          // EC
+//          float ec_cms = getEC(EC_IN, ds18_temp);
+//         
+//          lcd.setCursor(0,0);
+//          lcd.print("EC:");
+//          lcd.setCursor(5,1);
+//          lcd.print(String(ec_cms));
+//          lcd.print(" S/cm");
+//          break;
+//      }     
+//      case 5:{
+//          // DS18B20
+//          int ds18_temp = getDS18temp(DS18_IN);    
+//          lcd.setCursor(0,0);
+//          lcd.print("WATER TEMP:");
+//          lcd.setCursor(10,1);
+//          lcd.print(String(ds18_temp));
+//          lcd.print(" `c");
+//          break;
+//      }
+//      case 6:{
+//          unsigned int ldr_val = getLDR(LDR_IN);
+//          lcd.setCursor(0,0);
+//          lcd.print("PHOTOCELL :");
+//          lcd.setCursor(10,1);
+//          lcd.print(String(ldr_val));
+//          lcd.print("");
+//          break;
+//      }
+//      case 7:{
+//        lcd.setCursor(0,0);
+//        lcd.print("PFC V2");
+//        lcd.setCursor(0,1);
+//        lcd.print("#NERDFARMERS");
+//        break;
+//      }
+//            
+//    }
+//
+//
+//    flag_index++;
+//    last_millis = millis(); 
+//    
+//  }
 
 }
 
@@ -684,22 +707,22 @@ double averagearray(int* arr, int number) {
     return avg;
   }
 }
-
-int read_LCD_buttons(){
-  adc_key_in = analogRead(lcd_key);
-
-  if(adc_key_in > 1000) return btnNONE;
-
-  if(adc_key_in < 50 ) return btnRIGHT;
-  if(adc_key_in < 250 ) return btnUP;
-  if(adc_key_in < 450 ) return btnDOWN;
-  if(adc_key_in < 650 ) return btnLEFT;
-  if(adc_key_in < 950 ) return btnSELECT;
-
-  return btnNONE;
-}
-
-
+//
+//int read_LCD_buttons(){
+//  adc_key_in = analogRead(lcd_key);
+//
+//  if(adc_key_in > 1000) return btnNONE;
+//
+//  if(adc_key_in < 50 ) return btnRIGHT;
+//  if(adc_key_in < 250 ) return btnUP;
+//  if(adc_key_in < 450 ) return btnDOWN;
+//  if(adc_key_in < 650 ) return btnLEFT;
+//  if(adc_key_in < 950 ) return btnSELECT;
+//
+//  return btnNONE;
+//}
+//
+//
 
 
 

@@ -18,17 +18,22 @@ class usb_cam:
 	def capture(self,skip_num=None):
 		if skip_num == None:
 			skip_num = self.SKIP_FRAME
-
 		fc_name = datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg'
-		os.system("fswebcam -r 640x480 --no-banner %s/%s --skip %d " % (self.PATH, fc_name, skip_num))
 
-		exist_file = self.is_exist_file(self.PATH + fc_name);
+		for i in range(50):
+			exist_file = self.is_exist_file(self.PATH + fc_name)
+			if exist_file == False:
+				os.system("fswebcam -r 1280x960 --no-banner %s/%s --skip %d " % (self.PATH, fc_name, skip_num))
+			else :
+				break
 
-		if exist_file == False:
-			print("Capture file not created")
-		else :
-			print("Capture file created")
-			self.call_cv_process(self.PATH + fc_name)
+			time.sleep(1)
+			print("trying count : ")
+			print(i)
+
+		self.call_cv_process(self.PATH + fc_name)
+
+
 	def call_cv_process(self,file_name):
 		cv_measurer = pfc_cv_measurer.pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath=file_name,carea=600, min_side=50)
 
