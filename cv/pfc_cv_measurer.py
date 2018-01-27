@@ -189,6 +189,8 @@ class pfc_cv_measurer:
 
 		(f_contours,_) = contours.sort_contours(f_contours)
 
+		detect_object_cnt = 0
+		object_stack = []
 		for (i,c) in enumerate(f_contours):
 			box = cv2.minAreaRect(c)
 			box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
@@ -230,11 +232,17 @@ class pfc_cv_measurer:
 			# print('=========')
 			mid_point_dot = tuple(map(lambda x: int(x), self.get_midpoint((tlblX, tlblY), (trbrX, trbrY))))
 
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,2)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,2)) + "mm", (mid_point_dot[0]+30,mid_point_dot[1]+30),cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,3)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,3)) + "mm", (mid_point_dot[0]+30,mid_point_dot[1]+30),cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
 
+
+			detect_object_cnt+=1
+			# print(str(detect_object_cnt) + "/" + str(round(self.PX_MM_RATIO * dA,3)) + "mm" + "/" + str(round(self.PX_MM_RATIO * dB,3)) + "mm")
+			object_stack.append((round(self.PX_MM_RATIO * dA,3),round(self.PX_MM_RATIO * dB,3)))
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dA,2)) + "px", (mid_point_dot[0]-40,mid_point_dot[1]-40), cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dB,2)) + "px", (mid_point_dot[0]+40,mid_point_dot[1]+40),cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
+		#print object stack which detected by algorithms
+		pprint(object_stack)
 
 
 	# 최종작업을 완료하고 모든 이미지들을 저장한다.
