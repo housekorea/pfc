@@ -12,6 +12,7 @@ import time
 from scipy.spatial import distance as dist
 import numpy as np
 from pprint import pprint
+# np.set_printoptions(threshold='nan')
 
 class pfc_cv_measurer:
 	COIN_PX = None
@@ -20,6 +21,7 @@ class pfc_cv_measurer:
 	ORIGINAL_FILE_PATH = None
 	IMAGES = {
 							'ORIGINAL' : None,
+							'KCLUSTER' : None,
 							'COLOR' : None,
 							'GRAY_IMG': None,
 							'GAUSSIAN_IMG' : None,
@@ -31,7 +33,8 @@ class pfc_cv_measurer:
 	THRESHOLD_CONTOUR_AREA = 200
 	THRESHOLD_MINIMUM_SIDE = 30
 	PX_MM_RATIO = 0
-
+	COLOR_DIFF = 30
+	PLANT_COLOR = (198,228,82)
 	BOUNDARIES = []
 
 	# 클래스 인스턴스시에 이미 CV 프로세스를 진행할 이미지가 접근가능하다.
@@ -42,11 +45,22 @@ class pfc_cv_measurer:
 			return False
 			sys.exit()
 
+
+
 		self.BOUNDARIES = [
-			(self.color_rgb_to_gbr(84,141,21),self.color_rgb_to_gbr(205,250,155))
+			(self.color_rgb_to_gbr(self.PLANT_COLOR[0]-self.COLOR_DIFF, self.PLANT_COLOR[1]-self.COLOR_DIFF, self.PLANT_COLOR[2] - self.COLOR_DIFF)),
+			(self.color_rgb_to_gbr(self.PLANT_COLOR[0]+self.COLOR_DIFF, self.PLANT_COLOR[1]+self.COLOR_DIFF, self.PLANT_COLOR[2]+self.COLOR_DIFF))
 			]
 
+		for i,colo_set in enumerate(self.BOUNDARIES):
+			for j,colo_val in enumerate(colo_set):
+				if colo_val > 255:
+					self.BOUNDARIES[i][j] = 255
+				elif colo_val < 1:
+					self.BOUNDARIES[i][j] = 0
 
+		print("Palnt Color Range setted by Hardcode. lower / upper")
+		print(self.BOUNDARIES)
 
 		self.COIN_PX = coin_px
 		self.COIN_MM = coin_mm
@@ -57,10 +71,14 @@ class pfc_cv_measurer:
 
 		self.PX_MM_RATIO = self.calc_PxForMmRatio(self.COIN_PX,self.COIN_MM)
 
+		self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
+
+		self.get_kcluster(K=4)
 		self.color_detection()
 		self.transition_images()
 		self.find_contours()
-		self.color_detection()
+
+
 		# If you want save all of image on the transition process, set debug_save = True
 		self.save_images(debug_save=True)
 
@@ -90,11 +108,29 @@ class pfc_cv_measurer:
 
 	def color_rgb_to_gbr(self,r,g,b):
 		return [b,g,r]
+
+
+	def get_kcluster(self,K=8):
+		self.IMAGES['KCLUSTER'] = self.IMAGES['ORIGINAL'].copy()
+		Z = self.IMAGES['KCLUSTER'].reshape((-1,3))
+		Z = np.float32(Z)
+		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,20,1.0)
+		ret, label, center = cv2.kmeans(Z,K,None,criteria,20,cv2.KMEANS_RANDOM_CENTERS)
+		print("Extracted COLOR code : BGR ")
+		print(center)
+		# print(np.bincount(label.flatten()))
+
+		center = np.uint8(center)
+		process_image = center[label.flatten()]
+		self.IMAGES['KCLUSTER'] = process_image.reshape((self.IMAGES['KCLUSTER'].shape))
+
+		# cv2.imshow(str(K) + " cluster_image", self.IMAGES['KCLUSTER'])
+		# cv2.waitKey(0)
+		# cv2.destroyAllWindows()
+
 	def color_detection(self):
-		self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
 
-
-		(lower, upper) = self.BOUNDARIES[0]
+		(lower, upper) = self.BOUNDARIES
 		# create NumPy arrays from the boundaries
 		lower = np.array(lower, dtype = "uint8")
 		upper = np.array(upper, dtype = "uint8")
@@ -102,8 +138,9 @@ class pfc_cv_measurer:
 
 		# find the colors within the specified boundaries and apply
 		# the mask
-		mask = cv2.inRange(self.IMAGES['ORIGINAL'], lower, upper)
-
+		mask = cv2.inRange(self.IMAGES['KCLUSTER'], lower, upper)
+		print("Find Mask Range : " )
+		pprint(mask)
 
 		# output = cv2.bitwise_and(self.IMAGES['ORIGINAL'], self.IMAGES['ORIGINAL'] , mask = mask)
 		output = cv2.bitwise_and(self.IMAGES['ORIGINAL'], self.IMAGES['ORIGINAL'] , mask = mask)
@@ -122,9 +159,10 @@ class pfc_cv_measurer:
 		# self.IMAGES['ORIGINAL'] = cv2.imread(self.ORIGINAL_FILE_PATH)
 		self.IMAGES['CV_IMG'] = self.IMAGES['ORIGINAL'].copy()
 		# self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['ORIGINAL'], cv2.COLOR_BGR2GRAY)
+		# self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['COLOR'], cv2.COLOR_BGR2GRAY)
 		self.IMAGES['GRAY_IMG'] = cv2.cvtColor(self.IMAGES['COLOR'], cv2.COLOR_BGR2GRAY)
 		self.IMAGES['GAUSSIAN_IMG'] = cv2.GaussianBlur(self.IMAGES['GRAY_IMG'], (1,1),0)
-		self.IMAGES['CANNY_IMG'] = cv2.Canny(self.IMAGES['GAUSSIAN_IMG'],50,80)
+		self.IMAGES['CANNY_IMG'] = cv2.Canny(self.IMAGES['GAUSSIAN_IMG'],30,120)
 		self.IMAGES['DILATE_IMG'] = cv2.dilate(self.IMAGES['CANNY_IMG'],None,iterations=2)
 		self.IMAGES['ERODE_IMG'] = cv2.erode(self.IMAGES['DILATE_IMG'],None,iterations=1)
 
@@ -142,8 +180,17 @@ class pfc_cv_measurer:
 		f_contours = cv2.findContours(copy_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 		f_contours = f_contours[0] if imutils.is_cv2() else f_contours[1]
+
+		if len(f_contours) == 0:
+			print("Print f_contour : " + str(len(f_contours)))
+			self.save_images(debug_save=True)
+			sys.exit()
+
+
 		(f_contours,_) = contours.sort_contours(f_contours)
 
+		detect_object_cnt = 0
+		object_stack = []
 		for (i,c) in enumerate(f_contours):
 			box = cv2.minAreaRect(c)
 			box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
@@ -185,11 +232,17 @@ class pfc_cv_measurer:
 			# print('=========')
 			mid_point_dot = tuple(map(lambda x: int(x), self.get_midpoint((tlblX, tlblY), (trbrX, trbrY))))
 
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,2)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
-			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,2)) + "mm", (mid_point_dot[0]+30,mid_point_dot[1]+30),cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dA,3)) + "mm", (mid_point_dot[0]-60,mid_point_dot[1]-60), cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
+			cv2.putText(self.IMAGES['CV_IMG'], str(round(self.PX_MM_RATIO * dB,3)) + "mm", (mid_point_dot[0]+30,mid_point_dot[1]+30),cv2.FONT_HERSHEY_SIMPLEX,1, (15,15,15),2)
 
+
+			detect_object_cnt+=1
+			# print(str(detect_object_cnt) + "/" + str(round(self.PX_MM_RATIO * dA,3)) + "mm" + "/" + str(round(self.PX_MM_RATIO * dB,3)) + "mm")
+			object_stack.append((round(self.PX_MM_RATIO * dA,3),round(self.PX_MM_RATIO * dB,3)))
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dA,2)) + "px", (mid_point_dot[0]-40,mid_point_dot[1]-40), cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dB,2)) + "px", (mid_point_dot[0]+40,mid_point_dot[1]+40),cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
+		#print object stack which detected by algorithms
+		pprint(object_stack)
 
 
 	# 최종작업을 완료하고 모든 이미지들을 저장한다.
@@ -204,6 +257,8 @@ class pfc_cv_measurer:
 
 
 if __name__ == '__main__':
-	pfc_cv_measurer = pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180105_174607.jpg",carea=600, min_side=100)
+	pfc_cv_measurer = pfc_cv_measurer(coin_px=92, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180126_162136.jpg",carea=200, min_side=5)
+
+
 
 
