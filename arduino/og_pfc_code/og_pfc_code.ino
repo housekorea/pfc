@@ -79,11 +79,15 @@ void setup() {
   lcd.setCursor(0,1);
   lcd.print("#NERDFARMERS");
   last_millis = millis(); 
+
+
 }
 
 
 void loop() {
 
+
+  
 
   if (Serial.available() > 0 ) {
     String pfc_order;

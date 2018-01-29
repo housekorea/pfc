@@ -83,10 +83,10 @@ void setup() {
 //  last_millis = millis(); 
 
 
-
-    digitalWrite(ch8_relay[LED],LOW);
-    digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
-    digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
+//
+//    digitalWrite(ch8_relay[LED],LOW);
+//    digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
+//    digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
 }
 
 
@@ -193,7 +193,7 @@ void loop() {
       digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
       Serial.println("on");    
     }
-    else if ( !strcmp(pfc_order_arr, "off_in_air_fan_in"))
+    else if ( !strcmp(pfc_order_arr, "off_air_fan_in"))
     {
       digitalWrite(ch8_relay[AIR_FAN_IN],HIGH);
       Serial.println("off");      

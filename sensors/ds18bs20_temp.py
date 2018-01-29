@@ -3,6 +3,7 @@ import time
 import sys
 import os
 import termios
+from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino
@@ -31,5 +32,6 @@ if __name__ == '__main__':
 	order = sys.argv[1]
 
 	if order == 'get':
-		v = ds18bs20_temp.getValue()
-		print(v);
+		v = ds18bs20_temp.getValue().strip()
+		print(v+ "," + str(datetime.now()))
+

@@ -21,18 +21,14 @@ class usb_cam:
 		fc_name = datetime.now().strftime("%Y%m%d_%H%M%S") + '.jpg'
 
 		for i in range(50):
+			print("trying count : " + str(i+1))
 			exist_file = self.is_exist_file(self.PATH + fc_name)
 			if exist_file == False:
 				os.system("fswebcam -r 1280x960 --no-banner %s/%s --skip %d " % (self.PATH, fc_name, skip_num))
 			else :
 				break
-
 			time.sleep(1)
-			print("trying count : ")
-			print(i)
-
 		self.call_cv_process(self.PATH + fc_name)
-
 
 	def call_cv_process(self,file_name):
 		cv_measurer = pfc_cv_measurer.pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath=file_name,carea=600, min_side=50)

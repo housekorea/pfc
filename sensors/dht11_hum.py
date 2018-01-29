@@ -31,5 +31,5 @@ if __name__ == '__main__':
 	order = sys.argv[1]
 
 	if order == 'get':
-		v = dht11_hum.getValue()
-		print(v);
+		v = dht11_hum.getValue().strip()
+		print(v+ "," + str(datetime.now()))
