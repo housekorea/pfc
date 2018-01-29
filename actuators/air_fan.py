@@ -56,6 +56,6 @@ if __name__ == '__main__':
 	else :
 		print("It is not correct arugments")
 		sys.exit()
-	print(value)
+	print(value.strip())
 
 

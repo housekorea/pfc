@@ -4,6 +4,7 @@ import time
 import sys
 import os
 import termios
+from datetime import datetime
 
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -58,6 +59,7 @@ if __name__ == '__main__':
 		print("It is not correct arguments")
 		sys.exit()
 
-	print(value)
+	print(value.strip() + "/dt=" + str(datetime.now()))
+
 
 

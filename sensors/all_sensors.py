@@ -46,5 +46,5 @@ if __name__ == '__main__':
 
 
 	if order == 'get':
-		v = all_sensors.getValue().rstrip()
-		print(v+ "," + str(datetime.now()));
+		v = all_sensors.getValue().strip()
+		print(v+ "," + str(datetime.now()))

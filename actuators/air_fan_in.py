@@ -36,7 +36,7 @@ class air_fan_in:
 		return value
 
 if __name__ == '__main__':
-	air_fan = air_fan()
+	air_fan_in = air_fan_in()
 
 	if len(sys.argv) == 1:
 		exit()
@@ -56,6 +56,5 @@ if __name__ == '__main__':
 	else :
 		print("It is not correct arugments")
 		sys.exit()
-	print(value)
-
+	print(value.strip())
 

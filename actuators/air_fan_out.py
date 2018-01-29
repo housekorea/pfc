@@ -4,6 +4,7 @@ import time
 import sys
 import os
 import termios
+from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino
@@ -36,7 +37,7 @@ class air_fan_out:
 		return value
 
 if __name__ == '__main__':
-	air_fan = air_fan()
+	air_fan_out = air_fan_out()
 
 	if len(sys.argv) == 1:
 		exit()
@@ -56,6 +57,6 @@ if __name__ == '__main__':
 	else :
 		print("It is not correct arugments")
 		sys.exit()
-	print(value)
+	print(value.strip() + "/dt=" + str(datetime.now()))
 
 
