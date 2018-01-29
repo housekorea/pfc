@@ -23,9 +23,16 @@ class ph_b_pump:
 	def on(self):
 		time.sleep(0.5)
 		self.SERIAL.write("on_ph_b_pump")
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
+
 	def off(self):
 		time.sleep(0.5)
 		self.SERIAL.write("off_ph_b_pump")
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 
 
 if __name__ == '__main__':
@@ -45,6 +52,12 @@ if __name__ == '__main__':
 
 
 	if order == 'on':
-		ph_b_pump.on()
+		value = ph_b_pump.on()
 	elif order == 'off':
-		ph_b_pump.off()
+		value = ph_b_pump.off()
+	else :
+		print("It is not correct arguments")
+		sys.exit()
+	print(value)
+
+

@@ -9,11 +9,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino
 
 
-class ventil_fan:
+class air_fan_out:
 	SERIAL = None
 	def __init__(self):
 		self.connect()
-
 	def connect(self):
 		cont_ad = pfc_connection_arduino()
 		port = cont_ad.get_USB_PORT()
@@ -22,24 +21,22 @@ class ventil_fan:
 		attrs[2] = attrs[2] & ~termios.HUPCL
 		termios.tcsetattr(f, termios.TCSAFLUSH, attrs)
 		f.close()
-		self.SERIAL = serial.Serial(port,cont_ad.get_BAUD_RATE());
+		self.SERIAL = serial.Serial(port, cont_ad.get_BAUD_RATE());
 	def on(self):
 		time.sleep(0.5)
-		self.SERIAL.write("on_ventil_fan")
+		self.SERIAL.write("on_air_fan_out")
 		time.sleep(0.5)
 		value = self.SERIAL.readline()
 		return value
-
 	def off(self):
 		time.sleep(0.5)
-		self.SERIAL.write("off_ventil_fan")
+		self.SERIAL.write("off_air_fan_out")
 		time.sleep(0.5)
 		value = self.SERIAL.readline()
 		return value
 
-
 if __name__ == '__main__':
-	ventil_fan = ventil_fan()
+	air_fan = air_fan()
 
 	if len(sys.argv) == 1:
 		exit()
@@ -53,20 +50,12 @@ if __name__ == '__main__':
 	time.sleep(float(delay))
 
 	if order == 'on':
-		value = ventil_fan.on()
+		value = air_fan_out.on()
 	elif order =='off':
-		value = ventil_fan.off()
+		value = air_fan_out.off()
 	else :
 		print("It is not correct arugments")
 		sys.exit()
 	print(value)
-
-
-
-
-
-
-
-
 
 

@@ -22,12 +22,17 @@ class water_pump:
 		self.SERIAL = serial.Serial(port, cont_ad.get_BAUD_RATE());
 
 	def on(self):
-		time.sleep(0.7)
+		time.sleep(0.5)
 		self.SERIAL.write("on_water_pump")
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 	def off(self):
-		time.sleep(0.7)
+		time.sleep(0.5)
 		self.SERIAL.write("off_water_pump")
-
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 
 if __name__ == '__main__':
 	water_pump = water_pump()
@@ -44,6 +49,11 @@ if __name__ == '__main__':
 	time.sleep(float(delay))
 
 	if order == 'on':
-		water_pump.on()
+		value = water_pump.on()
 	elif order == 'off':
-		water_pump.off()
+		value = water_pump.off()
+	else :
+		print("It is not correct arugments")
+		sys.exit()
+	print(value)
+

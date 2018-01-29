@@ -25,12 +25,17 @@ class led:
 		self.SERIAL = serial.Serial(port, cont_ad.get_BAUD_RATE())
 
 	def on(self):
-		time.sleep(0.7)
+		time.sleep(0.5)
 		self.SERIAL.write("on_led")
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 	def off(self):
-		time.sleep(0.7)
+		time.sleep(0.5)
 		self.SERIAL.write("off_led")
-
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 
 if __name__ == '__main__':
 	led = led()
@@ -46,10 +51,13 @@ if __name__ == '__main__':
 	time.sleep(float(delay))
 
 	if order == 'on':
-		led.on()
+		value = led.on()
 	elif order =='off':
-		led.off()
+		value = led.off()
 	else :
 		print("It is not correct arguments")
+		sys.exit()
 
-	led.SERIAL.close()
+	print(value)
+
+

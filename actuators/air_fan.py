@@ -25,10 +25,15 @@ class air_fan:
 	def on(self):
 		time.sleep(0.5)
 		self.SERIAL.write("on_air_fan")
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 	def off(self):
 		time.sleep(0.5)
 		self.SERIAL.write("off_air_fan")
-
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 
 if __name__ == '__main__':
 	air_fan = air_fan()
@@ -45,6 +50,12 @@ if __name__ == '__main__':
 	time.sleep(float(delay))
 
 	if order == 'on':
-		air_fan.on()
+		value = air_fan.on()
 	elif order =='off':
-		air_fan.off()
+		value = air_fan.off()
+	else :
+		print("It is not correct arugments")
+		sys.exit()
+	print(value)
+
+

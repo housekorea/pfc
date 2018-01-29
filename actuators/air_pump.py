@@ -25,9 +25,16 @@ class air_pump:
 	def on(self):
 		time.sleep(0.5)
 		self.SERIAL.write('on_air_pump')
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
 	def off(self):
 		time.sleep(0.5)
 		self.SERIAL.write('off_air_pump')
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
+
 
 if __name__ == '__main__':
 	air_pump = air_pump()
@@ -43,6 +50,10 @@ if __name__ == '__main__':
 	time.sleep(float(delay))
 
 	if order == 'on':
-		air_pump.on()
+		value = air_pump.on()
 	elif order == 'off':
-		air_pump.off()
+		value = air_pump.off()
+	else :
+		print("It is not correct arugments")
+		sys.exit()
+	print(value)

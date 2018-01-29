@@ -81,10 +81,18 @@ void setup() {
 //  lcd.setCursor(0,1);
 //  lcd.print("#NERDFARMERS");
 //  last_millis = millis(); 
+
+
+
+    digitalWrite(ch8_relay[LED],LOW);
+    digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
+    digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
 }
 
 
 void loop() {
+
+
 
 
   if (Serial.available() > 0 ) {
