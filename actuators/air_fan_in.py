@@ -21,7 +21,7 @@ class air_fan_in:
 		attrs[2] = attrs[2] & ~termios.HUPCL
 		termios.tcsetattr(f, termios.TCSAFLUSH, attrs)
 		f.close()
-		self.SERIAL = serial.Serial(port, cont_ad.get_BAUD_RATE());
+		self.SERIAL = serial.Serial(port, cont_ad.get_BAUD_RATE(),timeout=60)
 	def on(self):
 		time.sleep(0.5)
 		self.SERIAL.write("on_air_fan_in")
