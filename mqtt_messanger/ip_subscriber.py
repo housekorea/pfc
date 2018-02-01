@@ -5,9 +5,10 @@ import os
 import socket
 import fcntl
 import struct
+from datetime import datetime
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from configure import pfc_conf
-from datetime import datetime
 class ip_subscriber:
 	client = None
 	subscribe_topic = 'ezfarm/pfc/ip_notifier'
@@ -24,7 +25,7 @@ class ip_subscriber:
 	def on_message(self,client,userdata, msg):
 		print("Topic : ", msg.topic + " / Message : " + str(msg.payload) + " ____Received on " + str(datetime.now()))
 		ip_addr_msg = msg.payload
-		f=open(self.ip_log_file,'a')
+		f=open(self.ip_log_file_path,'a')
 		f.write(ip_addr_msg +"/"+str(datetime.now()) + "\r\n")
 		f.close()
 

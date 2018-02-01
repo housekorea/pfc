@@ -31,7 +31,7 @@ class ip_notifier:
 		self.get_ip_addr('wlan0')
 		self.client.connect(pfc_conf.PFC_BROKER_HOST, pfc_conf.PFC_BROKER_PORT,pfc_conf.PFC_BROKER_KEEPALIVE)
 		self.client.publish(self.publish_topic, self.ip_addr + "/" + self.pfc_alias)
-		# self.client.publish(self.publish_topic, 'Meesage sented by ip_notifier - ' + self.pfc_alias + '/' + str(datetime.now()))
+		print("Send to IP address of this PFC/" + str(datetime.now()))
 		self.client.disconnect()
 
 
