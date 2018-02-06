@@ -1,12 +1,16 @@
 #include <DHT.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <SoftwareSerial.h>
+
+
+
 
 //SENSORS
 #define DHT_IN 50
 #define LDR_IN A0
 #define DS18_IN 52
-#define CO2_IN 26
+#define CO2_IN 46
 
 //#define EC_IN A1
 //#define PH_IN A2
@@ -20,48 +24,33 @@
 #define AIR_FAN_OUT 5
 #define LED 7
 
-//LCD KEYPAD
-//#define btnRIGHT 0
-//#define btnUP 1
-//#define btnDOWN 2
-//#define btnLEFT 3
-//#define btnSELECT 4
-//#define btnNONE 5
-
-// LCD KEYPAD
-//LiquidCrystal lcd(12,13,8,9,10,11);
-//int lcd_key = 3;
-//int adc_key_in = 0;
-//int flag_index = 0;
-//int flag_arr[8] = {"temp","hum","co2","ph","ec","dstemp","LDR","nerdfarmers"};
-//unsigned long last_millis = 0;
-//int lcd_interval = 30000;
+// This value have to be a change on the realy wiring
+SoftwareSerial mhz14_co2_SerialCom (A0,A1);
 
 // 8Channel Relay
-int ch8_relay[8] = {53,51,49,47,45,43,41,39};
+int ch8_relay[8] = {53, 51, 49, 47, 45, 43, 41, 39};
 
 
-int dtime = 0.5; // Delay Time
+int dtime = 0.5;// Delay Time
 boolean current_led_stat = true;
 unsigned int min_cnt = 0;
 unsigned int turn_on_min_cnt = 60 * 4;
 unsigned int turn_off_min_cnt = 60 * 1;
 
-
-// For DHT11 Sensors.
 unsigned int ldr_val;
-// Initialize DHT sensor.
-// Note that older versions of this library took an optional third parameter to
-// tweak the timings for faster processors.  This parameter is no longer needed
-// as the current DHT reading algorithm adjusts itself to work on faster procs.
 
-
+//Co2 Sensor array(MH-Z14a)
+byte mhz14_co2_addArray[] = {
+0xFF, 0x01, 0x86,
+0x00, 0x00, 0x00,
+0x00, 0x00, 0x79
+};
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(19200);
 
-  while(!Serial)
+  while (!Serial)
   {
     return;
   }
@@ -72,33 +61,30 @@ void setup() {
   for (i = 0; i < 8; i++)
   {
     pinMode(ch8_relay[i], OUTPUT);
-    digitalWrite(ch8_relay[i],HIGH);
+    digitalWrite(ch8_relay[i], HIGH);
   }
-//
-//  lcd.begin(16,2);
-//  lcd.setCursor(0,0);
-//  lcd.print("PFC V2");
-//  lcd.setCursor(0,1);
-//  lcd.print("#NERDFARMERS");
-//  last_millis = millis(); 
 
+  pinMode(CO2_IN, INPUT);
 
-//
-//    digitalWrite(ch8_relay[LED],LOW);
-//    digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
-//    digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
 }
 
 
 void loop() {
 
 
+  while (1)
+  {
+    Serial.println(getPWM());
+    delay(1000);
+  }
 
 
   if (Serial.available() > 0 ) {
     String pfc_order;
     pfc_order = Serial.readString();
     const char *pfc_order_arr = pfc_order.c_str();
+
+
 
     Serial.print("order=");
     Serial.print(pfc_order);
@@ -110,7 +96,7 @@ void loop() {
     {
       float *dht_data = getDHT(DHT_IN);
       Serial.println(dht_data[1]);
-  
+
       return dht_data[1];
 
     }
@@ -139,49 +125,23 @@ void loop() {
       Serial.println(co2_ppm);
       return co2_ppm;
     }
-//    else if ( !strcmp(pfc_order_arr, "get_ec"))
-//    {
-//      int ds18temp = getDS18temp(DS18_IN);
-//      float ec_cms = getEC(EC_IN, ds18temp);
-//      Serial.println(ec_cms);
-//      return ec_cms;
-//    }
-//    else if ( !strcmp(pfc_order_arr, "get_ph"))
-//    {
-//      double ph_val = getPH(PH_IN);
-//      Serial.println(ph_val);
-//      return ph_val;
-//    }
-    else if( !strcmp(pfc_order_arr, "get_all_sensors"))
+    else if ( !strcmp(pfc_order_arr, "get_all_sensors"))
     {
       // RESULT for CSV format( Comma Seperator)
       String csv_res = "";
-      
+
       // DHT11
       float *dht_data = getDHT(DHT_IN);
       float air_temp = dht_data[1];
       float air_hum = dht_data[0];
-      // LDR
       unsigned int ldr_val = getLDR(LDR_IN);
-      // CO2
-//      int co2_ppm = getCo2ppm(CO2_IN);
       // DS18B20
       int ds18_temp = getDS18temp(DS18_IN);
-      // EC
-//      float ec_cms = getEC(EC_IN, ds18_temp);
-      // PH
-//      double ph_val = getPH(PH_IN);
 
-
-
-      csv_res +=String(air_temp) + ",";
-      csv_res +=String(air_hum) + ",";
-      csv_res +=String(ldr_val) + ",";
-//      csv_res +=String(co2_ppm) + ",";
-      csv_res +=String(ds18_temp);
-//      csv_res +=String(ec_cms) + ",";
-//      csv_res +=String(ph_val);
-//      csv_res += "\n";
+      csv_res += String(air_temp) + ",";
+      csv_res += String(air_hum) + ",";
+      csv_res += String(ldr_val) + ",";
+      csv_res += String(ds18_temp);
       Serial.println(csv_res);
 
     }
@@ -190,270 +150,62 @@ void loop() {
     //Actuators
     else if ( !strcmp(pfc_order_arr, "on_air_fan_in"))
     {
-      digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
-      Serial.println("on");    
+      digitalWrite(ch8_relay[AIR_FAN_IN], LOW);
+      Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_air_fan_in"))
     {
-      digitalWrite(ch8_relay[AIR_FAN_IN],HIGH);
-      Serial.println("off");      
+      digitalWrite(ch8_relay[AIR_FAN_IN], HIGH);
+      Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_air_fan_out"))
     {
-      digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
+      digitalWrite(ch8_relay[AIR_FAN_OUT], LOW);
       Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_air_fan_out"))
     {
-      digitalWrite(ch8_relay[AIR_FAN_OUT],HIGH);
+      digitalWrite(ch8_relay[AIR_FAN_OUT], HIGH);
       Serial.println("off");
-      
-    }
-    
 
-//    else if ( !strcmp(pfc_order_arr, "on_ventil_fan"))
-//    {
-//      digitalWrite(ch8_relay[AIR_FAN_OUT],LOW);
-//      Serial.println("on");
-//
-//    }
-//    else if ( !strcmp(pfc_order_arr, "off_ventil_fan"))
-//    {
-//      digitalWrite(ch8_relay[AIR_FAN_OUT],HIGH);
-//      Serial.println("off");
-//    }
-//    else if ( !strcmp(pfc_order_arr, "on_air_fan"))
-//    {
-//      digitalWrite(ch8_relay[AIR_FAN_IN],LOW);
-//      Serial.println("on");
-//    }
-//    else if ( !strcmp(pfc_order_arr, "off_air_fan"))
-//    {
-//      digitalWrite(ch8_relay[AIR_FAN_IN],HIGH);
-//      Serial.println("off");
-//    }
+    }
     else if ( !strcmp(pfc_order_arr, "on_led"))
     {
-      digitalWrite(ch8_relay[LED],LOW);
+      digitalWrite(ch8_relay[LED], LOW);
       Serial.println("on");
-    } 
+    }
     else if ( !strcmp(pfc_order_arr, "off_led"))
     {
-      digitalWrite(ch8_relay[LED],HIGH);
+      digitalWrite(ch8_relay[LED], HIGH);
       Serial.println("off");
-    } 
-//    else if ( !strcmp(pfc_order_arr, "on_air_pump"))
-//    {
-//      digitalWrite(ch8_relay[AIR_PUMP],LOW);
-//      Serial.println("on");
-//    }
-//    else if ( !strcmp(pfc_order_arr, "off_air_pump"))
-//    {
-//      digitalWrite(ch8_relay[AIR_PUMP],HIGH);
-//      Serial.println("off");
-//    }
-//    else if ( !strcmp(pfc_order_arr, "on_ph_a_pump"))
-//    {
-//      digitalWrite(ch8_relay[PH_A_PUMP],LOW);
-//      Serial.println("on");
-//
-//    }
-//    else if ( !strcmp(pfc_order_arr, "off_ph_a_pump"))
-//    {
-//      digitalWrite(ch8_relay[PH_A_PUMP],HIGH);
-//      Serial.println("off");
-//
-//    }
-//    else if ( !strcmp(pfc_order_arr, "on_ph_b_pump"))
-//    {
-//      digitalWrite(ch8_relay[PH_B_PUMP],LOW);
-//      Serial.println("on");
-//
-//    }
-//    else if ( !strcmp(pfc_order_arr, "off_ph_b_pump"))
-//    {
-//      digitalWrite(ch8_relay[PH_B_PUMP],HIGH);
-//      Serial.println("off");
-//
-//    }
-//    else if ( !strcmp(pfc_order_arr, "on_water_pump"))
-//    {
-//      digitalWrite(ch8_relay[WATER_PUMP],LOW);
-//      Serial.println("on");
-//
-//    }
-//    else if ( !strcmp(pfc_order_arr, "off_water_pump"))
-//    {
-//      digitalWrite(ch8_relay[WATER_PUMP],HIGH);
-//      Serial.println("off");
-//
-//    }
-    // LCD PANEL
-//    else if ( !strcmp(pfc_order_arr, "display_status"))
-//    {
-//      lcd.clear();
-//      lcd.setCursor(0,0);
-//      lcd.write("PFC STATUS : " );
-//      lcd.setCursor(8,1);
-//      lcd.write("Healthy");
-//      Serial.println("display_status");
-//    }
-//    else if ( !strcmp(pfc_order_arr, "display_internet_disconnet"))
-//    {
-//      lcd.clear();
-//      lcd.setCursor(0,0);
-//      lcd.write("Internet");
-//      lcd.setCursor(0,1);
-//      lcd.write("Disconneted");
-//      Serial.println("display_internet_disconnect");      
-//    }
-//    else if ( !strcmp(pfc_order_arr, "display_ip_address"))
-//    {
-//      lcd.clear();
-//      lcd.setCursor(0,0);
-//      lcd.write("display_ip_address : " );
-//      Serial.println("display_ip_address"); 
-//    }
-//    else if ( !strcmp(pfc_order_arr, "display_pfc_ver"))
-//    {
-//      lcd.clear();
-//      lcd.setCursor(0,0);
-//      lcd.write("PFC v2.0" );
-//      lcd.setCursor(0,1);
-//      lcd.write("#NerdFarmers");
-//       Serial.println("display_pfc_ver");
-//    }
-
+    }
     else
     {
       Serial.println("non-order");
     }
-
-
-
   }
-  
-//
-//  if((millis() - last_millis) > lcd_interval)
-//  {
-//
-//    
-//    if(flag_index == 8)
-//    {
-//      flag_index =0;
-//    }
-//
-//    lcd.clear();
-//    
-//    switch(flag_index){
-//      case 0:{
-//          float *dht_data = getDHT(DHT_IN);
-//          float air_temp = dht_data[1];
-//          lcd.setCursor(0,0);
-//          lcd.print("AIR TEMP:");
-//          lcd.setCursor(7,1);
-//          lcd.print(String(air_temp));
-//          lcd.print(" `c");
-//          break;
-//      }
-//      case 1:{
-//          float *dht_data = getDHT(DHT_IN);
-//          float air_hum = dht_data[0];
-//          lcd.setCursor(0,0);
-//          lcd.print("AIR HUMIDITY:");
-//          lcd.setCursor(7,1);
-//          lcd.print(String(air_hum));
-//          lcd.print(" %");
-//          break;
-//      }
-//      case 2:{
-//          int co2_ppm = getCo2ppm(CO2_IN);
-//          lcd.setCursor(0,0);
-//          lcd.print("CO2 PPM:");
-//          lcd.setCursor(5,1);
-//          lcd.print(String(co2_ppm));
-//          lcd.print(" ppm");
-//          break;
-//      }
-//      case 3:{
-//          double ph_val = getPH(PH_IN);
-//          lcd.setCursor(0,0);
-//          lcd.print("PH:");
-//          lcd.setCursor(5,1);
-//          lcd.print(String(ph_val));
-//          lcd.print(" PH");
-//          break;
-//      }        
-//      case 4:{
-//          // DS18B20
-//          int ds18_temp = getDS18temp(DS18_IN);
-//          // EC
-//          float ec_cms = getEC(EC_IN, ds18_temp);
-//         
-//          lcd.setCursor(0,0);
-//          lcd.print("EC:");
-//          lcd.setCursor(5,1);
-//          lcd.print(String(ec_cms));
-//          lcd.print(" S/cm");
-//          break;
-//      }     
-//      case 5:{
-//          // DS18B20
-//          int ds18_temp = getDS18temp(DS18_IN);    
-//          lcd.setCursor(0,0);
-//          lcd.print("WATER TEMP:");
-//          lcd.setCursor(10,1);
-//          lcd.print(String(ds18_temp));
-//          lcd.print(" `c");
-//          break;
-//      }
-//      case 6:{
-//          unsigned int ldr_val = getLDR(LDR_IN);
-//          lcd.setCursor(0,0);
-//          lcd.print("PHOTOCELL :");
-//          lcd.setCursor(10,1);
-//          lcd.print(String(ldr_val));
-//          lcd.print("");
-//          break;
-//      }
-//      case 7:{
-//        lcd.setCursor(0,0);
-//        lcd.print("PFC V2");
-//        lcd.setCursor(0,1);
-//        lcd.print("#NERDFARMERS");
-//        break;
-//      }
-//            
-//    }
-//
-//
-//    flag_index++;
-//    last_millis = millis(); 
-//    
-//  }
-
 }
 
 
 char *floatToChar(float val)
-{  
-  char *buf = malloc(10*sizeof(char));
+{
+  char *buf = malloc(10 * sizeof(char));
   return buf;
-  
+
 }
 
 char *intToChar(int val)
 {
-  char *buf = malloc(10*sizeof(char));
+  char *buf = malloc(10 * sizeof(char));
   sprintf(buf, "%d", val);
   return buf;
 }
 
 char *doubleToChar(double val)
 {
-   char *buf = malloc(10*sizeof(char));
-   sprintf(buf, "%d", val);
-   return buf;
+  char *buf = malloc(10 * sizeof(char));
+  sprintf(buf, "%d", val);
+  return buf;
 }
 
 
@@ -487,7 +239,7 @@ int getDS18temp(int ds_in)
   OneWire oneWire(ds_in);
   DallasTemperature sensors(&oneWire);
   int temp = 0;
-  int temp_arr[5]={0};
+  int temp_arr[5] = {0};
   int min_v = 0;
   int max_v = 0;
   int amount = 0;
@@ -496,28 +248,28 @@ int getDS18temp(int ds_in)
   temp = sensors.getTempCByIndex(0);
   min_v = temp;
   max_v = temp;
-  
-    
-  for(int in_i=0; in_i<max_iter;in_i++)
+
+
+  for (int in_i = 0; in_i < max_iter; in_i++)
   {
     sensors.requestTemperatures();
     temp = sensors.getTempCByIndex(0);
-    
-    if(temp < min_v)
+
+    if (temp < min_v)
     {
       min_v = temp;
     }
-    else if(temp > max_v)
+    else if (temp > max_v)
     {
       max_v = temp;
     }
-    amount+= temp;
-    
+    amount += temp;
+
     delay(50);
   }
 
-  int avg = (amount - min_v - max_v ) / ( max_iter -2 );
-  
+  int avg = (amount - min_v - max_v ) / ( max_iter - 2 );
+
   return avg;
 }
 
@@ -528,27 +280,17 @@ int getCo2ppm(int co2_in)
   float voltage = sensorValue * (4600 / 1024.0);
   if (voltage == 0)
   {
-//    Serial.println("Fault");
     return false;
   }
   else if (voltage < 400)
   {
-//    Serial.println("Preheating");
+    //    Serial.println("Preheating");
     return false;
   }
   else
   {
     int voltage_diference = voltage - 400;
     float concentration = voltage_diference * 50.0 / 16.0;
-
-
-//    Serial.print("voltage : ");
-//    Serial.print(voltage);
-//    Serial.print("mv/");
-//    Serial.print("concentration : ");
-//    Serial.print(concentration);
-//    Serial.println("ppm");
-    
     return concentration;
   }
 }
@@ -612,13 +354,8 @@ float getEC(int ec_in, float temperature)
         //          Serial.println("EC is high");
         ECcurrent = 5.3 * CoefficientVoltage + 2278;
       }
-
-
-
       ECcurrent /= 1000;
       return ECcurrent;
-
-
     }
     delay(10);
   }
@@ -639,12 +376,12 @@ double getPH(int ph_in)
   unsigned long printTime = millis();
   float pHValue, voltage;
 
-  while(true)
+  while (true)
   {
-    
+
     if (millis() - samplingTime > samplingInterval)
     {
-      pHArray[pHArrayIndex++] = analogRead(ph_in);      
+      pHArray[pHArrayIndex++] = analogRead(ph_in);
       if (pHArrayIndex == ArrayLength) pHArrayIndex = 0;
       samplingTime = millis();
       voltage = averagearray(pHArray, ArrayLength) * 5.0 / 1024;
@@ -715,23 +452,28 @@ double averagearray(int* arr, int number) {
     return avg;
   }
 }
-//
-//int read_LCD_buttons(){
-//  adc_key_in = analogRead(lcd_key);
-//
-//  if(adc_key_in > 1000) return btnNONE;
-//
-//  if(adc_key_in < 50 ) return btnRIGHT;
-//  if(adc_key_in < 250 ) return btnUP;
-//  if(adc_key_in < 450 ) return btnDOWN;
-//  if(adc_key_in < 650 ) return btnLEFT;
-//  if(adc_key_in < 950 ) return btnSELECT;
-//
-//  return btnNONE;
-//}
-//
-//
+int getPWM()
+{
+  while (digitalRead(CO2_IN) == LOW);  
+  long startTime = micros();
+  while (digitalRead(CO2_IN) == HIGH);
+  long duration = micros() - startTime;
+  long co2ppm = 5 * ((duration / 1000) - 2);
+  return co2ppm;
+}
 
+
+int mhz14_co2()
+{
+  char co2_dataValue[9];
+  mhz14_co2_SerialCom.write(mhz14_co2_addArray,9);
+  mhz14_co2_SerialCom.readBytes(co2_dataValue,9);
+  int resHigh = (int)co2_dataValue[2];
+  int resLow = (int)co2_dataValue[3];
+  int pulse = (256*resHigh) + resLow;
+  return pulse;
+
+}
 
 
 

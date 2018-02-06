@@ -12,7 +12,7 @@ from configure import pfc_conf
 class ip_subscriber:
 	client = None
 	subscribe_topic = 'ezfarm/pfc/ip_notifier'
-	ip_log_file_path = '/var/www/html/og/log/pfc_ips.log'
+	ip_log_file_path = '/var/www/html/og/logs/pfc_ips.log'
 	def __init__(self):
 		self.client = mqtt.Client()
 		self.client.on_connect = self.on_connect
@@ -23,11 +23,13 @@ class ip_subscriber:
 		client.subscribe(self.subscribe_topic)
 
 	def on_message(self,client,userdata, msg):
-		print("Topic : ", msg.topic + " / Message : " + str(msg.payload) + " ____Received on " + str(datetime.now()))
-		ip_addr_msg = msg.payload
-		f=open(self.ip_log_file_path,'a')
-		f.write(ip_addr_msg +"/"+str(datetime.now()) + "\r\n")
-		f.close()
+		print("Message received")
+		print(msg.payload)
+		# print("Topic : ", msg.topic + " / Message : " + str(msg.payload) + " ____Received on " + str(datetime.now()))
+		# ip_addr_msg = msg.payload
+		# f=open(self.ip_log_file_path,'a')
+		# f.write(ip_addr_msg +"/"+str(datetime.now()) + "\r\n")
+		# f.close()
 
 	def client_looping(self):
 		self.client.connect(pfc_conf.PFC_BROKER_HOST,pfc_conf.PFC_BROKER_PORT,pfc_conf.PFC_BROKER_KEEPALIVE)

@@ -10,21 +10,31 @@ import time
 
 class pfc_log_publisher:
 	log_path = '/var/og/logs/log.log'
-	publish_topic= 'ezfarm/pfc/base_log'
+	log_path = '/Users/house/Desktop/pfc_milesstone.pdf'
+	publish_topic= 'ezfarm/pfc/baselog'
 	def __init__(self):
 		self.client = mqtt.Client()
-
+		self.client.on_publish = self.on_publish
+	def on_publish(self,client,obj,mid):
+		print("mid : " + str(mid))
+		print("ojb : " + str(obj))
+		print("client : " + str(client))
 
 	def publish_log(self):
+		pfc_conf.PFC_BROKER_HOST = 'iot.eclipse.org'
 		self.client.connect(pfc_conf.PFC_BROKER_HOST, pfc_conf.PFC_BROKER_PORT, pfc_conf.PFC_BROKER_KEEPALIVE)
 		f = open(self.log_path)
 		log_f = f.read()
 		log_bytearray = bytearray(log_f)
-		self.client.publish(self.publish_topic,payload=log_bytearray)
+		f.close()
+		self.client.publish(self.publish_topic,payload=log_bytearray,qos=2,retain=False)
+		# self.client.publish(self.publish_topic,"hello from the mac hahahaha")
 		print("Send " + str(self.log_path) + "/" + str(datetime.now()))
-		self.client.disconnect()
+		# self.client.disconnect()
 
 
 if __name__ == '__main__':
 	pfc_log_publisher = pfc_log_publisher()
-	pfc_log_publisher.publish_log()
+	while True:
+		pfc_log_publisher.publish_log()
+		time.sleep(10)
