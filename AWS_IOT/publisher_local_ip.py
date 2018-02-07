@@ -62,5 +62,6 @@ if __name__ == '__main__':
 	}
 	messageJson = json.dumps(message)
 	publisher_ip.publish_mqtt_broker(messageJson)
-	print "Published Message Topic : " + pfc_mqtt_topic.PUBLISH_LOCAL_IP
+	print "Published Message Topic : " + pfc_mqtt_topic.PUBLISH_LOCAL_IP + "_" + str(datetime.now());
+	print "\n"
 

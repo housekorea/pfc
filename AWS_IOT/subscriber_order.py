@@ -27,7 +27,7 @@ class subscriber_order:
 	def msg_callback(self, client, userdata, message):
 		mes_pld = message.payload
 		mes_tpc = message.topic
-		f = open('/Users/house/Desktop/cert_pfc_0001/log.log','a+')
+		f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
 		f.write(mes_tpc + ' => ' + mes_pld + str(datetime.now()))
 		f.write('\n')
 		f.close()
@@ -39,8 +39,7 @@ class subscriber_order:
 		self.iot_mqtt_client.subscribe(pfc_mqtt_topic.SUBSCRIBE_ORDER,self.QOS_LEVEL, self.msg_callback)
 		print("Subscribing topic : " + str(pfc_mqtt_topic.SUBSCRIBE_ORDER))
 
-		while True:
-			time.sleep(1)
+		time.sleep(5)
 	def logging(self):
 		None
 
@@ -49,7 +48,6 @@ if __name__ == '__main__':
 	# sys.argv
 	iot_subscriber = subscriber_order()
 	iot_subscriber.subscribe_mqtt_broker()
-
 
 
 
