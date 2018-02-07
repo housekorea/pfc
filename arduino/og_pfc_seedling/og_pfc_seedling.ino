@@ -72,11 +72,11 @@ void setup() {
 void loop() {
 
 
-  while (1)
-  {
-    Serial.println(getPWM());
-    delay(1000);
-  }
+//  while (1)
+//  {
+//    Serial.println(getPWM());
+//    delay(1000);
+//  }
 
 
   if (Serial.available() > 0 ) {

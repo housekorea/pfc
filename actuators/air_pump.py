@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/bin/bash
 import serial
 import time
