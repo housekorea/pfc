@@ -46,15 +46,11 @@ class subscriber_order:
 
 
 	def order_callback(self, om_type, om_target, om_order):
-		om_type = 'SENSOR'
-		om_target = 'CO2'
-		om_order = 'GET'
-
 		if om_type == 'SENSOR':
 			if om_target in command_mapper.SENSOR and om_order in command_mapper.SENSOR[om_target]:
 				command_pfc_sensor = command_mapper.SENSOR_DIR_PATH +command_mapper.SENSOR[om_target][om_order]
-				SENSOR_DATA = subprocess.check_output(["python", command_pfc_sensor])
-				# subprocess.check_output("python " + command_pfc_sensor))
+				SENSOR_DATA = subprocess.check_output("python " + command_pfc_sensor,shell=True)
+				print(SENSOR_DATA)
 
 		elif om_type == 'ACTUATOR':
 			None
