@@ -52,7 +52,8 @@ class subscriber_order:
 		if om_type == 'SENSOR':
 			if om_target in command_mapper.SENSOR and om_order in command_mapper.SENSOR[om_target]:
 				command_pfc_sensor = command_mapper.SENSOR_DIR_PATH +command_mapper.SENSOR[om_target][om_order]
-				proc = subprocess.Popen("python " + command_pfc_sensor, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				print(command_pfc_sensor)
+				proc = subprocess.Popen(command_pfc_sensor, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 				kill_proc = lambda p: p.kill()
 				timer = Timer(10, kill_proc,[proc])
 				try :
@@ -77,15 +78,6 @@ class subscriber_order:
 
 
 
-
-
-
-
-
-
-
-
-
 	def subscribe_mqtt_broker(self):
 		self.iot_mqtt_client.connect()
 		self.iot_mqtt_client.subscribe(pfc_mqtt_topic.SUBSCRIBE_ORDER,self.QOS_LEVEL, self.msg_callback)
@@ -101,6 +93,7 @@ if __name__ == '__main__':
 	# sys.argv
 	iot_subscriber = subscriber_order()
 	iot_subscriber.subscribe_mqtt_broker()
+	# iot_subscriber.order_callback('SENSOR','CO2','GET')
 
 
 
