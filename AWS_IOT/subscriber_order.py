@@ -10,7 +10,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from configure import pfc_conf
 from configure import pfc_mqtt_topic
 from command_mapper import command_mapper
-import subprocess
+import subprocess, shlex
+from threading import Timer
+
+
 class subscriber_order:
 	iot_mqtt_client = None
 	QOS_LEVEL = 1
@@ -49,8 +52,20 @@ class subscriber_order:
 		if om_type == 'SENSOR':
 			if om_target in command_mapper.SENSOR and om_order in command_mapper.SENSOR[om_target]:
 				command_pfc_sensor = command_mapper.SENSOR_DIR_PATH +command_mapper.SENSOR[om_target][om_order]
-				SENSOR_DATA = subprocess.check_output("python " + command_pfc_sensor,shell=True)
-				print(SENSOR_DATA)
+				proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				kill_proc = lambda p: p.kill()
+				timer = Timer(10, kill_proc,[proc])
+				try :
+					timer.start()
+					stdout,stderr = proc.communicate()
+				finally:
+					timer.cancle()
+				print(stdout)
+				print(stderr)
+
+
+				# SENSOR_DATA = subprocess.check_output("python " + command_pfc_sensor,shell=True)
+				# print(SENSOR_DATA)
 
 		elif om_type == 'ACTUATOR':
 			None
