@@ -85,12 +85,7 @@ class subscriber_order:
 if __name__ == '__main__':
 	# sys.argv
 	iot_subscriber = subscriber_order()
-	# iot_subscriber.subscribe_mqtt_broker()
-
-	om_type = 'SENSOR'
-	om_target = 'CO2'
-	om_order = 'GET'
-	iot_subscriber.order_callback(om_type,om_target,om_order)
+	iot_subscriber.subscribe_mqtt_broker()
 
 
 
