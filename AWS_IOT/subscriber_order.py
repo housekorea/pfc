@@ -53,9 +53,9 @@ class subscriber_order:
 			if om_target in command_mapper.SENSOR and om_order in command_mapper.SENSOR[om_target]:
 				command_pfc_sensor = command_mapper.SENSOR_DIR_PATH +command_mapper.SENSOR[om_target][om_order]
 				print(command_pfc_sensor)
-				proc = subprocess.Popen(command_pfc_sensor, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+				proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				kill_proc = lambda p: p.kill()
-				timer = Timer(10, kill_proc,[proc])
+				timer = Timer(30, kill_proc,[proc])
 				try :
 					timer.start()
 					stdout,stderr = proc.communicate()
