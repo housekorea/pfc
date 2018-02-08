@@ -48,21 +48,23 @@ class subscriber_order:
 		self.order_callback(om_type, om_target,om_order)
 
 
+
 	def order_callback(self, om_type, om_target, om_order):
 		if om_type == 'SENSOR':
 			if om_target in command_mapper.SENSOR and om_order in command_mapper.SENSOR[om_target]:
 				command_pfc_sensor = command_mapper.SENSOR_DIR_PATH +command_mapper.SENSOR[om_target][om_order]
 				print(command_pfc_sensor)
-				proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				sensor_proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				kill_proc = lambda p: p.kill()
-				timer = Timer(30, kill_proc,[proc])
+				timer = Timer(30, kill_proc,[sensor_proc])
 				try :
 					timer.start()
-					stdout,stderr = proc.communicate()
+					stdout,stderr = sensor_proc.communicate()
 				finally:
 					timer.cancel()
-				print(stdout)
-				print(stderr)
+
+				sensor_data = {'data' :stdout , 'PFC_SERIAL' :'239412', 'DEVICE_DT' : str(datetime.now())}
+				pub_proc = subprocess.Popen(shlex.split("python publisher_sensor_data.py -t 'EZFARM/PFC/V1/DEV' -m \"" +str(sensor_data) + '"'))
 
 
 				# SENSOR_DATA = subprocess.check_output("python " + command_pfc_sensor,shell=True)
@@ -83,7 +85,7 @@ class subscriber_order:
 		self.iot_mqtt_client.subscribe(pfc_mqtt_topic.SUBSCRIBE_ORDER,self.QOS_LEVEL, self.msg_callback)
 		print("Subscribing topic : " + str(pfc_mqtt_topic.SUBSCRIBE_ORDER))
 		while True:
-			time.sleep(5)
+			time.sleep(1)
 
 	def logging(self):
 		None

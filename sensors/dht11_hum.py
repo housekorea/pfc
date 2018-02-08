@@ -3,6 +3,7 @@ import time
 import sys
 import os
 import termios
+from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino

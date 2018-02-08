@@ -18,13 +18,13 @@ class command_mapper:
 			"GET" : "co2.py get"
 		},
 		"DHT11_TEMP": {
-			"get" : "dht11_temp.py get"
+			"GET" : "dht11_temp.py get"
 		},
 		"DHT11_HUM": {
 			"GET" : "dht11_hum.py get"
 		},
 		"DS18BS20_TEMP":{
-			"GET" : "ds18b20_temp.py get"
+			"GET" : "ds18bs20_temp.py get"
 		},
 		"LDR" : {
 			"GET" : "ldr.py get"
@@ -37,58 +37,58 @@ class command_mapper:
 		}
 	}
 	ACTUATOR = {
-		"air_fan" : {
+		"AIR_FAN" : {
 			"ON" : "air_fan.py on",
 			"OFF" : "air_fan.py off"
 		},
-		"air_fan_in" : {
+		"AIR_FAN_IN" : {
 			"ON" : "air_fan_in.py on",
 			"OFF" : "air_fan_in.py off"
 		},
-		"air_fan_out" : {
+		"AIR_FAN_OUT" : {
 			"ON" : "air_fan_out.py on",
 			"OFF" : "air_fan_out.py off"
 		},
-		"air_pump" : {
+		"AIR_PUMP" : {
 			"ON" : "air_pump.py on",
 			"OFF" : "air_pump.py off"
 		},
-		"led" : {
+		"LED" : {
 			"ON" : "led.py on",
 			"OFF" : "led.py off"
 		},
-		"ph_minus_pump" : {
+		"PH_MINUS_PUMP" : {
 			"ON" : "ph_minus_pump.py on",
 			"OFF" : "ph_minus_pump.py off"
 		},
-		"ph_plus_pump" : {
+		"PH_PLUS_PUMP" : {
 			"ON" : "ph_plus_pump.py on",
 			"OFF" : "ph_plus_pump.py off"
 		},
-		"solution_a_pump" : {
+		"SOLUTION_A_PUMP" : {
 			"ON" : "solution_a_pump.py on",
 			"OFF" : "solution_a_pump.py off"
 		},
-		"solution_b_pump" : {
+		"SOLUTION_B_PUMP" : {
 			"ON" : "solution_b_pump.py on",
 			"OFF" : "solution_b_pump.py off"
 		},
-		"ventil_fan" : {
+		"VENTIL_FAN" : {
 			"ON" : "ventil_fan.py on",
 			"OFF" : "ventil_fan.py off"
 		},
-		"water_pump" : {
+		"WATER_PUMP" : {
 			"ON" : "water_pump.py on",
 			"OFF" : "water_pump.py off"
 		},
-		"humidifier" : {
+		"HUMIDIFIER" : {
 			"ON" : "humidifier.py on",
 			"OFF" : "humidifier.py off"
 		}
 
 	}
 	HEARTBEAT = {
-		"heartbeat" : {
+		"HEARTBEAT" : {
 			"BEATING" : "publisher_heartbeat.py"
 		}
 	}
