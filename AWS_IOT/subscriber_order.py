@@ -45,21 +45,21 @@ class subscriber_order:
 		om_type = messageJson['TYPE']
 		om_target = messageJson['TARGET']
 		om_order = messageJson['ORDER']
-		self.order_callback(self, om_type, om_order)
+		self.order_callback(om_type, om_target,om_order)
 
 
 	def order_callback(self, om_type, om_target, om_order):
 		if om_type == 'SENSOR':
 			if om_target in command_mapper.SENSOR and om_order in command_mapper.SENSOR[om_target]:
 				command_pfc_sensor = command_mapper.SENSOR_DIR_PATH +command_mapper.SENSOR[om_target][om_order]
-				proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				proc = subprocess.Popen("python " + command_pfc_sensor, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				kill_proc = lambda p: p.kill()
 				timer = Timer(10, kill_proc,[proc])
 				try :
 					timer.start()
 					stdout,stderr = proc.communicate()
 				finally:
-					timer.cancle()
+					timer.cancel()
 				print(stdout)
 				print(stderr)
 
