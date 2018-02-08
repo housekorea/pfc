@@ -8,7 +8,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino
 
-class ph_a_pump:
+class ph_plus_pump:
 	SERIAL = None
 	def __init__(self):
 		self.connect()
@@ -21,42 +21,45 @@ class ph_a_pump:
 		termios.tcsetattr(f, termios.TCSAFLUSH, attrs)
 		f.close()
 		self.SERIAL = serial.Serial(port, cont_ad.get_BAUD_RATE(),timeout=60)
-
 	def on(self):
 		time.sleep(0.5)
-		self.SERIAL.write("on_ph_a_pump")
-		time.sleep(0.5)
-		value = self.SERIAL.readline()
-		return value
-	def off(self):
-		time.sleep(0.5)
-		self.SERIAL.write("off_ph_a_pump")
+		self.SERIAL.write("on_ph_plus_pump")
 		time.sleep(0.5)
 		value = self.SERIAL.readline()
 		return value
 
+	def off(self):
+		time.sleep(0.5)
+		self.SERIAL.write("off_ph_plus_pump")
+		time.sleep(0.5)
+		value = self.SERIAL.readline()
+		return value
+
+
 if __name__ == '__main__':
-	ph_a_pump = ph_a_pump()
+	ph_plus_pump = ph_plus_pump()
 
 	if len(sys.argv) == 1:
 		exit()
 	elif len(sys.argv) == 2:
 		order = sys.argv[1]
 		delay = 0
-	elif (len(sys.argv) == 3 ) and sys.argv[2].isdigit():
+	elif (len(sys.argv) == 3) and sys.argv[2].isdigit():
 		order = sys.argv[1]
 		delay = sys.argv[2]
 
 	time.sleep(float(delay))
 
-	if order == 'on':
-		value = ph_a_pump.on()
-	elif order == 'off':
-		value = ph_a_pump.off()
-	else :
-		print("It is not correct arugments")
-		sys.exit()
 
+
+	if order == 'on':
+		value = ph_plus_pump.on()
+	elif order == 'off':
+		value = ph_plus_pump.off()
+	else :
+		print("It is not correct arguments")
+		sys.exit()
 	print(value.strip() + "/dt=" + str(datetime.now()))
+
 
 

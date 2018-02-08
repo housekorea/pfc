@@ -11,8 +11,8 @@
 #define EC_IN A1
 #define PH_IN A2
 //ACUTATORS
-#define PH_A_PUMP 0
-#define PH_B_PUMP 1
+#define PH_MINUS_PUMP 0
+#define PH_PLUS_PUMP 1
 #define WATER_PUMP 2
 #define AIR_FAN 3
 #define LED 4
@@ -222,27 +222,27 @@ void loop() {
       digitalWrite(ch8_relay[AIR_PUMP],HIGH);
       Serial.println("off");
     }
-    else if ( !strcmp(pfc_order_arr, "on_ph_a_pump"))
+    else if ( !strcmp(pfc_order_arr, "on_ph_minus_pump"))
     {
-      digitalWrite(ch8_relay[PH_A_PUMP],LOW);
+      digitalWrite(ch8_relay[PH_MINUS_PUMP],LOW);
       Serial.println("on");
 
     }
-    else if ( !strcmp(pfc_order_arr, "off_ph_a_pump"))
+    else if ( !strcmp(pfc_order_arr, "off_ph_minus_pump"))
     {
-      digitalWrite(ch8_relay[PH_A_PUMP],HIGH);
+      digitalWrite(ch8_relay[PH_MINUS_PUMP],HIGH);
       Serial.println("off");
 
     }
-    else if ( !strcmp(pfc_order_arr, "on_ph_b_pump"))
+    else if ( !strcmp(pfc_order_arr, "on_ph_plus_pump"))
     {
-      digitalWrite(ch8_relay[PH_B_PUMP],LOW);
+      digitalWrite(ch8_relay[PH_PLUS_PUMP],LOW);
       Serial.println("on");
 
     }
-    else if ( !strcmp(pfc_order_arr, "off_ph_b_pump"))
+    else if ( !strcmp(pfc_order_arr, "off_ph_plus_pump"))
     {
-      digitalWrite(ch8_relay[PH_B_PUMP],HIGH);
+      digitalWrite(ch8_relay[PH_PLUS_PUMP],HIGH);
       Serial.println("off");
 
     }

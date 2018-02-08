@@ -1,0 +1,45 @@
+{
+	//Topic_name
+	//"EZFARM/PFC/${Version}/${Actor}/${PFC_SERIAL}/${topic_name}"
+
+	"V1" : {
+		"DEV" : {
+				"PFC_SERIAL" :{
+					//TOPICS
+					"order_subscribe" : [
+						"PFC_SERIAL",
+						"DEVICE_DT",
+						"ORDER",
+						"TYPE",
+						"ORDER_DT"
+					],
+					"local_ip" : [
+						"PFC_SERIAL",
+						"DEVICE_DT",
+						"IP_ADDR"
+					],
+					"sensor_data" : [
+						"PFC_SERIAL",
+						"DEVICE_DT",
+						"SENSOR_TYPE",
+						"DATA"
+
+					],
+					"actuator_data" : [
+						"PFC_SERIAL",
+						"DEVICE_DT",
+						"ACTUATOR_TYPE",
+						"DATA"
+					],
+					"heartbeat" : [
+						"PFC_SERIAL",
+						"DEVICE_DT",
+						"DATA"
+					]
+				}
+		},
+		"EDU" : {
+
+		}
+	}
+}
