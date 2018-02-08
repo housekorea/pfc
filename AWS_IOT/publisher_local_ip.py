@@ -57,8 +57,8 @@ if __name__ == '__main__':
 	ip_addr = publisher_ip.get_ip_addr('wlan0')
 	message = {
 		'PFC_SERIAL' : str(pfc_conf.PFC_AWS_IOT_SERIAL),
+		'DEVICE_DT' : str(datetime.now()),
 		'IP_ADDR' : str(ip_addr),
-		'send_dt' : str(datetime.now())
 	}
 	messageJson = json.dumps(message)
 	publisher_ip.publish_mqtt_broker(messageJson)
