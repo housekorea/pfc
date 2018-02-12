@@ -42,6 +42,8 @@ class subscriber_order:
 	def msg_callback(self, client, userdata, message):
 		mes_pld = message.payload
 		mes_tpc = message.topic
+
+		print("[Get the message] " + str(datetime.now()))
 		f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
 		f.write(mes_tpc + ' => ' + mes_pld + str(datetime.now()))
 		f.write('\n')
@@ -53,13 +55,14 @@ class subscriber_order:
 			return False
 
 		om_type = messageJson['TYPE']
-		om_target = messageJson['TARGET']
-		om_order = messageJson['ORDER']
+		om_target = messageJson['TARGET']if 'TARGET' in messageJson else None
+		om_order = messageJson['ORDER'] if 'ORDER' in messageJson else None
 		self.order_callback(om_type, om_target,om_order)
 
 
 
 	def order_callback(self, om_type, om_target, om_order):
+		global Timer
 
 		kill_proc = lambda p: p.kill()
 
@@ -79,18 +82,19 @@ class subscriber_order:
 					timer.cancel()
 
 				# Publish sensor data to AWS IOT DEVICE GATEWAY
-				sensor_data = {'data' :stdout , 'PFC_SERIAL' :str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
-				pub_proc = subprocess.Popen(shlex.split("python publisher_sensor_data.py -t '" + pfc_mqtt_topic.PUBLISH_SENSOR+ "' -m \"" +str(sensor_data) + '"'))
+				sensor_data = {"data" :stdout , "PFC_SERIAL" :str(pfc_conf.PFC_AWS_IOT_SERIAL), "DEVICE_DT" : str(datetime.now())}
+				pub_proc = subprocess.Popen(shlex.split("python publisher_sensor_data.py -t '" + pfc_mqtt_topic.PUBLISH_SENSOR+ "' -m '" +json.dumps(sensor_data) + "'"))
 				timer = Timer(30,kill_proc, [pub_proc])
 				try :
 					timer.start()
 					stdout,stderr = pub_proc.communicate()
 				finally :
 					timer.cancel()
-
+			else :
+				print("'TARGET' or 'ORDER' is not exists on the command_mapper")
 		elif om_type == 'ACTUATOR':
 			if om_target in command_mapper.ACTUATOR and om_order in command_mapper.ACTUATOR[om_target]:
-				command_pfc_actuator = command_mapper.SENSOR_DIR_PATH + command_mapper.ACTUATOR[om_target][om_order]
+				command_pfc_actuator = command_mapper.ACTUATOR_DIR_PATH + command_mapper.ACTUATOR[om_target][om_order]
 
 				print(command_pfc_actuator)
 				# Execute get sensor data python process through subprocess
@@ -99,22 +103,23 @@ class subscriber_order:
 				timer = Timer(30, kill_proc,[actuator_proc])
 				try :
 					timer.start()
-					stdout.stderr = actuator_proc.communicate()
+					stdout, stderr = actuator_proc.communicate()
 				finally :
 					timer.cancel()
 
 				actuator_data = {'data':stdout, 'PFC_SERIAL': str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
-				pub_proc = subprocess.Popen(shlex.split("python publisher_actuator_data.py -t '"+pfc_mqtt_topic.PUBLISH_ACTUATOR+"' -m \"" +str(actuator_data) + '"'))
+				pub_proc = subprocess.Popen(shlex.split("python publisher_actuator_data.py -t '"+pfc_mqtt_topic.PUBLISH_ACTUATOR+"' -m '" +json.dumps(actuator_data) + "'"))
 				timer = Timer(30,kill_proc, [pub_proc])
 				try :
 					timer.start()
 					stdout,stderr = pub_proc.communicate()
 				finally :
 					timer.cancel()
-
+			else :
+				print("'TARGET' or 'ORDER' is not exists on the command_mapper")
 		elif om_type == 'LOCAL_IP' :
-			pub_proc = subprocess.Popen(shlex.split("python publisher_local_ip.py"))
-			Timer = Timer(30,kill_proc, [pub_proc])
+			pub_proc = subprocess.Popen(shlex.split("python " + 					command_mapper.LOCAL_IP['LOCAL_IP']['LOCAL_IP']))
+			timer = Timer(30,kill_proc, [pub_proc])
 			try :
 				timer.start()
 				stdout,stderr = pub_proc.communicate()
@@ -122,7 +127,7 @@ class subscriber_order:
 				timer.cancel()
 
 		elif om_type == 'HEARTBEAT' :
-			pub_proc = subprocess.Popen(shlex.split("python publisher_heartbeat.py"))
+			pub_proc = subprocess.Popen(shlex.split("python " + command_mapper.LOCAL_IP['HEARTBEAT']['BEATING']))
 			Timer = Timer(30, kill_proc, [pub_proc])
 			try :
 				timer.start()

@@ -1,46 +1,67 @@
 # -*- coding: utf-8 -*-
+#!/bin/bash
 import os
 import sys
 from datetime import datetime
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
-import json
 import time
+import json
+import argparse
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from configure import pfc_conf
+from configure import pfc_mqtt_topic
 
-CA_PATH = "/Users/house/Desktop/cert_pfc_0001/VeriSign-Class 3-Public-Primary-Certification-Authority-G5.pem"
-PRIVATE_KEY_PATH ="/Users/house/Desktop/cert_pfc_0001/83f2f5c142-private.pem.key"
-CERTIFICATE_PATH ="/Users/house/Desktop/cert_pfc_0001/83f2f5c142-certificate.pem.crt"
+class aws_publisher:
+	IOT_MQTT_CLIENT = None
+	QOS_LEVEL = 1
+	def __init__(self,QOS_LEVEL=1):
+		self.QOS_LEVEL = QOS_LEVEL
+		self.IOT_MQTT_CLIENT = AWSIoTMQTTClient(pfc_conf.PFC_AWS_IOT_CLIENT_ID)
+		self.IOT_MQTT_CLIENT.configureEndpoint(pfc_mqtt_topic.AWS_ENDPOINT,8883)
+		self.IOT_MQTT_CLIENT.configureCredentials(pfc_conf.CA_PATH, pfc_conf.PRIVATE_KEY_PATH, pfc_conf.CERTIFICATE_PATH)
+		self.IOT_MQTT_CLIENT.configureAutoReconnectBackoffTime(1, 32, 20)
+		self.IOT_MQTT_CLIENT.configureOfflinePublishQueueing(-1)
+		self.IOT_MQTT_CLIENT.configureDrainingFrequency(2)
+		self.IOT_MQTT_CLIENT.configureConnectDisconnectTimeout(10)
+		self.IOT_MQTT_CLIENT.configureMQTTOperationTimeout(20)
 
-def test_cb(self, params, packet):
-	print(packet.payload)
-	f = open('/Users/house/Desktop/copy/temp_copy_'+str(time.time()) + '.log','w')
-	f.write(packet.payload)
-	f.close()
+	def publish_mqtt_broker(self,topic,messageJson):
+		if messageJson == None:
+			print("message is none.")
+			sys.exit()
+		elif "PFC_SERIAL" not in messageJson or "DEVICE_DT" not in messageJson:
+			print("PFC_SERIAL, DEVICE_DT is a demandable.")
+			sys.exit()
 
-myMQTTClient = AWSIoTMQTTClient("myClientID")
+		self.IOT_MQTT_CLIENT.connect()
+		self.IOT_MQTT_CLIENT.publish(topic, messageJson, self.QOS_LEVEL)
+		self.IOT_MQTT_CLIENT.disconnect()
+		print("Pbulished MQTT topic: " + str(topic))
 
-myMQTTClient.configureEndpoint("a1wxijaxbxg469.iot.ap-northeast-2.amazonaws.com",8883)
-myMQTTClient.configureCredentials(CA_PATH,PRIVATE_KEY_PATH,CERTIFICATE_PATH)
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument("-t","--topic",action="store",required=True,dest="topic", help="MQTT message `Topic` name")
+	parser.add_argument("-m","--message",action="store",required=True,dest="message", help="MQTT message data")
+	parser.add_argument("-q","--qos_level",action="store",dest="qos_level", help="MQTT QOS_LEVEL", default=1)
+
+	qos_level = 1
+	topic = 'EZFARM/PFC/V1/DEV/00000001/order_subscribe'
+	message = {
+  "PFC_SERIAL": "fruites",
+  "DEVICE_DT" : "",
+  "ORDER" : "ON",
+  "TARGET" : "LED",
+  "TYPE" : "ACTUATOR",
+  "ORDER_DT" : ""
+	}
 
 
+	message['ORDER_DT'] = str(datetime.now())
+	messageJson = json.dumps(message)
 
 
-# AWSIoTMQTTClient connection configuration
-myMQTTClient.configureAutoReconnectBackoffTime(1, 32, 20)
-myMQTTClient.configureOfflinePublishQueueing(-1)  # Infinite offline Publish queueing
-myMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
-myMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
-myMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
+	publisher_aws = aws_publisher(QOS_LEVEL = qos_level)
+	publisher_aws.publish_mqtt_broker(topic,messageJson)
 
-
-myMQTTClient.connect()
-
-loopCount =1
-while True:
-		message = {'pfc' : 'v0001', 'messanger':"KgwangHee Han","dt":str(datetime.now())}
-		messageJson = json.dumps(message)
-		myMQTTClient.publish("pfc/test", messageJson, 1)
-		print(str(loopCount)+'. Published topic %s: %s' % ('pfc/test', messageJson))
-		loopCount += 1
-		time.sleep(5)
 
 

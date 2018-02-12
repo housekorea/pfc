@@ -8,6 +8,9 @@ class command_mapper:
 
 	ACTUATOR_DIR_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/actuators/'
 	SENSOR = {
+		"ALL_SENSOR" : {
+			"GET" : "all_sensors.py get"
+		},
 		"PH" : {
 			"GET" : "ph.py get"
 		},

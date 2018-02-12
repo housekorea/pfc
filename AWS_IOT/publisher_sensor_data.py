@@ -37,7 +37,7 @@ class publisher_sensor_data:
 		mqtt_topic = pfc_mqtt_topic.PUBLISH_SENSOR
 
 		self.IOT_MQTT_CLIENT.connect()
-		self.IOT_MQTT_CLIENT.publish(mqtt_topic, messageJson,self.QOS_LEVEL);
+		self.IOT_MQTT_CLIENT.publish(mqtt_topic, messageJson,self.QOS_LEVEL)
 		self.IOT_MQTT_CLIENT.disconnect()
 		print("Published MQTT topic : " + str(topic))
 
@@ -50,9 +50,8 @@ if __name__ == '__main__':
 
 	args = parser.parse_args()
 	topic = args.topic
-	message_py_sets = args.message
 	qos_level = args.qos_level
-	messageJson = json.dumps(message_py_sets)
+	messageJson = args.message
 
 	if "PFC_SERIAL" not in messageJson or "DEVICE_DT" not in messageJson:
 		print ("PFC_SERIAL, DEVICE_DT is a demandable")
