@@ -102,11 +102,11 @@ I considered AWS architecture to include IoT feature in the PFC project. AWS has
 
  NoSQL Database System to archive the all of the sensor, actuator data
 
-7.S3(Simple Storage Service)
+7. S3(Simple Storage Service)
 
  Object Bucket Service. All of the images which captures the growing plant on the PFC would save in this bucket system. Any other "Blob" format data would save in here. I expect Voice data and preprocessing image data generate by the OpenCV(PlantCV)
 
-8.SageMaker
+8. SageMaker
 
  New Feature. Not yet I have no any experience this Machine Learning Feature. But, I heard that AWS team developed well this feature and they have a goal to the team who without data scientist could using machine learning well. If SageMaker is not appropriate well my PFC project, I would use the "Spark ML"Library on the AWS. 
 
