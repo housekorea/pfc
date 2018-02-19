@@ -22,6 +22,7 @@ class subscriber_actor:
 		self.iot_mqtt_client.configureDrainingFrequency(2)
 		self.iot_mqtt_client.configureConnectDisconnectTimeout(10)
 		self.iot_mqtt_client.configureMQTTOperationTimeout(5)
+
 	def msg_callback(self, client, userdata, message):
 		mes_pld = message.payload
 		mes_tpc = message.topic
@@ -29,6 +30,92 @@ class subscriber_actor:
 		f.write(mes_tpc + ' => ' + mes_pld + str(datetime.now()))
 		f.write('\n')
 		f.close()
+		try :
+			messageJson = json.loads(message.payload)
+		except :
+			print("Throw Message JSON Parse Error.")
+			return False
+
+		om_type = messageJson['TYPE']
+		om_target = messageJson['TARGET']if 'TARGET' in messageJson else None
+		om_order = messageJson['ORDER'] if 'ORDER' in messageJson else None
+		self.order_callback(om_type, om_target,om_order)
+
+
+	def order_callback(self, om_type, om_target, om_order):
+		global Timer
+
+		kill_proc = lambda p: p.kill()
+
+		if om_type == 'SENSOR':
+			if om_target in command_mapper.SENSOR and om_order in command_mapper.SENSOR[om_target]:
+				command_pfc_sensor = command_mapper.SENSOR_DIR_PATH +command_mapper.SENSOR[om_target][om_order]
+
+				print(command_pfc_sensor)
+				# Execute get sensor data python process through subprocess
+				# It has a timeout setting to prevent permanent blocking
+				sensor_proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				timer = Timer(30, kill_proc,[sensor_proc])
+				try :
+					timer.start()
+					stdout,stderr = sensor_proc.communicate()
+				finally:
+					timer.cancel()
+
+				# Publish sensor data to AWS IOT DEVICE GATEWAY
+				sensor_data = {"data" :stdout , "PFC_SERIAL" :str(pfc_conf.PFC_AWS_IOT_SERIAL), "DEVICE_DT" : str(datetime.now())}
+				pub_proc = subprocess.Popen(shlex.split("python publisher_sensor_data.py -t '" + pfc_mqtt_topic.PUBLISH_SENSOR+ "' -m '" +json.dumps(sensor_data) + "'"))
+				timer = Timer(30,kill_proc, [pub_proc])
+				try :
+					timer.start()
+					stdout,stderr = pub_proc.communicate()
+				finally :
+					timer.cancel()
+			else :
+				print("'TARGET' or 'ORDER' is not exists on the command_mapper")
+		elif om_type == 'ACTUATOR':
+			if om_target in command_mapper.ACTUATOR and om_order in command_mapper.ACTUATOR[om_target]:
+				command_pfc_actuator = command_mapper.ACTUATOR_DIR_PATH + command_mapper.ACTUATOR[om_target][om_order]
+
+				print(command_pfc_actuator)
+				# Execute get sensor data python process through subprocess
+				# It has a timeout setting to prevent permanent blocking
+				actuator_proc = subprocess.Popen(shlex.split("python " + command_pfc_actuator), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				timer = Timer(30, kill_proc,[actuator_proc])
+				try :
+					timer.start()
+					stdout, stderr = actuator_proc.communicate()
+				finally :
+					timer.cancel()
+
+				actuator_data = {'data':stdout, 'PFC_SERIAL': str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
+				pub_proc = subprocess.Popen(shlex.split("python publisher_actuator_data.py -t '"+pfc_mqtt_topic.PUBLISH_ACTUATOR+"' -m '" +json.dumps(actuator_data) + "'"))
+				timer = Timer(30,kill_proc, [pub_proc])
+				try :
+					timer.start()
+					stdout,stderr = pub_proc.communicate()
+				finally :
+					timer.cancel()
+			else :
+				print("'TARGET' or 'ORDER' is not exists on the command_mapper")
+		elif om_type == 'LOCAL_IP' :
+			pub_proc = subprocess.Popen(shlex.split("python " + 					command_mapper.LOCAL_IP['LOCAL_IP']['LOCAL_IP']))
+			timer = Timer(30,kill_proc, [pub_proc])
+			try :
+				timer.start()
+				stdout,stderr = pub_proc.communicate()
+			finally :
+				timer.cancel()
+
+		elif om_type == 'HEARTBEAT' :
+			pub_proc = subprocess.Popen(shlex.split("python " + command_mapper.LOCAL_IP['HEARTBEAT']['BEATING']))
+			Timer = Timer(30, kill_proc, [pub_proc])
+			try :
+				timer.start()
+				stdout, stderr = pub_proc.communicate()
+			finally :
+				timer.cancel()
+
 
 
 	def subscribe_mqtt_broker(self):
@@ -36,7 +123,7 @@ class subscriber_actor:
 		self.iot_mqtt_client.subscribe(pfc_mqtt_topic.SUBSCRIBE_DEV,self.QOS_LEVEL,self.msg_callback)
 		print("Subscribing topic : " + str(pfc_mqtt_topic.SUBSCRIBE_DEV))
 		while True:
-			time.sleep(2)
+			time.sleep(1)
 
 	def logging(self):
 		None

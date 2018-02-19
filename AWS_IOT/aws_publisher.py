@@ -47,10 +47,10 @@ if __name__ == '__main__':
 	qos_level = 1
 	topic = 'EZFARM/PFC/V1/DEV/00000001/order_subscribe'
 	message = {
-  "PFC_SERIAL": "fruites",
+  "PFC_SERIAL": "MAC_BOOK_ORDER",
   "DEVICE_DT" : "",
   "ORDER" : "ON",
-  "TARGET" : "LED",
+  "TARGET" : "VENTIL_FAN",
   "TYPE" : "ACTUATOR",
   "ORDER_DT" : ""
 	}
