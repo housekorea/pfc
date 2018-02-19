@@ -1,7 +1,8 @@
 # PFC(Personal Food Computer) by KgwangHee Han.
 
 
-![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/s_capture_4.jpeg) 
+![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/KakaoTalk_Photo_2018-02-13-21-55-13_22.jpeg) 
+
 
 This repository for purpose distribute to others who have a interests about the PFC. It first developed by MIT Media Lab Open Inititiative.Thanks to their efforts, i can started this exciting projects(Along with i believe that we have a possibility to beacame #NerdFarmer!).If you want make a PFC, absolutely you can fork this repsitory.(I hope that this repository helpful!) 
 
@@ -69,6 +70,50 @@ Data is key of PFC project, what kind of any version or custom of your PFC, abso
 ![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/house_PFC_v2.png) 
 
 Any question or suggestion welcomed on my repository.
+
+
+### AWS Service Architecture for PFC(Developing)
+![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/aws%20service%20architecture.png) 
+
+I considered AWS architecture to include IoT feature in the PFC project. AWS has a good feature and many services relate in from the protocol to the machine learning. It is a just initial diagram to integrate AWS Architecture, through some experiment with AWS, I would modify and fitting it.
+
+
+1. AWS IoT, Rule Engine
+
+ Each PFC is "Device" in the AWS IoT Context. Fortunately, they support Device SDK on the many programming languages(In my case I used python SDK on the Raspberry PI). This "Device SDK" specialize "MQTT" Protocol and we can easily publish and subscribe the MQTT topic and message on AWS IoT Architecture. Rule Engine supports a number of ways to integrate service of AWS include Lambda, S3, DynamoDB or Machine Learning Service too. 
+
+2. Lambda Function
+
+ This Serverless Architecture, "Lambda Function" is a good feature to avoid manage the "Application Server". It only executed by the "Predefined rule on the Rule Engine" and "CloudWatch Event". This Lambda Function executes publish the "MQTT topic" on a specific event(or time). Along With, I expect this Lambda could support a lot of alternative server's role. From the cronjob(Reserved schedule job) to Machine Learning Feature. 
+
+3. IAM, Certificate, Policy
+
+ I love this. AWS IoT strongly limits to take the "Security" to operate IoT Architecture Stack. We have to install individual Certificate and public/private key which published by the AWS IoT. Absolutely this certificate base on the X.509. And "IAM", "Policy" would separate their role of the Each PFC or Manager's accessibility.
+
+4. CloudWatch, ElasitcSearch
+
+ CloudWatch and ELasticSearch support Analysis by the log and expand capacity the management log of the PFC. In addition, CloudWatch support "Event" has a very similar feature like a "Cron" on the Linux. I can modify scheduled job in the Cloud system. It is a very scalable way. Let me give an example, If I want to modify LED, Air Pump, Measuring Sensor data... Schedule of 10 PFC. Assume that if I managed this scheduled job on the cronjob in the Linux, I have to modify each all of the PFC cronjob(10 of the PFC). But they subscribe their job task on the cloud, I only one time modify "ColudWatch" event time, and all of the subscribe PFC changed their schedule jobs. It is a clear way.
+
+5. SES, SNS
+
+ Notification feature in the AWS. If finding the abnormal symptom through the analysis process alert to the manager(Farmer). 
+
+6. DynamoDB
+
+ NoSQL Database System to archive the all of the sensor, actuator data
+
+7. S3(Simple Storage Service)
+
+ Object Bucket Service. All of the images which captures the growing plant on the PFC would save in this bucket system. Any other "Blob" format data would save in here. I expect Voice data and preprocessing image data generate by the OpenCV(PlantCV)
+
+8. SageMaker
+
+ New Feature. Not yet I have no any experience this Machine Learning Feature. But, I heard that AWS team developed well this feature and they have a goal to the team who without data scientist could using machine learning well. If SageMaker is not appropriate well my PFC project, I would use the "Spark ML"Library on the AWS. 
+
+9. Lex, Poly
+
+ It relates to the User Interface. It just a plan. IoT demand more familiar and interaction methodology between device and human. I like an Order by the voice. AWS support their same intelligence system "Alexa"("LEX" on the AWS). But It has a local issue. Because of they  the Korean Language on the "LEX". I contact AWS architect on the S.Korea, They just say AWS team will open the Korean language in near future. But I don't know exactly what is "near future".
+
 
 <hr>
 #NerdFarmer,
