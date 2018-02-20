@@ -59,8 +59,8 @@ class pfc_cv_measurer:
 				elif colo_val < 1:
 					self.BOUNDARIES[i][j] = 0
 
-		print("Palnt Color Range setted by Hardcode. lower / upper")
-		print(self.BOUNDARIES)
+		# print("Palnt Color Range setted by Hardcode. lower / upper")
+		# print(self.BOUNDARIES)
 
 		self.COIN_PX = coin_px
 		self.COIN_MM = coin_mm
@@ -139,8 +139,8 @@ class pfc_cv_measurer:
 		# find the colors within the specified boundaries and apply
 		# the mask
 		mask = cv2.inRange(self.IMAGES['KCLUSTER'], lower, upper)
-		print("Find Mask Range : " )
-		pprint(mask)
+		# print("Find Mask Range : " )
+		# pprint(mask)
 
 		# output = cv2.bitwise_and(self.IMAGES['ORIGINAL'], self.IMAGES['ORIGINAL'] , mask = mask)
 		output = cv2.bitwise_and(self.IMAGES['ORIGINAL'], self.IMAGES['ORIGINAL'] , mask = mask)
@@ -182,7 +182,7 @@ class pfc_cv_measurer:
 		f_contours = f_contours[0] if imutils.is_cv2() else f_contours[1]
 
 		if len(f_contours) == 0:
-			print("Print f_contour : " + str(len(f_contours)))
+			# print("Print f_contour : " + str(len(f_contours)))
 			self.save_images(debug_save=True)
 			sys.exit()
 
@@ -242,7 +242,7 @@ class pfc_cv_measurer:
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dA,2)) + "px", (mid_point_dot[0]-40,mid_point_dot[1]-40), cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
 			# cv2.putText(self.IMAGES['CV_IMG'], str(round(dB,2)) + "px", (mid_point_dot[0]+40,mid_point_dot[1]+40),cv2.FONT_HERSHEY_SIMPLEX,1, (102,255,255),3)
 		#print object stack which detected by algorithms
-		pprint(object_stack)
+		# pprint(object_stack)
 
 
 	# 최종작업을 완료하고 모든 이미지들을 저장한다.
@@ -254,7 +254,7 @@ class pfc_cv_measurer:
 		elif debug_save == True :
 			for (i,k) in enumerate(list(self.IMAGES)):
 				cv2.imwrite(splt_image_file_name[0] + "_" + str(i)+"_"+str(k) + "." + splt_image_file_name[1], self.IMAGES[k])
-
+		print ("Saved Images : " + splt_image_file_name[0] + "_" + str(i)+"_"+str(k) + "." + splt_image_file_name[1])
 
 if __name__ == '__main__':
 	pfc_cv_measurer = pfc_cv_measurer(coin_px=92, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180126_162136.jpg",carea=200, min_side=5)
