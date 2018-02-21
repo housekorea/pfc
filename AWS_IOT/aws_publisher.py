@@ -50,7 +50,7 @@ if __name__ == '__main__':
   "PFC_SERIAL": "00000000",
   "DEVICE_DT" : "",
   "ORDER" : "ON",
-  "TARGET" : "VENTIL_FAN",
+  "TARGET" : "AIR_PUMP",
   "TYPE" : "ACTUATOR",
   "ORDER_DT" : ""
 	}
