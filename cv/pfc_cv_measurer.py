@@ -116,8 +116,8 @@ class pfc_cv_measurer:
 		Z = np.float32(Z)
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,10,1.0)
 		ret, label, center = cv2.kmeans(Z,K,None,criteria,10,cv2.KMEANS_RANDOM_CENTERS)
-		print("Extracted COLOR code : BGR ")
-		print(center)
+		# print("Extracted COLOR code : BGR ")
+		# print(center)
 		# print(np.bincount(label.flatten()))
 
 		center = np.uint8(center)
