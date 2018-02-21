@@ -37,10 +37,10 @@ class publisher_actuator_data:
 		mqtt_topic = pfc_mqtt_topic.PUBLISH_ACTUATOR
 
 		self.IOT_MQTT_CLIENT.connect()
-		self.IOT_MQTT_CLIENT.publish(mqtt_topic, messageJson,self.QOS_LEVEL)
+		publish_ret = self.IOT_MQTT_CLIENT.publish(mqtt_topic, messageJson,self.QOS_LEVEL)
 		self.IOT_MQTT_CLIENT.disconnect()
-		print("Published MQTT topic : " + str(topic))
 
+		return [topic, messageJson, publish_ret]
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
@@ -54,13 +54,16 @@ if __name__ == '__main__':
 	messageJson = args.message
 
 	if "PFC_SERIAL" not in messageJson or "DEVICE_DT" not in messageJson:
-		print("PFC_SERIAL, DEVICE_DT is a demandable")
-		sys.exit()
+		res_message = "arg_pass error. PFC_SERIAL, DEVICE_DT is a demandable"
+	else :
+		publisher_ad = publisher_actuator_data(QOS_LEVEL = qos_level)
+		tp,mj,pr = publisher_ad.publish_mqtt_broker(topic,messageJson)
+		res_message = str(tp) + "result : " + str(pr)
 
-	publisher_ad = publisher_actuator_data(QOS_LEVEL = qos_level)
-	publisher_ad.publish_mqtt_broker(topic,messageJson)
-
-
+	f = open(pfc_conf.LOG_DIR_PATH + '/aws_publisher_actuator.log'. 'a+')
+	f.write("[" + str(datetime.now()) + "]" + str(res_message))
+	f.write("\n")
+	f.close()
 
 
 

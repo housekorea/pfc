@@ -2,6 +2,7 @@ import json
 import boto3
 from croniter import croniter
 import datetime
+from pytz import timezone
 import sys
 
 
@@ -10,7 +11,7 @@ def lambda_handler(event, context):
     # # Maintainence
     # publish_local_ip_cr = "*/15 * * * *"
 
-
+    seoul_tz = timezone("Asia/Seoul")
     # # Actuator
     # led_on_cr = "15 4-24 * * *"
     # led_off_cr = "15 0-3 * * *"
@@ -37,11 +38,13 @@ def lambda_handler(event, context):
         "ventil_fan_on":["1-59/2 * * * *","ON","VENTIL_FAN","ACTUATOR"],
         "ventil_fan_off":["0-58/2 * * * *","OFF","VENTIL_FAN","ACTUATOR"],
         "air_fan_on":["10,30,50 * * * *","ON","AIR_FAN","ACTUATOR"],
+        "water_pump_on" : ["30 8,17 * * *", "ON", "WATER_PUMP","ACTUATOR"],
+        "water_pump_off" : ["31 8,17 * * *", "OFF", "WATER_PUMP","ACTUATOR"],
         "air_fan_off":["0,20,40 * * * * ","OFF","AIR_FAN","ACTUATOR"],
         "usb_cam":["*/5 * * * *","CAPTURE","USB_CAM_TOP","SENSOR"],
         "all_sensor":["*/5 * * * *","GET","ALL_SENSOR","SENSOR"]
     }
-    current_dt = datetime.datetime.now()
+    current_dt = datetime.datetime.now(seoul_tz)
     client = boto3.client('iot-data', region_name='ap-northeast-2')
 
     for key in sches:
@@ -56,11 +59,11 @@ def lambda_handler(event, context):
             response = client.publish(
                 payload=json.dumps({
                     "PFC_SERIAL" : "00000000",
-                    "DEVICE_DT" : str(datetime.datetime.now()),
+                    "DEVICE_DT" : str(datetime.datetime.now(seoul_tz)),
                     "ORDER" : ORDER,
                     "TARGET" : TARGET,
                     "TYPE" : TYPE,
-                    "ORDER_DT" : str(datetime.datetime.now()),
+                    "ORDER_DT" : str(datetime.datetime.now(seoul_tz)),
                  }),
                 topic = 'EZFARM/PFC/V1/DEV',
                 qos=1
@@ -82,11 +85,6 @@ def lambda_handler(event, context):
     #     topic = 'EZFARM/PFC/V1/DEV/00000001/order_subscribe',
     #     qos=1
     # )
-
-
-lambda_handler('hello','good')
-
-
 
 
 
