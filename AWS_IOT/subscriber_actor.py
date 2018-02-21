@@ -92,7 +92,7 @@ class subscriber_actor:
 					timer.cancel()
 
 				actuator_data = {'DATA':stdout, 'PFC_SERIAL': str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
-				pub_proc = subprocess.Popen(shlex.split("python publisher_actuator_data.py -t '"+pfc_mqtt_topic.PUBLISH_ACTUATOR+"' -m '" +json.dumps(actuator_data) + "'"))
+				pub_proc = subprocess.Popen(shlex.split("python publisher_actuator_data.py -t '" + pfc_mqtt_topic.PUBLISH_ACTUATOR +   "' -m '" +json.dumps(actuator_data) + "'"))
 				timer = Timer(30,kill_proc, [pub_proc])
 				try :
 					timer.start()

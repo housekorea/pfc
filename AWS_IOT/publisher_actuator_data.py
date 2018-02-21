@@ -58,10 +58,10 @@ if __name__ == '__main__':
 	else :
 		publisher_ad = publisher_actuator_data(QOS_LEVEL = qos_level)
 		tp,mj,pr = publisher_ad.publish_mqtt_broker(topic,messageJson)
-		res_message = str(tp) + "result : " + str(pr)
+		res_message = str(tp) + ". result : " + str(pr)
 
-	f = open(pfc_conf.LOG_DIR_PATH + '/aws_publisher_actuator.log'. 'a+')
-	f.write("[" + str(datetime.now()) + "]" + str(res_message))
+	f = open(pfc_conf.LOG_DIR_PATH + '/aws_publisher_actuator.log', 'a+')
+	f.write("[" + str(datetime.now()) + "]" + str(res_message) + "||" +str(mj))
 	f.write("\n")
 	f.close()
 

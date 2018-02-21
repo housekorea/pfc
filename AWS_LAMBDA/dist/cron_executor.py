@@ -46,12 +46,14 @@ def lambda_handler(event, context):
     }
     current_dt = datetime.datetime.now(seoul_tz)
     client = boto3.client('iot-data', region_name='ap-northeast-2')
-
+    print(str(current_dt))
     for key in sches:
         temp_cron = croniter(str(sches[key][0]),current_dt)
         temp_prev = temp_cron.get_prev(datetime.datetime)
+        print(str(key) + "/" + str(temp_prev))
         is_reserved = (abs(temp_prev - current_dt) < datetime.timedelta(minutes=2))
         if is_reserved == True:
+            print(">>>> Publish")
             TYPE = sches[key][3]
             TARGET = sches[key][2]
             ORDER = sches[key][1]
