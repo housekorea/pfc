@@ -42,7 +42,8 @@ def lambda_handler(event, context):
         "water_pump_off" : ["31,51,53 8,17 * * *", "OFF", "WATER_PUMP","ACTUATOR"],
         "air_fan_off":["0,20,40 * * * * ","OFF","AIR_FAN","ACTUATOR"],
         "usb_cam":["*/5 * * * *","CAPTURE","USB_CAM_TOP","SENSOR"],
-        "all_sensor":["*/5 * * * *","GET","ALL_SENSOR","SENSOR"]
+        "all_sensor":["*/5 * * * *","GET","ALL_SENSOR","SENSOR"],
+        "s3_img_uploader":["5,45 */12 * * *", "UPLOAD", "S3_UPLOAD","DATALAKE" ]
     }
     current_dt = datetime.datetime.now(seoul_tz)
     client = boto3.client('iot-data', region_name='ap-northeast-2')

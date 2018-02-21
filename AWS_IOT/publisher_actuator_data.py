@@ -35,11 +35,13 @@ class publisher_actuator_data:
 			sys.exit()
 
 		mqtt_topic = pfc_mqtt_topic.PUBLISH_ACTUATOR
-
-		self.IOT_MQTT_CLIENT.connect()
-		publish_ret = self.IOT_MQTT_CLIENT.publish(mqtt_topic, messageJson,self.QOS_LEVEL)
-		self.IOT_MQTT_CLIENT.disconnect()
-
+		try :
+			self.IOT_MQTT_CLIENT.connect()
+			publish_ret = self.IOT_MQTT_CLIENT.publish(mqtt_topic, messageJson,self.QOS_LEVEL)
+			self.IOT_MQTT_CLIENT.disconnect()
+		except Exception,e:
+			print str(e)
+			print "error"
 		return [topic, messageJson, publish_ret]
 
 if __name__ == '__main__':

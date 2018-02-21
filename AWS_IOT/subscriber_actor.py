@@ -112,14 +112,21 @@ class subscriber_actor:
 
 		elif om_type == 'HEARTBEAT' :
 			pub_proc = subprocess.Popen(shlex.split("python " + command_mapper.LOCAL_IP['HEARTBEAT']['BEATING']))
-			Timer = Timer(30, kill_proc, [pub_proc])
+			timer = Timer(30, kill_proc, [pub_proc])
 			try :
 				timer.start()
 				stdout, stderr = pub_proc.communicate()
 			finally :
 				timer.cancel()
-
-
+		elif om_type == 'DATA_LAKE' :
+			command_pfc_data_lake = command_mapper.SENSOR_DIR_PATH +command_mapper.DATA_LAKE['S3_UPLOAD']['UPLOAD']
+			pub_proc = subprocess.Popen(shlex.split("python " + command_pfc_data_lake))
+			timer = Timer(600, kill_proc, [pub_proc])
+			try :
+				timer.start()
+				stdout, stderr = pub_proc.communicate()
+			finally :
+				timer.cancel()
 
 	def subscribe_mqtt_broker(self):
 		self.iot_mqtt_client.connect()

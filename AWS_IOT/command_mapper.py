@@ -7,6 +7,8 @@ class command_mapper:
 	SENSOR_DIR_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/sensors/'
 
 	ACTUATOR_DIR_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/actuators/'
+	AWS_IOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/AWS_IOT/'
+
 	SENSOR = {
 		"ALL_SENSOR" : {
 			"GET" : "all_sensors.py get"
@@ -100,6 +102,10 @@ class command_mapper:
 			"LOCAL_IP" : "publisher_local_ip.py"
 		}
 	}
-
+	DATA_LAKE = {
+		"S3_UPLOAD" : {
+			"UPLOAD" : "aws_s3_img_uploader.py"
+		}
+	}
 
 
