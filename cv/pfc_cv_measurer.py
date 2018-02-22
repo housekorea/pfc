@@ -80,7 +80,7 @@ class pfc_cv_measurer:
 
 
 		# If you want save all of image on the transition process, set debug_save = True
-		self.save_images(debug_save=True)
+		# self.save_images(debug_save=True)
 
 	# CV에 의해 식별된 Contour의 각 좌표를 순회하며, 해당 좌표가 대표하는 위치를 찾는다. 아래의 4개 위치 식별.
 	# 1.TOP LEFT
@@ -258,7 +258,3 @@ class pfc_cv_measurer:
 
 if __name__ == '__main__':
 	pfc_cv_measurer = pfc_cv_measurer(coin_px=92, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180126_162136.jpg",carea=200, min_side=5)
-
-
-
-

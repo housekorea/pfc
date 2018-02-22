@@ -45,14 +45,19 @@ if __name__ == '__main__':
 	parser.add_argument("-q","--qos_level",action="store",dest="qos_level", help="MQTT QOS_LEVEL", default=1)
 
 	qos_level = 1
-	topic = 'EZFARM/PFC/V1/DEV/00000001/order_subscribe'
+	# topic = 'EZFARM/PFC/V1/DEV/00000001/order_subscribe'
+	topic = 'EZFARM/PFC/V1/DEV'
 	message = {
   "PFC_SERIAL": "00000000",
-  "DEVICE_DT" : "",
-  "ORDER" : "ON",
-  "TARGET" : "AIR_PUMP",
-  "TYPE" : "ACTUATOR",
-  "ORDER_DT" : ""
+  "DEVICE_DT" : str(datetime.now()),
+  "ORDER" : "UPLOAD",
+  "TARGET" : "S3_UPLOAD",
+  "TYPE" : "DATA_LAKE",
+  # "ORDER" : "CAPTURE",
+  # "TARGET" : "USB_CAM_TOP",
+  # "TYPE" : "SENSOR",
+
+  "ORDER_DT" : str(datetime.now())
 	}
 
 

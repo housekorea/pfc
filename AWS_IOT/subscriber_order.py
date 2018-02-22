@@ -43,7 +43,7 @@ class subscriber_order:
 		mes_pld = message.payload
 		mes_tpc = message.topic
 
-		print("[Get the message] " + str(datetime.now()))
+		print("[Get the message] " + str(datetime.now()) + ' / ' + str(mes_tpc))
 		f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
 		f.write(mes_tpc + ' => ' + mes_pld + str(datetime.now()))
 		f.write('\n')
@@ -135,12 +135,22 @@ class subscriber_order:
 			finally :
 				timer.cancel()
 		elif om_type == 'DATA_LAKE' :
-			command_pfc_data_lake = command_mapper.SENSOR_DIR_PATH +command_mapper.DATA_LAKE['S3_UPLOAD']['UPLOAD']
+			command_pfc_data_lake = command_mapper.AWS_IOT_DIR_PATH +command_mapper.DATA_LAKE['S3_UPLOAD']['UPLOAD']
 			pub_proc = subprocess.Popen(shlex.split("python " + command_pfc_data_lake))
 			timer = Timer(600, kill_proc, [pub_proc])
 			try :
 				timer.start()
 				stdout, stderr = pub_proc.communicate()
+			finally :
+				timer.cancel()
+
+
+			datalake_data = {'DATA' : stdout, 'PFC_SERIAL' : str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
+			pub_proc = subprocess.Popen(shlex.split("python publisher_datalake_data.py -t '" + pfc_mqtt_topic.PUBLISH_DATALAKE + "' -m '" + json.dumps(datalake_data) + "'"))
+			timer = Timer(30, kill_proc, [pub_proc])
+			try :
+				timer.start()
+				stdout,stderr = pub_proc.communicate()
 			finally :
 				timer.cancel()
 

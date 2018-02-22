@@ -18,6 +18,10 @@
 #define LED 4
 #define AIR_PUMP 5
 #define VENTIL_FAN 6
+#define SOL_A_PUMP 8
+#define SOL_B_PUMP 9 
+
+
 //LCD KEYPAD
 #define btnRIGHT 0
 #define btnUP 1
@@ -37,7 +41,7 @@ int lcd_interval = 30000;
 
 // 8Channel Relay
 int ch8_relay[8] = {39,41,43,45,47,49,51,53};
-
+int ch16_relay[16] = {39,38,41,40,43,42,45,44,47,46,49,48,51,50,53,52};
 
 int dtime = 0.5; // Delay Time
 boolean current_led_stat = true;
@@ -67,10 +71,10 @@ void setup() {
   analogReference(DEFAULT);
 
   int i = 0;
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 16; i++)
   {
-    pinMode(ch8_relay[i], OUTPUT);
-    digitalWrite(ch8_relay[i],HIGH);
+    pinMode(ch16_relay[i], OUTPUT);
+    digitalWrite(ch16_relay[i],HIGH);
   }
 
   lcd.begin(16,2);
@@ -184,77 +188,97 @@ void loop() {
     //Actuators
     else if ( !strcmp(pfc_order_arr, "on_ventil_fan"))
     {
-      digitalWrite(ch8_relay[VENTIL_FAN],LOW);
+      digitalWrite(ch16_relay[VENTIL_FAN],LOW);
       Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_ventil_fan"))
     {
-      digitalWrite(ch8_relay[VENTIL_FAN],HIGH);
+      digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
       Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_air_fan"))
     {
-      digitalWrite(ch8_relay[AIR_FAN],LOW);
+      digitalWrite(ch16_relay[AIR_FAN],LOW);
       Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_air_fan"))
     {
-      digitalWrite(ch8_relay[AIR_FAN],HIGH);
+      digitalWrite(ch16_relay[AIR_FAN],HIGH);
       Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_led"))
     {
-      digitalWrite(ch8_relay[LED],LOW);
+      digitalWrite(ch16_relay[LED],LOW);
       Serial.println("on");
     } 
     else if ( !strcmp(pfc_order_arr, "off_led"))
     {
-      digitalWrite(ch8_relay[LED],HIGH);
+      digitalWrite(ch16_relay[LED],HIGH);
       Serial.println("off");
     } 
     else if ( !strcmp(pfc_order_arr, "on_air_pump"))
     {
-      digitalWrite(ch8_relay[AIR_PUMP],LOW);
+      digitalWrite(ch16_relay[AIR_PUMP],LOW);
       Serial.println("on");
     }
     else if ( !strcmp(pfc_order_arr, "off_air_pump"))
     {
-      digitalWrite(ch8_relay[AIR_PUMP],HIGH);
+      digitalWrite(ch16_relay[AIR_PUMP],HIGH);
       Serial.println("off");
     }
     else if ( !strcmp(pfc_order_arr, "on_ph_minus_pump"))
     {
-      digitalWrite(ch8_relay[PH_MINUS_PUMP],LOW);
+      digitalWrite(ch16_relay[PH_MINUS_PUMP],LOW);
       Serial.println("on");
 
     }
     else if ( !strcmp(pfc_order_arr, "off_ph_minus_pump"))
     {
-      digitalWrite(ch8_relay[PH_MINUS_PUMP],HIGH);
+      digitalWrite(ch16_relay[PH_MINUS_PUMP],HIGH);
       Serial.println("off");
 
     }
     else if ( !strcmp(pfc_order_arr, "on_ph_plus_pump"))
     {
-      digitalWrite(ch8_relay[PH_PLUS_PUMP],LOW);
+      digitalWrite(ch16_relay[PH_PLUS_PUMP],LOW);
       Serial.println("on");
 
     }
     else if ( !strcmp(pfc_order_arr, "off_ph_plus_pump"))
     {
-      digitalWrite(ch8_relay[PH_PLUS_PUMP],HIGH);
+      digitalWrite(ch16_relay[PH_PLUS_PUMP],HIGH);
       Serial.println("off");
 
     }
+    else if ( !strcmp(pfc_order_arr, "on_sol_a_pump"))
+    {
+       digitalWrite(ch16_relay[SOL_A_PUMP],LOW);
+       Serial.println("on");
+    }
+    else if ( !strcmp(pfc_order_arr, "off_sol_a_pump"))
+    {
+       digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
+       Serial.println("off");
+    }
+    else if ( !strcmp(pfc_order_arr, "on_sol_b_pump"))
+    {
+       digitalWrite(ch16_relay[SOL_B_PUMP],LOW);
+       Serial.println("on");
+    }
+    else if ( !strcmp(pfc_order_arr, "off_sol_b_pump"))
+    {
+       digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
+       Serial.println("off");
+    }
     else if ( !strcmp(pfc_order_arr, "on_water_pump"))
     {
-      digitalWrite(ch8_relay[WATER_PUMP],LOW);
+      digitalWrite(ch16_relay[WATER_PUMP],LOW);
       Serial.println("on");
 
     }
     else if ( !strcmp(pfc_order_arr, "off_water_pump"))
     {
-      digitalWrite(ch8_relay[WATER_PUMP],HIGH);
+      digitalWrite(ch16_relay[WATER_PUMP],HIGH);
       Serial.println("off");
 
     }

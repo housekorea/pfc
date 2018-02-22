@@ -119,12 +119,21 @@ class subscriber_actor:
 			finally :
 				timer.cancel()
 		elif om_type == 'DATA_LAKE' :
-			command_pfc_data_lake = command_mapper.SENSOR_DIR_PATH +command_mapper.DATA_LAKE['S3_UPLOAD']['UPLOAD']
+			command_pfc_data_lake = command_mapper.AWS_IOT_DIR_PATH +command_mapper.DATA_LAKE['S3_UPLOAD']['UPLOAD']
 			pub_proc = subprocess.Popen(shlex.split("python " + command_pfc_data_lake))
 			timer = Timer(600, kill_proc, [pub_proc])
 			try :
 				timer.start()
 				stdout, stderr = pub_proc.communicate()
+			finally :
+				timer.cancel()
+
+			datalake_data = {'DATA' : stdout, 'PFC_SERIAL' : str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
+			pub_proc = subprocess.Popen(shlex.split("python publisher_datalake_data.py -t '" + pfc_mqtt_topic.PUBLISH_DATALAKE + "' -m '" + json.dumps(datalake_data) + "'"))
+			timer = Timer(30, kill_proc, [pub_proc])
+			try :
+				timer.start()
+				stdout,stderr = pub_proc.communicate()
 			finally :
 				timer.cancel()
 
