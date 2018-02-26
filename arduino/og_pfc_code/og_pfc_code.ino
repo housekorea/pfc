@@ -1,7 +1,12 @@
 #include <DHT.h>
 #include <OneWire.h>
+#include <Wire.h>
 #include <DallasTemperature.h>
 #include <LiquidCrystal.h>
+
+//Communication with Raspberry Pi
+#define SLAVE_ADDRESS 0x04
+
 
 //SENSORS
 #define DHT_IN 22
@@ -20,7 +25,7 @@
 #define VENTIL_FAN 6
 #define SOL_A_PUMP 8
 #define SOL_B_PUMP 9 
-
+#define HUMIDIFIER false
 
 //LCD KEYPAD
 #define btnRIGHT 0
@@ -38,6 +43,8 @@ int flag_index = 0;
 int flag_arr[8] = {"temp","hum","co2","ph","ec","dstemp","LDR","nerdfarmers"};
 unsigned long last_millis = 0;
 int lcd_interval = 30000;
+char* act_maps[16] = {"all","led","solution_a_pump","solution_b_pump","ph_minus_pump","ph_plus_pump","water_pump","air_pump","air_fan","ventil_fan","humidifier","heater","col_color","dummy1","dummy2","dummy3"};
+
 
 // 8Channel Relay
 int ch8_relay[8] = {39,41,43,45,47,49,51,53};
@@ -60,15 +67,17 @@ unsigned int ldr_val;
 
 
 void setup() {
-  // put your setup code here, to run once:
+
   Serial.begin(19200);
 
-  while(!Serial)
-  {
-    return;
-  }
+  //Initialize i2c communication as a slave
+  Wire.begin(SLAVE_ADDRESS);
+  Wire.onReceive(i2c_receiveData);
+  Wire.onRequest(i2c_sendData);
 
-  analogReference(DEFAULT);
+  Serial.println(Wire.available());
+
+//  analogReference(DEFAULT);
 
   int i = 0;
   for (i = 0; i < 16; i++)
@@ -84,20 +93,28 @@ void setup() {
   lcd.print("#NERDFARMERS");
   last_millis = millis(); 
 
+  
+
 
 }
 
 
 void loop() {
 
-
-  
+  delay(1000);
 
   if (Serial.available() > 0 ) {
     String pfc_order;
     pfc_order = Serial.readString();
     const char *pfc_order_arr = pfc_order.c_str();
+//    
+//       size_t Size = strlen(str);
+//    return Size;
+//    
+    Serial.println(strlen(pfc_order_arr));
 
+
+    
     Serial.print("order=");
     Serial.print(pfc_order);
     Serial.print("/");
@@ -724,6 +741,337 @@ int read_LCD_buttons(){
   return btnNONE;
 }
 
+
+int act_led(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
+    digitalWrite(ch16_relay[LED],LOW);
+    Serial.println("on");
+    return 1;
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[LED],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+
+
+int act_solution_a_pump(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[SOL_A_PUMP],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+int act_solution_b_pump(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[SOL_B_PUMP],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+int act_ph_minus_pump(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[PH_MINUS_PUMP],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[PH_MINUS_PUMP],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+int act_ph_plus_pump(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[PH_PLUS_PUMP],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[PH_PLUS_PUMP],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+int act_water_pump(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[WATER_PUMP],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[WATER_PUMP],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+int act_air_pump(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[AIR_PUMP],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[AIR_PUMP],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+  
+}
+int act_air_fan(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[AIR_FAN],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[AIR_FAN],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+int act_ventil_fan(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[VENTIL_FAN],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+int act_humidifier(int act_status){
+  if(act_status == 1)
+  {
+    digitalWrite(ch16_relay[HUMIDIFIER],LOW);
+    Serial.println("on");
+    return 1;
+    
+  }
+  else if(act_status == 0)
+  {
+    digitalWrite(ch16_relay[HUMIDIFIER],HIGH);
+    Serial.println("off");
+    return 0;
+  }
+}
+
+
+
+
+String rasp_order;
+const char *rasp_order_arr;
+int cnt = 0;
+int order_indicator;
+
+void i2c_receiveData(int byteCount){
+  
+  while(Wire.available()){
+    rasp_order = Wire.read();
+    rasp_order_arr = rasp_order.c_str();
+       
+    if(cnt == 0)
+    {
+      order_indicator = atoi(rasp_order_arr);
+      Serial.print("order_indicator : ");
+      Serial.println(order_indicator);
+      
+    }
+    if( (cnt-1) == order_indicator)
+    {
+      if (act_maps[order_indicator] == "all")
+      {
+              
+      }
+      else if(act_maps[order_indicator] == "led")
+      {
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_led(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_led(0);
+        }
+      }
+      else if(act_maps[order_indicator] == "solution_a_pump")
+      {
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_solution_a_pump(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_solution_a_pump(0);
+        }
+      }
+      else if(act_maps[order_indicator] == "solution_b_pump")
+      {
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_solution_b_pump(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_solution_b_pump(0);
+        }
+      }
+      else if(act_maps[order_indicator] == "ph_minus_pump")
+      {
+       if(atoi(rasp_order_arr) == 1)
+        {
+          act_ph_minus_pump(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_ph_minus_pump(0);
+        } 
+      }
+      else if(act_maps[order_indicator] == "ph_plus_pump")
+      {
+       if(atoi(rasp_order_arr) == 1)
+        {
+          act_ph_plus_pump(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_ph_plus_pump(0);
+        } 
+      }
+      else if(act_maps[order_indicator] == "water_pump")
+      {
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_water_pump(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_water_pump(0);
+        }
+      }
+      else if(act_maps[order_indicator] == "air_pump")
+      {
+        Serial.println("It's AIR_PUMP order");
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_air_pump(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_air_pump(0);
+        }
+
+        
+      }
+      else if(act_maps[order_indicator] == "air_fan")
+      {
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_air_fan(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_air_fan(0);
+        }
+      }
+      else if(act_maps[order_indicator] == "ventil_fan")
+      {
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_ventil_fan(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_ventil_fan(0);
+        }
+      }
+      else if(act_maps[order_indicator] == "humidifier")
+      {
+        if(atoi(rasp_order_arr) == 1)
+        {
+          act_humidifier(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_humidifier(0);
+        }
+      }
+      else if(act_maps[order_indicator] == "col_color")
+      {
+
+      }
+      else if(act_maps[order_indicator] == "dummy1")
+      {
+        
+      }
+      else if(act_maps[order_indicator] == "dummy2")
+      {
+        
+      }
+      else if(act_maps[order_indicator] == "dummy3")
+      {
+        
+      }
+    
+    
+    }
+    Serial.print("GET data");
+    Serial.print(cnt - 1);
+    Serial.print(" : ");
+    Serial.println(rasp_order_arr);
+
+   
+    
+    
+    cnt =cnt+1;
+  }
+  cnt=0;
+
+}
+void i2c_sendData(){
+//  Wire.write("I got your Message");
+  Wire.write("result");
+}
 
 
 
