@@ -4,21 +4,21 @@
 ![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/KakaoTalk_Photo_2018-02-13-21-55-13_22.jpeg) 
 
 
-This repository for purpose distribute to others who have a interests about the PFC. It first developed by MIT Media Lab Open Inititiative.Thanks to their efforts, i can started this exciting projects(Along with i believe that we have a possibility to beacame #NerdFarmer!).If you want make a PFC, absolutely you can fork this repsitory.(I hope that this repository helpful!) 
+This repository's purpose is to distribute others who have interest in building there own PFC. It was first developed by MIT Media Lab Open Inititiative. Thanks to their efforts, I can start this exciting project(Along with my belief that we also have a possibility to beacome #NerdFarmer!). If you want to make your own PFC, you can absolutely fork this repsitory.(I hope that this repository is helpful!) 
 
-It is different some hardware/software between my personal PFC prototype and MIT original prototype. But it is challengable work to localizing in S.Korea for generalizng on here(S.Korea) 
+Although hardware & software used in my personal PFC prototype and original prototype from MIT may differ, it is challengable to localize it in S.Korea for general use.   
 
-This repository have a four types of directory.(Probably It would expanding now, whenever i have a time to writing about the more detail guide for PFC makers, i will summarize about the PFC and their philosophy and mechanism(with Vision too). 
+I believe that PFC project is a huge step for urbanizing food production.  Like our NerdFarmers, farming with Information Technology rather than shovel and pick.
 
-I believe that PFC project is one of stepping stones for solving problem which we are facing about rapidly urbanziation and food. Our NerdFarmer, Farming using with a Information Technology than shoval and pick.
+This repository have four directories.(It is still in development and I will summarize the philosophy and mechanism whenever I have time to write code.)   
 
 <hr>
 
-### first, Sensor directory.
+### 1. Sensors
 
- This directory have a sourcecode to commnuicate with Rapsberry PI ans Arduion through Serial Communication. It means that, this codes more familiar with ordering to the arudino.(It is not include any directely relate code for arduino sensors. If you want check a code which relate in Arduino, check the Arduino Directory. 
+ This directory contains codes for communication between Raspberry PI and Arduino through Serial Communication. It means that, codes in here is an ordering process to the arudino from Raspberry PI.(It does not include any directely related code for arduino sensors. See arduino directory for actual codes) 
  
-**Sensor List**
+**Sensors**
 
 1. DHT11 (Air temperature, Air Humidity)
 2. DS18B20 Water Proof sensor
@@ -30,11 +30,11 @@ I believe that PFC project is one of stepping stones for solving problem which w
 8. Water level sensor (Comming Soon)
 9. Water Flow sensor (Comming Soon)
 
-### second, Actuator directory.
+### 2. Actuators.
  
- This directory have a sourcecode related in "Actuators", In the my PFC project context, this word "Actuators" means machine or any instrument for making Enviroment of growing plants. Let me give an example, PFC simulate natural wind to using FAN cooler, and for giving light like a sun light, we usually using LED bulb. We can call this, "Actuators" for FAN,LED or anything which verifying purpose i mentioned. 
+ This directory have codes related with "Actuators". In this text, the word "Actuators" means machine or any instrument that provides enviroment for plants to grow. For example, PFC simulates natural wind by using FANs, and provides light source using LED bulbs. For FANs and LEDs, we call it "Actuators".  
  
-**Acutator List**
+**Acutators**
 
 1. LED
 2. Air circulration FAN
@@ -46,73 +46,73 @@ I believe that PFC project is one of stepping stones for solving problem which w
 8. Peristaltic Pump For PH(-) (Comming Soon)
 9. Peristaltic Pump For PH(+) (Comming Soon)
 10. Solenoid Valve for each Peristaltic Pump (Considerable)
-11. Chiler Unit (Considerable)
+11. Chiller Unit (Considerable)
 
-### thrid, Computer Vision directory.
+### 3. Computer Vision.
 
- I have a great expectation about the role of **"Computer Vision"**, it is give a opportunity on the various ragne from  recognize about the any symptom for disease to measuring crops size,status too. In this time i used openCV3 library with python2 programing language. You can check my sourcecode relate this image processing for detecting plant and measuring their size using openCV library. At the same time, our openAG forum opend a specific thread to discuss for how to making this image processing to important role of our PFC model. You can check various and great ideas of usecase "Computer Vision". 
- Probably, on my PFC's computer vision headed to the next stage for Machine Learning more specialize Image Processing. I hope that a number of smart guys joined this Computer Vision thread, and sharing their knowledge and experience through cooperate.
+ I have great expectations about the role of **"Computer Vision"**, it gives an opportunity on various applications ranging from recognizing symptoms for disease to measuring crops size or status. At this time I used openCV3 library with python2 programing language. You can check it in my sourcecodes that image processing uses OpenCV library to detect plant and measure their size. Also our openAG forum opened a specific thread to discuss about how to make this image processing plays important role of our PFC model. You can check various and great ideas of usecases of "Computer Vision" by visiting our therad 
+ Probably, on my PFC's computer vision headed to the next stage for Machine Learning more specialize Image Processing. I hope that a number of smart guys joined this Computer Vision thread, and share their knowledge and experience through cooperation.
 
-Computer Vision Thread on openAG forum : http://forum.openag.media.mit.edu/t/cv-and-image-processing-for-the-pfc/273/18
+Link to our Computer Vision Thread on openAG forum : http://forum.openag.media.mit.edu/t/cv-and-image-processing-for-the-pfc/273/18
 
-### fourth, Arduino Code directory.
+### 4. Arduino Code directory.
 
- If you want find arduino codes for making PFC? Exploring this "Arduino" Directory, this directory is only space for mananging Arduino Sourcecodes. I warned to you about the hardcode on my sourcodes. Until now, i used "Arduino Mega 2560" microcontroller board Model, this sourcode only specialized this specific microcontroller board. A number of GPIO(General Purpose Input/Output Pin) managed by "Constant Variable" on my Arduino Sourcecode. 
+ Do you want to find arduino codes for making PFC? Explore "Arduino" Directory, this directory is the only space in our project for mananging Arduino Sourcecodes. Although I warn you about the pinout on my sourcodes. As of right now, I'm using "Arduino Mega 2560" microcontroller board Model and this sourcode is specialized for this specific microcontroller board. Pin numbers of GPIO(General Purpose Input/Output Pin) are listed in "Constant Variable" on my Arduino Sourcecode. 
  
- After that, I would write about the electronics design circuit about my PFC codes : ). Absolutely i have to fight my inner laziness too!
+ After that, I would like to write about the electronics design circuit about my PFC : ). I'm absolutely fighting with my inner laziness!
 
-### fifth, Database ERD
+### 5. Database ERD
 
-Data is key of PFC project, what kind of any version or custom of your PFC, absoltuely next stage(we are headed) is Machine Learning through "Data". For desing of Database, i have to consider some chracteristic about this project. It mean that, i have to aussme that parrell multiple PFC operate at the same time. But remote database server have a one address which other Prototype can be reach to this address, and it have a flexible and scalibility(i intended to make a "Meta Table of each sensor/actuator/particpant/models ...), this meta table have a key/value architecture, it would give us to flexsible but hard to using a wild joinning or exploring between meta tables.(I hope that a new "Search Technology" solving this problem. Such as ElasticSearch,Titan DB graph ...) 
+Data is the key of PFC project. Regardless of version or custom PFC your on, absoltuely next stage(we are headed) is Machine Learning through "Data". Before designing the Database, I have to keep flexibility and scalibility in mind. It means that, multiple PFCs can be operating in parrell at the same time. So it is possible that multiple PFCs may try to access remote database server where it can only have one address. Therefore I've designed a "Meta Table" of each sensor/actuator/particpant/models...etc. This meta table will have a key/value architecture, so that it could give us the flexibility but hard to using a wild joinning or exploring between meta tables.(I hope that a new "Search Technology" solving this problem. Such as ElasticSearch,Titan DB graph ...) 
 
-**This ERD not finished for archiving PFC sensor data, it is continuing now, i would welcome any idea or suggestion!**
+**This ERD not finished for archiving PFC sensor data, it is still in development. I would love to hear any ideas or suggestions!**
 
 ![Initial Database Schema ERD](https://github.com/housekorea/pfc/blob/master/doc/house_PFC_v2.png) 
 
-Any question or suggestion welcomed on my repository.
+Any questions or suggestions is welcomed on my repository.
 
 
-### AWS Service Architecture for PFC(Developing)
+### AWS Service Architecture for PFC(In development)
 ![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/aws%20service%20architecture.png) 
 
-I considered AWS architecture to include IoT feature in the PFC project. AWS has a good feature and many services relate in from the protocol to the machine learning. It is a just initial diagram to integrate AWS Architecture, through some experiment with AWS, I would modify and fitting it.
+I considered AWS architecture for IoT feature in the PFC project. AWS has good features and many service protocols are related with machine learning. This is just a initial diagram to integrated AWS Architecture. through some experiment with AWS, I would modify and add it.
 
 
 1. AWS IoT, Rule Engine
 
- Each PFC is "Device" in the AWS IoT Context. Fortunately, they support Device SDK on the many programming languages(In my case I used python SDK on the Raspberry PI). This "Device SDK" specialize "MQTT" Protocol and we can easily publish and subscribe the MQTT topic and message on AWS IoT Architecture. Rule Engine supports a number of ways to integrate service of AWS include Lambda, S3, DynamoDB or Machine Learning Service too. 
+ Each PFC is considered as "Device" in the AWS IoT Context. Fortunately, they support Device SDK on the many programming languages(In my case I used python SDK on the Raspberry PI). This "Device SDK" specialized on "MQTT" Protocol and we can easily publish and subscribe the MQTT topic and message on AWS IoT Architecture. Rule Engine supports a number of ways to integrate service of AWS including Lambda, S3, DynamoDB or Machine Learning Service too. 
 
 2. Lambda Function
 
- This Serverless Architecture, "Lambda Function" is a good feature to avoid manage the "Application Server". It only executed by the "Predefined rule on the Rule Engine" and "CloudWatch Event". This Lambda Function executes publish the "MQTT topic" on a specific event(or time). Along With, I expect this Lambda could support a lot of alternative server's role. From the cronjob(Reserved schedule job) to Machine Learning Feature. 
+ This Serverless Architecture, "Lambda Function" is a good feature to avoid managing the "Application Server". It only executes by the "Predefined rule on the Rule Engine" and "CloudWatch Event". This Lambda Function executes publish the "MQTT topic" on a specific event(or time). Along With that I expect this Lambda could support a lot of alternative server's roles, from the cronjob(Reserved schedule job) to Machine Learning Feature. 
 
 3. IAM, Certificate, Policy
 
- I love this. AWS IoT strongly limits to take the "Security" to operate IoT Architecture Stack. We have to install individual Certificate and public/private key which published by the AWS IoT. Absolutely this certificate base on the X.509. And "IAM", "Policy" would separate their role of the Each PFC or Manager's accessibility.
+ I love this. AWS IoT strongly limits to take the "Security" to operate IoT Architecture Stack. We have to install individual Certificate and public/private key which is published by the AWS IoT. Absolutely this certificate base on the X.509. And "IAM", "Policy" would separate their role of the Each PFC or Manager's accessibility.
 
 4. CloudWatch, ElasitcSearch
 
- CloudWatch and ELasticSearch support Analysis by the log and expand capacity the management log of the PFC. In addition, CloudWatch support "Event" has a very similar feature like a "Cron" on the Linux. I can modify scheduled job in the Cloud system. It is a very scalable way. Let me give an example, If I want to modify LED, Air Pump, Measuring Sensor data... Schedule of 10 PFC. Assume that if I managed this scheduled job on the cronjob in the Linux, I have to modify each all of the PFC cronjob(10 of the PFC). But they subscribe their job task on the cloud, I only one time modify "ColudWatch" event time, and all of the subscribe PFC changed their schedule jobs. It is a clear way.
+ CloudWatch and ELasticSearch support Analysis by the log and expand capacity of the management log on the PFC. In addition, CloudWatch support "Event" that has a very similar feature like a "Cron" on the Linux. I can modify scheduled job in the Cloud system. It is a very scalable way. Let me give an example, If I want to modify LED, Air Pump, Measuring Sensor data... Schedule of 10 PFC. Assume that if I managed this scheduled job on the cronjob in the Linux, I would have to modify individual PFC's cronjob(10 PFC). Whereas with CloudWatch I could just subscribe their job task on the cloud, and I only have to make one time modify "ColudWatch" event time, and all of the subscribed PFC changes their scheduled jobs. It is a very clean way of managing.
 
 5. SES, SNS
 
- Notification feature in the AWS. If finding the abnormal symptom through the analysis process alert to the manager(Farmer). 
+ Notification feature in the AWS. If any abnormal symptom happens through the analysis process, alerts to the manager(or Farmer). 
 
 6. DynamoDB
 
- NoSQL Database System to archive the all of the sensor, actuator data
+ NoSQL Database System to archive all of the sensors, actuators data
 
 7. S3(Simple Storage Service)
 
- Object Bucket Service. All of the images which captures the growing plant on the PFC would save in this bucket system. Any other "Blob" format data would save in here. I expect Voice data and preprocessing image data generate by the OpenCV(PlantCV)
+ Object Bucket Service. Any captured images of the growing plant on the PFC gets saved in this bucket system. Any other "Blob" format data gets saved in here also. I expect Voice data and preprocessing image data generate by the OpenCV(PlantCV)
 
 8. SageMaker
 
- New Feature. Not yet I have no any experience this Machine Learning Feature. But, I heard that AWS team developed well this feature and they have a goal to the team who without data scientist could using machine learning well. If SageMaker is not appropriate well my PFC project, I would use the "Spark ML"Library on the AWS. 
+ New Feature. I have no experience just yet about this Machine Learning Feature, Though, I've heard that AWS team developed this feature nicely and their goal is to make this easy so that anybody without experties could use machine learning well. If SageMaker is not appropriate for my PFC project, I would use the "Spark ML" Library on the AWS. 
 
 9. Lex, Poly
 
- It relates to the User Interface. It just a plan. IoT demand more familiar and interaction methodology between device and human. I like an Order by the voice. AWS support their same intelligence system "Alexa"("LEX" on the AWS). But It has a local issue. Because of they  the Korean Language on the "LEX". I contact AWS architect on the S.Korea, They just say AWS team will open the Korean language in near future. But I don't know exactly what is "near future".
+ It is related to the User Interface. It is just a plan as of right now. IoT demands more familiar and easy interaction methodology between device and human. If I want to control PFC by using my own voice, AWS supports their intelligence system "Alexa"("LEX" on the AWS). But currently it doesn't supports some languages like Korean. I contacted AWS architect on the S.Korea, But the only answer I got was that AWS team will open the Korean language in near future. But I don't know exactly when is the "near future".
 
 
 <hr>
@@ -127,11 +127,11 @@ Enjoying Farming guys!
 **P.s 
 If you are live in S.Korea, and you have a intereset in making a PFC in S.korea. Join Us through this Thread. I want contribute with others about the belows issue on our location(South Korea.)**
 
-1. How to sourcing alternative parts in S.kora local market.
-2. How to break the language barrier of the documentation of MIT PFC's repository and fourm.(Until now, about any PFC documentation not translated in Korean language. Probably it is one of the valuable activity for our Elementary,Middle schoole students to joining PFC project.)
-3. Solving problem origined by Local issue which such as "Government Rule", "Local Traditional Culture", "Recogintion of Farmers". 
+1. How to source alternative parts in S.kora local market.
+2. How to break the language barrier of the documentations of MIT PFC's repository and fourm.(Until now, pretty much any PFC documentation is not translated in Korean. Probably it is one of the most anticipated activity for our Elementary, Middle schoole students to join PFC project.)
+3. Solving problems origined by Local issue such as "Government Rule", "Local Traditional Culture", "Recogintion of Farmers". 
 
-Doesn't matter any issue which we are facing, i have a optimistic about the "We can solving this issue, and developing our agriculture on S.korea! Absolutely, we can helping others on the global too".
+Doesn't matter what kind of issue we are facing, I have a optimistic about "We can solving this issue, and developing our agriculture on S.korea! Absolutely, we can helping others on the global too".
 
 
 http://forum.openag.media.mit.edu/t/openag-in-south-korea/2801/16
