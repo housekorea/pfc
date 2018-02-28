@@ -30,16 +30,19 @@ class led:
 
 
 	def on(self):
-		self.MESS[self.ACT_INDICATOR] = 1
-		self.I2C_BUS.write_i2c_block_data(self.SLAVE_ADDRESS, int(self.ACT_INDICATOR), self.MESS)
-		time.sleep(0.5)
-		receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
-		res = "";
-		for v in receive_data:
-			if v == 255:
-				break;
-			else:
-				res = v
+		try :
+			self.MESS[self.ACT_INDICATOR] = 1
+			self.I2C_BUS.write_i2c_block_data(self.SLAVE_ADDRESS, int(self.ACT_INDICATOR), self.MESS)
+			time.sleep(0.5)
+			receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
+			res = "";
+			for v in receive_data:
+				if v == 255:
+					break;
+				else:
+					res = v
+		except Exception:
+			return 2
 		return res
 	def off(self):
 		self.MESS[self.ACT_INDICATOR] = 0

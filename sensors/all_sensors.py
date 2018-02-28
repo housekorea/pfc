@@ -25,7 +25,7 @@ class all_sensors:
 
 	def getValue(self):
 		self.SERIAL.write("get_all_sensors")
-		time.sleep(3)
+		time.sleep(5)
 		value = self.SERIAL.readline()
 		return value
 if __name__ == '__main__':

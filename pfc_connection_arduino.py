@@ -18,7 +18,14 @@ class pfc_connection_arduino:
 		("cold_cooler",bool),
 		("dummy1",bool),
 		("dummy2",bool),
-		("dummy3",bool)
+		("dummy3",bool),
+		("co2",bool),
+		("dht11_hum",bool),
+		("dht11_temp",bool),
+		("ds18bs20",bool),
+		("ec",bool),
+		("ldr",bool),
+		("ph",bool)
 	]
 	SENSOR_MES_TMPL = [
 

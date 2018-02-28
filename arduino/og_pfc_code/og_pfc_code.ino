@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <DallasTemperature.h>
 #include <LiquidCrystal.h>
+#include <avr/wdt.h>
 
 //Communication with Raspberry Pi
 #define SLAVE_ADDRESS 0x04
@@ -43,8 +44,9 @@ int flag_index = 0;
 int flag_arr[8] = {"temp","hum","co2","ph","ec","dstemp","LDR","nerdfarmers"};
 unsigned long last_millis = 0;
 int lcd_interval = 30000;
-char* act_maps[16] = {"all","led","solution_a_pump","solution_b_pump","ph_minus_pump","ph_plus_pump","water_pump","air_pump","air_fan","ventil_fan","humidifier","heater","col_color","dummy1","dummy2","dummy3"};
-
+char* act_maps[23] = {"all","led","solution_a_pump","solution_b_pump","ph_minus_pump","ph_plus_pump",
+"water_pump","air_pump","air_fan","ventil_fan","humidifier","heater","col_color","dummy1","dummy2","dummy3",
+"co2","dht11_hum","dht11_temp","ds18bs20","ec","ldr","ph"};
 
 // 8Channel Relay
 int ch8_relay[8] = {39,41,43,45,47,49,51,53};
@@ -56,6 +58,7 @@ unsigned int min_cnt = 0;
 unsigned int turn_on_min_cnt = 60 * 4;
 unsigned int turn_off_min_cnt = 60 * 1;
 int act_result = 2;
+int sensor_result = 0;
 
 // For DHT11 Sensors.
 unsigned int ldr_val;
@@ -63,6 +66,17 @@ unsigned int ldr_val;
 // Note that older versions of this library took an optional third parameter to
 // tweak the timings for faster processors.  This parameter is no longer needed
 // as the current DHT reading algorithm adjusts itself to work on faster procs.
+unsigned long reset_st_time;
+
+
+void softwareReset( uint8_t prescaller) {
+  // start watchdog with the provided prescaller
+  wdt_enable( prescaller);
+  // wait for the prescaller time to expire
+  // without sending the reset signal by using
+  // the wdt_reset() method
+  while(1) {}
+}
 
 
 
@@ -75,9 +89,10 @@ void setup() {
   Wire.onReceive(i2c_receiveData);
   Wire.onRequest(i2c_sendData);
 
+
 //  Serial.println(Wire.available());
 
-  analogReference(DEFAULT);
+//  analogReference(DEFAULT);
 
   int i = 0;
   for (i = 0; i < 16; i++)
@@ -93,6 +108,7 @@ void setup() {
   lcd.print("#NERDFARMERS");
   last_millis = millis(); 
 
+  reset_st_time = millis();
   
 
 
@@ -100,6 +116,16 @@ void setup() {
 
 
 void loop() {
+
+//  //Reset codes inteval every 12 hours. 
+  if(millis() - reset_st_time >= 43200000)
+  {
+     Serial.println("RESET----");
+     Serial.println(millis());
+     delay(100);
+     softwareReset(WDTO_60MS);
+  }
+
 
   if (Serial.available() > 0 ) {
     String pfc_order;
@@ -109,8 +135,8 @@ void loop() {
 //       size_t Size = strlen(str);
 //    return Size;
 //    
-    Serial.println(strlen(pfc_order_arr));
-
+//    Serial.println(strlen(pfc_order_arr));
+    
 
     
     Serial.print("order=");
@@ -268,17 +294,27 @@ void loop() {
     else if ( !strcmp(pfc_order_arr, "on_sol_a_pump"))
     {
        digitalWrite(ch16_relay[SOL_A_PUMP],LOW);
-       Serial.println("on");
+      Serial.println("on");
+      
+      delay(3300); // every 5 second supply 7.5ml , 3.3second for 5ml.
+      digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
+      Serial.println("off on automatically");
     }
     else if ( !strcmp(pfc_order_arr, "off_sol_a_pump"))
     {
        digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
        Serial.println("off");
+       
     }
     else if ( !strcmp(pfc_order_arr, "on_sol_b_pump"))
     {
        digitalWrite(ch16_relay[SOL_B_PUMP],LOW);
        Serial.println("on");
+             
+      delay(3300); // every 5 second supply 7.5ml , 3.3second for 5ml.
+      digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
+      Serial.println("off on automatically");
+
     }
     else if ( !strcmp(pfc_order_arr, "off_sol_b_pump"))
     {
@@ -288,7 +324,7 @@ void loop() {
     else if ( !strcmp(pfc_order_arr, "on_water_pump"))
     {
       digitalWrite(ch16_relay[WATER_PUMP],LOW);
-      Serial.println("on");
+      
 
     }
     else if ( !strcmp(pfc_order_arr, "off_water_pump"))
@@ -332,7 +368,10 @@ void loop() {
       lcd.write("#NerdFarmers");
        Serial.println("display_pfc_ver");
     }
-
+    else if ( !strcmp(pfc_order_arr, "reset_arduino"))
+    {
+      softwareReset( WDTO_60MS);  
+    }
     else
     {
       Serial.println("non-order");
@@ -475,9 +514,9 @@ float *getDHT(int dht_in)
 
   float hum = dht.readHumidity();
   float temp = dht.readTemperature();
-
   dht_data[0] = hum;
   dht_data[1] = temp;
+ 
   return dht_data;
 
 
@@ -744,13 +783,13 @@ int act_led(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[LED],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[LED],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -760,14 +799,14 @@ int act_solution_a_pump(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[SOL_A_PUMP],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -775,14 +814,14 @@ int act_solution_b_pump(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[SOL_B_PUMP],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -790,14 +829,14 @@ int act_ph_minus_pump(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[PH_MINUS_PUMP],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[PH_MINUS_PUMP],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -805,14 +844,14 @@ int act_ph_plus_pump(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[PH_PLUS_PUMP],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[PH_PLUS_PUMP],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -820,14 +859,14 @@ int act_water_pump(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[WATER_PUMP],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[WATER_PUMP],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -835,14 +874,14 @@ int act_air_pump(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[AIR_PUMP],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[AIR_PUMP],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
   
@@ -851,14 +890,14 @@ int act_air_fan(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[AIR_FAN],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[AIR_FAN],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -866,14 +905,14 @@ int act_ventil_fan(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[VENTIL_FAN],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -881,14 +920,14 @@ int act_humidifier(int act_status){
   if(act_status == 1)
   {
     digitalWrite(ch16_relay[HUMIDIFIER],LOW);
-    Serial.println("on");
+//    Serial.println("on");
     return 1;
     
   }
   else if(act_status == 0)
   {
     digitalWrite(ch16_relay[HUMIDIFIER],HIGH);
-    Serial.println("off");
+//    Serial.println("off");
     return 0;
   }
 }
@@ -900,19 +939,15 @@ String rasp_order;
 const char *rasp_order_arr;
 int cnt = 0;
 int order_indicator;
-
 void i2c_receiveData(int byteCount){
-  Serial.println(byteCount);     
+ 
   while(Wire.available()){
     rasp_order = Wire.read();
     rasp_order_arr = rasp_order.c_str();
-
-    if(cnt == 0)
+    
+    if(cnt == 0 && order_indicator==0)
     {
-      order_indicator = atoi(rasp_order_arr);
-      Serial.print("order_indicator : ");
-      Serial.println(order_indicator);
-      
+      order_indicator = atoi(rasp_order_arr);      
     }
     if( (cnt-1) == order_indicator)
     {
@@ -922,6 +957,8 @@ void i2c_receiveData(int byteCount){
       }
       else if(act_maps[order_indicator] == "led")
       {
+
+
         if(atoi(rasp_order_arr) == 1)
         {
           act_result=act_led(1);
@@ -1034,22 +1071,107 @@ void i2c_receiveData(int byteCount){
       }
       else if(act_maps[order_indicator] == "col_color")
       {
-
+         if(atoi(rasp_order_arr) == 1)
+        {
+          act_result=act_humidifier(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_result=act_humidifier(0);
+        }
       }
       else if(act_maps[order_indicator] == "dummy1")
       {
-        
+         if(atoi(rasp_order_arr) == 1)
+        {
+          act_result=act_humidifier(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_result=act_humidifier(0);
+        }
       }
       else if(act_maps[order_indicator] == "dummy2")
       {
-        
+         if(atoi(rasp_order_arr) == 1)
+        {
+          act_result=act_humidifier(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_result=act_humidifier(0);
+        }
       }
       else if(act_maps[order_indicator] == "dummy3")
       {
-        
+         if(atoi(rasp_order_arr) == 1)
+        {
+          act_result=act_humidifier(1);
+        }
+        else if(atoi(rasp_order_arr) == 0)
+        {
+          act_result=act_humidifier(0);
+        }
       }
-    
-    
+      else if(act_maps[order_indicator] == "co2")
+      {
+         if(atoi(rasp_order_arr) == 1)
+        {
+          sensor_result = getCo2ppm(CO2_IN);
+        }
+      }
+      else if(act_maps[order_indicator] == "dht11_hum")
+      {
+         if(atoi(rasp_order_arr) == 1)
+        {
+            float *dht_data = getDHT(DHT_IN);
+            float air_hum = dht_data[0];
+            sensor_result= dht_data[0];
+        }
+      }
+      else if(act_maps[order_indicator] == "dht11_temp")
+      {
+         if(atoi(rasp_order_arr) == 1)
+        {
+            float *dht_data = getDHT(DHT_IN);  
+            sensor_result= dht_data[1];
+        }
+      }
+      else if(act_maps[order_indicator] == "ds18bs20")
+      {
+         if(atoi(rasp_order_arr) == 1)
+        {
+          sensor_result = getDS18temp(DS18_IN);
+
+        }
+      }
+      else if(act_maps[order_indicator] == "ec")
+      {
+         if(atoi(rasp_order_arr) == 1)
+        {
+          float ds18temp = getDS18temp(DS18_IN);
+
+          float ec_cms = getEC(EC_IN, ds18temp);
+
+          sensor_result= ec_cms; 
+        }
+      }
+      else if(act_maps[order_indicator] == "ldr")
+      {
+
+        if(atoi(rasp_order_arr) == 1)
+        {
+          sensor_result = getLDR(LDR_IN);
+        }
+
+      }
+      else if(act_maps[order_indicator] == "ph")
+      {
+         if(atoi(rasp_order_arr) == 1)
+        {
+//          act_result=act_humidifier(1);
+        }
+       }             
     }
 
     cnt =cnt+1;
@@ -1058,13 +1180,37 @@ void i2c_receiveData(int byteCount){
 
 }
 void i2c_sendData(){
-  Wire.write(act_result); 
+//  Serial.print("[i2c_sendData]Order_indicator : "); 
+//  Serial.println(order_indicator);
+  
+
+  if(order_indicator <= 15)
+  {
+    //Request Actuator Data by Raspberry Pi 
+//    Serial.print("[i2c_sendData]order indicator : ");
+//    Serial.println(act_maps[order_indicator]);
+    Wire.write(act_result); 
+  }
+  else
+  {
+    char sval[10];
+    itoa(sensor_result,sval,10);
+//    Serial.print("Sensor Value : ");
+//    Serial.print(sensor_result);
+//    Serial.print("|");
+//    Serial.println(sval);
+////    Serial.print("[i2c_sendData]order indicator : ");
+////    Serial.print(act_maps[order_indicator]);
+////    Serial.println(sval);
+//    Wire.write(sval); 
+    
+  }
+//  delay(500);
+//  Wire.endTransmission(false);
   act_result=2;
+  sensor_result=0;
+  order_indicator=0;
 }
-
-
-
-
 
 
 
