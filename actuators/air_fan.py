@@ -10,10 +10,6 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino
 
-
-
-
-
 class air_fan:
 	SLAVE_ADDRESS = pfc_connection_arduino.SLAVE_ADDRESS
 	I2C_BUS = None
@@ -36,15 +32,29 @@ class air_fan:
 	def on(self):
 		self.MESS[self.ACT_INDICATOR] = 1
 		self.I2C_BUS.write_i2c_block_data(self.SLAVE_ADDRESS, int(self.ACT_INDICATOR), self.MESS)
-		time.sleep(1)
+		time.sleep(0.5)
+		receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
+		res = "";
+		for v in receive_data:
+			if v == 255:
+				break;
+			else:
+				res = v
+		return res
 
 
 	def off(self):
 		self.MESS[self.ACT_INDICATOR] = 0
 		self.I2C_BUS.write_i2c_block_data(self.SLAVE_ADDRESS, int(self.ACT_INDICATOR), self.MESS)
-		time.sleep(1)
-		# receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
-		# return receive_data
+		time.sleep(0.5)
+		receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
+		res = "";
+		for v in receive_data:
+			if v == 255:
+				break;
+			else:
+				res = v
+		return res
 
 
 
@@ -69,6 +79,6 @@ if __name__ == '__main__':
 	else :
 		print("It is not correct arugments")
 		sys.exit()
-	print(value.strip() + "/dt=" + str(datetime.now()))
+	print("result=" +str(value) + "/dt=" + str(datetime.now()))
 
 

@@ -55,7 +55,7 @@ boolean current_led_stat = true;
 unsigned int min_cnt = 0;
 unsigned int turn_on_min_cnt = 60 * 4;
 unsigned int turn_off_min_cnt = 60 * 1;
-
+int act_result = 2;
 
 // For DHT11 Sensors.
 unsigned int ldr_val;
@@ -75,9 +75,9 @@ void setup() {
   Wire.onReceive(i2c_receiveData);
   Wire.onRequest(i2c_sendData);
 
-  Serial.println(Wire.available());
+//  Serial.println(Wire.available());
 
-//  analogReference(DEFAULT);
+  analogReference(DEFAULT);
 
   int i = 0;
   for (i = 0; i < 16; i++)
@@ -100,8 +100,6 @@ void setup() {
 
 
 void loop() {
-
-  delay(1000);
 
   if (Serial.available() > 0 ) {
     String pfc_order;
@@ -745,7 +743,6 @@ int read_LCD_buttons(){
 int act_led(int act_status){
   if(act_status == 1)
   {
-    digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
     digitalWrite(ch16_relay[LED],LOW);
     Serial.println("on");
     return 1;
@@ -905,11 +902,11 @@ int cnt = 0;
 int order_indicator;
 
 void i2c_receiveData(int byteCount){
-  
+  Serial.println(byteCount);     
   while(Wire.available()){
     rasp_order = Wire.read();
     rasp_order_arr = rasp_order.c_str();
-       
+
     if(cnt == 0)
     {
       order_indicator = atoi(rasp_order_arr);
@@ -927,78 +924,77 @@ void i2c_receiveData(int byteCount){
       {
         if(atoi(rasp_order_arr) == 1)
         {
-          act_led(1);
+          act_result=act_led(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_led(0);
+          act_result=act_led(0);
         }
       }
       else if(act_maps[order_indicator] == "solution_a_pump")
       {
         if(atoi(rasp_order_arr) == 1)
         {
-          act_solution_a_pump(1);
+          act_result=act_solution_a_pump(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_solution_a_pump(0);
+          act_result=act_solution_a_pump(0);
         }
       }
       else if(act_maps[order_indicator] == "solution_b_pump")
       {
         if(atoi(rasp_order_arr) == 1)
         {
-          act_solution_b_pump(1);
+          act_result=act_solution_b_pump(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_solution_b_pump(0);
+          act_result=act_solution_b_pump(0);
         }
       }
       else if(act_maps[order_indicator] == "ph_minus_pump")
       {
        if(atoi(rasp_order_arr) == 1)
         {
-          act_ph_minus_pump(1);
+          act_result=act_ph_minus_pump(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_ph_minus_pump(0);
+          act_result=act_ph_minus_pump(0);
         } 
       }
       else if(act_maps[order_indicator] == "ph_plus_pump")
       {
        if(atoi(rasp_order_arr) == 1)
         {
-          act_ph_plus_pump(1);
+          act_result=act_ph_plus_pump(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_ph_plus_pump(0);
+          act_result=act_ph_plus_pump(0);
         } 
       }
       else if(act_maps[order_indicator] == "water_pump")
       {
         if(atoi(rasp_order_arr) == 1)
         {
-          act_water_pump(1);
+          act_result=act_water_pump(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_water_pump(0);
+          act_result=act_water_pump(0);
         }
       }
       else if(act_maps[order_indicator] == "air_pump")
       {
-        Serial.println("It's AIR_PUMP order");
         if(atoi(rasp_order_arr) == 1)
         {
-          act_air_pump(1);
+          act_result=act_air_pump(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_air_pump(0);
+          act_result=act_air_pump(0);
         }
 
         
@@ -1007,33 +1003,33 @@ void i2c_receiveData(int byteCount){
       {
         if(atoi(rasp_order_arr) == 1)
         {
-          act_air_fan(1);
+          act_result=act_air_fan(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_air_fan(0);
+          act_result=act_air_fan(0);
         }
       }
       else if(act_maps[order_indicator] == "ventil_fan")
       {
         if(atoi(rasp_order_arr) == 1)
         {
-          act_ventil_fan(1);
+          act_result=act_ventil_fan(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_ventil_fan(0);
+          act_result=act_ventil_fan(0);
         }
       }
       else if(act_maps[order_indicator] == "humidifier")
       {
         if(atoi(rasp_order_arr) == 1)
         {
-          act_humidifier(1);
+          act_result=act_humidifier(1);
         }
         else if(atoi(rasp_order_arr) == 0)
         {
-          act_humidifier(0);
+          act_result=act_humidifier(0);
         }
       }
       else if(act_maps[order_indicator] == "col_color")
@@ -1055,22 +1051,15 @@ void i2c_receiveData(int byteCount){
     
     
     }
-    Serial.print("GET data");
-    Serial.print(cnt - 1);
-    Serial.print(" : ");
-    Serial.println(rasp_order_arr);
 
-   
-    
-    
     cnt =cnt+1;
   }
   cnt=0;
 
 }
 void i2c_sendData(){
-//  Wire.write("I got your Message");
-  Wire.write("result");
+  Wire.write(act_result); 
+  act_result=2;
 }
 
 

@@ -15,11 +15,6 @@ from pfc_connection_arduino import pfc_connection_arduino
 
 
 
-
-
-
-
-
 class ph_minus_pump:
 	SLAVE_ADDRESS = pfc_connection_arduino.SLAVE_ADDRESS
 	I2C_BUS = None
@@ -42,46 +37,30 @@ class ph_minus_pump:
 	def on(self):
 		self.MESS[self.ACT_INDICATOR] = 1
 		self.I2C_BUS.write_i2c_block_data(self.SLAVE_ADDRESS, int(self.ACT_INDICATOR), self.MESS)
-		time.sleep(1)
+		time.sleep(0.5)
+		receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
+		res = "";
+		for v in receive_data:
+			if v == 255:
+				break;
+			else:
+				res = v
+		return res
 
 
 	def off(self):
 		self.MESS[self.ACT_INDICATOR] = 0
 		self.I2C_BUS.write_i2c_block_data(self.SLAVE_ADDRESS, int(self.ACT_INDICATOR), self.MESS)
-		time.sleep(1)
-		# receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
-		# return receive_data
+		time.sleep(0.5)
+		receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)
+		res = "";
+		for v in receive_data:
+			if v == 255:
+				break;
+			else:
+				res = v
+		return res
 
-
-
-
-
-# class ph_minus_pump:
-# 	SERIAL = None
-# 	def __init__(self):
-# 		self.connect()
-# 	def connect(self):
-# 		cont_ad = pfc_connection_arduino()
-# 		port = cont_ad.get_USB_PORT()
-# 		f = open(port)
-# 		attrs = termios.tcgetattr(f)
-# 		attrs[2] = attrs[2] & ~termios.HUPCL
-# 		termios.tcsetattr(f, termios.TCSAFLUSH, attrs)
-# 		f.close()
-# 		self.SERIAL = serial.Serial(port, cont_ad.get_BAUD_RATE(),timeout=60)
-
-# 	def on(self):
-# 		time.sleep(0.5)
-# 		self.SERIAL.write("on_ph_minus_pump")
-# 		time.sleep(0.5)
-# 		value = self.SERIAL.readline()
-# 		return value
-# 	def off(self):
-# 		time.sleep(0.5)
-# 		self.SERIAL.write("off_ph_minus_pump")
-# 		time.sleep(0.5)
-# 		value = self.SERIAL.readline()
-# 		return value
 
 if __name__ == '__main__':
 	ph_minus_pump = ph_minus_pump()
@@ -105,6 +84,6 @@ if __name__ == '__main__':
 		print("It is not correct arugments")
 		sys.exit()
 
-	print(value.strip() + "/dt=" + str(datetime.now()))
+	print("result=" + str(value) + "/dt=" + str(datetime.now()))
 
 
