@@ -119,6 +119,8 @@ void loop() {
 
 //  //Reset codes inteval every 12 hours. 
   if(millis() - reset_st_time >= 43200000)
+//  if(millis() - reset_st_time >= 43200000)
+//  if(millis() - reset_st_time >= 1000 * 5)
   {
      Serial.println("RESET----");
      Serial.println(millis());

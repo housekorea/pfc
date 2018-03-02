@@ -35,7 +35,7 @@ class pfc_cv_measurer:
 	PX_MM_RATIO = 0
 	COLOR_DIFF = 30
 	PLANT_COLOR = (198,228,82)
-	PLANT_COLOR = (147,33,208)
+	PLANT_COLOR = (102,7,111)
 	BOUNDARIES = []
 
 	# 클래스 인스턴스시에 이미 CV 프로세스를 진행할 이미지가 접근가능하다.
@@ -81,7 +81,7 @@ class pfc_cv_measurer:
 
 
 		# If you want save all of image on the transition process, set debug_save = True
-		# self.save_images(debug_save=True)
+		self.save_images(debug_save=True)
 
 	# CV에 의해 식별된 Contour의 각 좌표를 순회하며, 해당 좌표가 대표하는 위치를 찾는다. 아래의 4개 위치 식별.
 	# 1.TOP LEFT
