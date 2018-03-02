@@ -78,6 +78,11 @@ class subscriber_order:
 				try :
 					timer.start()
 					stdout,stderr = sensor_proc.communicate()
+				except :
+					f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
+					f.write("[Sensor-Data-PROCESS] Exception Occured")
+					f.write('\n')
+					f.close()
 				finally:
 					timer.cancel()
 
@@ -88,6 +93,12 @@ class subscriber_order:
 				try :
 					timer.start()
 					stdout,stderr = pub_proc.communicate()
+				except :
+					f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
+					f.write("[Sensor-Data-PROCESS] Exception Occured")
+					f.write('\n')
+					f.close()
+
 				finally :
 					timer.cancel()
 			else :
@@ -104,6 +115,11 @@ class subscriber_order:
 				try :
 					timer.start()
 					stdout, stderr = actuator_proc.communicate()
+				except :
+					f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
+					f.write("[Actuator-PROCESS] Exception Occured")
+					f.write('\n')
+					f.close()
 				finally :
 					timer.cancel()
 
@@ -113,6 +129,12 @@ class subscriber_order:
 				try :
 					timer.start()
 					stdout,stderr = pub_proc.communicate()
+				except :
+					f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
+					f.write("[Actuator-Data-Process] Exception Occured")
+					f.write('\n')
+					f.close()
+
 				finally :
 					timer.cancel()
 			else :
