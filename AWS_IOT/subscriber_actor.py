@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import datetime
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+import logging
 import json
 import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -12,6 +13,16 @@ from configure import pfc_mqtt_topic
 from command_mapper import command_mapper
 import subprocess, shlex
 from threading import Timer
+
+
+# Configure logging
+logging.basicConfig(filename=pfc_conf.LOG_DIR_PATH + '/aws_iot_log_subscriber_actor.log')
+logger = logging.getLogger("AWSIoTPythonSDK.core")
+logger.setLevel(logging.DEBUG)
+streamHandler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+streamHandler.setFormatter(formatter)
+logger.addHandler(streamHandler)
 
 class subscriber_actor:
 	iot_mqtt_client = None
@@ -29,6 +40,8 @@ class subscriber_actor:
 	def msg_callback(self, client, userdata, message):
 		mes_pld = message.payload
 		mes_tpc = message.topic
+
+		print("[Get the message] " + str(datetime.now()) + ' / ' + str(mes_tpc))
 		f = open(pfc_conf.LOG_DIR_PATH + '/aws_subscribe.log','a+')
 		f.write(mes_tpc + ' => ' + mes_pld + str(datetime.now()))
 		f.write('\n')
@@ -57,9 +70,10 @@ class subscriber_actor:
 				print(command_pfc_sensor)
 				# Execute get sensor data python process through subprocess
 				# It has a timeout setting to prevent permanent blocking
-				sensor_proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-				timer = Timer(30, kill_proc,[sensor_proc])
 				try :
+					sensor_proc = subprocess.Popen(shlex.split("python " + command_pfc_sensor), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+					timer = Timer(30, kill_proc,[sensor_proc])
+
 					timer.start()
 					stdout,stderr = sensor_proc.communicate()
 				except :
@@ -72,9 +86,10 @@ class subscriber_actor:
 
 				# Publish sensor data to AWS IOT DEVICE GATEWAY
 				sensor_data = {"DATA" :stdout , "PFC_SERIAL" :str(pfc_conf.PFC_AWS_IOT_SERIAL), "DEVICE_DT" : str(datetime.now())}
-				pub_proc = subprocess.Popen(shlex.split("python publisher_sensor_data.py -t '" + pfc_mqtt_topic.PUBLISH_SENSOR+ "' -m '" +json.dumps(sensor_data) + "'"))
-				timer = Timer(30,kill_proc, [pub_proc])
+
 				try :
+					pub_proc = subprocess.Popen(shlex.split("python publisher_sensor_data.py -t '" + pfc_mqtt_topic.PUBLISH_SENSOR+ "' -m '" +json.dumps(sensor_data) + "'"))
+					timer = Timer(30,kill_proc, [pub_proc])
 					timer.start()
 					stdout,stderr = pub_proc.communicate()
 				except :
@@ -93,9 +108,10 @@ class subscriber_actor:
 				print(command_pfc_actuator)
 				# Execute get sensor data python process through subprocess
 				# It has a timeout setting to prevent permanent blocking
-				actuator_proc = subprocess.Popen(shlex.split("python " + command_pfc_actuator), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-				timer = Timer(30, kill_proc,[actuator_proc])
+
 				try :
+					actuator_proc = subprocess.Popen(shlex.split("python " + command_pfc_actuator), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+					timer = Timer(30, kill_proc,[actuator_proc])
 					timer.start()
 					stdout, stderr = actuator_proc.communicate()
 				except :
@@ -108,9 +124,10 @@ class subscriber_actor:
 					timer.cancel()
 
 				actuator_data = {'DATA':stdout, 'PFC_SERIAL': str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
-				pub_proc = subprocess.Popen(shlex.split("python publisher_actuator_data.py -t '" + pfc_mqtt_topic.PUBLISH_ACTUATOR +   "' -m '" +json.dumps(actuator_data) + "'"))
-				timer = Timer(30,kill_proc, [pub_proc])
+
 				try :
+					pub_proc = subprocess.Popen(shlex.split("python publisher_actuator_data.py -t '" + pfc_mqtt_topic.PUBLISH_ACTUATOR+"' -m '" +json.dumps(actuator_data) + "'"))
+					timer = Timer(30,kill_proc, [pub_proc])
 					timer.start()
 					stdout,stderr = pub_proc.communicate()
 				except :
@@ -123,36 +140,38 @@ class subscriber_actor:
 			else :
 				print("'TARGET' or 'ORDER' is not exists on the command_mapper")
 		elif om_type == 'LOCAL_IP' :
-			pub_proc = subprocess.Popen(shlex.split("python " + 					command_mapper.LOCAL_IP['LOCAL_IP']['LOCAL_IP']))
-			timer = Timer(30,kill_proc, [pub_proc])
+
 			try :
+				pub_proc = subprocess.Popen(shlex.split("python " + 	command_mapper.LOCAL_IP['LOCAL_IP']['LOCAL_IP']))
+				timer = Timer(30,kill_proc, [pub_proc])
 				timer.start()
 				stdout,stderr = pub_proc.communicate()
 			finally :
 				timer.cancel()
 
 		elif om_type == 'HEARTBEAT' :
-			pub_proc = subprocess.Popen(shlex.split("python " + command_mapper.LOCAL_IP['HEARTBEAT']['BEATING']))
-			timer = Timer(30, kill_proc, [pub_proc])
 			try :
+				pub_proc = subprocess.Popen(shlex.split("python " + command_mapper.LOCAL_IP['HEARTBEAT']['BEATING']))
+				timer = Timer(30, kill_proc, [pub_proc])
 				timer.start()
 				stdout, stderr = pub_proc.communicate()
 			finally :
 				timer.cancel()
 		elif om_type == 'DATA_LAKE' :
 			command_pfc_data_lake = command_mapper.AWS_IOT_DIR_PATH +command_mapper.DATA_LAKE['S3_UPLOAD']['UPLOAD']
-			pub_proc = subprocess.Popen(shlex.split("python " + command_pfc_data_lake))
-			timer = Timer(600, kill_proc, [pub_proc])
 			try :
+				pub_proc = subprocess.Popen(shlex.split("python " + command_pfc_data_lake))
+				timer = Timer(600, kill_proc, [pub_proc])
 				timer.start()
 				stdout, stderr = pub_proc.communicate()
 			finally :
 				timer.cancel()
 
 			datalake_data = {'DATA' : stdout, 'PFC_SERIAL' : str(pfc_conf.PFC_AWS_IOT_SERIAL), 'DEVICE_DT' : str(datetime.now())}
-			pub_proc = subprocess.Popen(shlex.split("python publisher_datalake_data.py -t '" + pfc_mqtt_topic.PUBLISH_DATALAKE + "' -m '" + json.dumps(datalake_data) + "'"))
-			timer = Timer(30, kill_proc, [pub_proc])
+
 			try :
+				pub_proc = subprocess.Popen(shlex.split("python publisher_datalake_data.py -t '" + pfc_mqtt_topic.PUBLISH_DATALAKE + "' -m '" + json.dumps(datalake_data) + "'"))
+				timer = Timer(30, kill_proc, [pub_proc])
 				timer.start()
 				stdout,stderr = pub_proc.communicate()
 			finally :

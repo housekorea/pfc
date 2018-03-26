@@ -117,10 +117,13 @@ void setup() {
 
 void loop() {
 
-//  //Reset codes inteval every 12 hours. 
-  if(millis() - reset_st_time >= 43200000)
+ 
+
+//  //Reset codes inteval every 12 hours.//  //Reset codes inteval every 12 hours.
 //  if(millis() - reset_st_time >= 43200000)
 //  if(millis() - reset_st_time >= 1000 * 5)
+  // Reset codes interval every 60 minutes.
+  if(millis() - reset_st_time >= 3600000)
   {
      Serial.println("RESET----");
      Serial.println(millis());
@@ -647,6 +650,9 @@ float getEC(int ec_in, float temperature)
 
       float TempCoefficient = 1.0 + 0.0185 * (temperature - 25.0);
       float CoefficientVoltage = (float)averageVoltage / TempCoefficient;
+//      Serial.println(CoefficientVoltage);
+//      Serial.println(TempCoefficient);
+//      Serial.println(averageVoltage);
       if (CoefficientVoltage < 150)
       {
         //          Serial.println("[EC] No Solution!");
@@ -802,6 +808,8 @@ int act_solution_a_pump(int act_status){
   {
     digitalWrite(ch16_relay[SOL_A_PUMP],LOW);
 //    Serial.println("on");
+//    delay(3300);
+//    digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
     return 1;
     
   }
@@ -817,6 +825,8 @@ int act_solution_b_pump(int act_status){
   {
     digitalWrite(ch16_relay[SOL_B_PUMP],LOW);
 //    Serial.println("on");
+//    delay(3300);
+//    digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
     return 1;
     
   }

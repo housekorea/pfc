@@ -29,8 +29,10 @@ def lambda_handler(event, context):
 
     sches = {
         "publish_local_ip": ["55 * * * *","LOCAL_IP","LOCAL_IP","LOCAL_IP"],
-        "led_on":["15,45 4-23 * * *","ON","LED","ACTUATOR"],
+        "led_on":["* 4-23 * * *","ON","LED","ACTUATOR"],
+        # "led_on":["0-58/2 * * * *","ON","LED","ACTUATOR"],
         "led_off":["15,45 0-3 * * *","OFF","LED","ACTUATOR"],
+        # "led_off":["1-59/2 * * * *","OFF","LED","ACTUATOR"],
         "air_pump_on":["40,42 * * * *","ON","AIR_PUMP","ACTUATOR"],
         "air_pump_off":["50,52 * * * *","OFF","AIR_PUMP","ACTUATOR"],
         # "ventil_fan_on":["20,22 * * * *","ON","VENTIL_FAN","ACTUATOR"],
@@ -39,8 +41,8 @@ def lambda_handler(event, context):
         "ventil_fan_off":["20,22 * * * *","OFF","VENTIL_FAN","ACTUATOR"],
         "air_fan_on":["10,30,50 * * * *","ON","AIR_FAN","ACTUATOR"],
         "air_fan_off":["0,20,40 * * * * ","OFF","AIR_FAN","ACTUATOR"],
-        "water_pump_on" : ["30,50 8,17 * * *", "ON", "WATER_PUMP","ACTUATOR"],
-        "water_pump_off" : ["32,51,53 8,17 * * *", "OFF", "WATER_PUMP","ACTUATOR"],
+        "water_pump_on" : ["30,50 8 * * *", "ON", "WATER_PUMP","ACTUATOR"],
+        "water_pump_off" : ["32,51,53 8,9,17 * * *", "OFF", "WATER_PUMP","ACTUATOR"],
         "usb_cam":["*/10 * * * *","CAPTURE","USB_CAM_TOP","SENSOR"],
         "all_sensor":["*/10 * * * *","GET","ALL_SENSOR","SENSOR"],
         "s3_img_uploader":["5,45 */12 * * *", "UPLOAD", "S3_UPLOAD","DATALAKE" ]

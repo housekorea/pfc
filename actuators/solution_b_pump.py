@@ -81,6 +81,8 @@ if __name__ == '__main__':
 
 	if order == 'on':
 		value = solution_b_pump.on()
+		time.sleep(3.5);
+		value_off = solution_b_pump.off()
 	elif order == 'off':
 		value = solution_b_pump.off()
 	else :
