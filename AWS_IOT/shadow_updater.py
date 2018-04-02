@@ -21,14 +21,21 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 streamHandler.setFormatter(formatter)
 logger.addHandler(streamHandler)
 
+
+delta_status = None
 #Custom Shadow Callback
 def customShadowCallback_delta(payload, responseStatus, token):
+	global delta_status
 	print(responseStatus)
-	payloadDict = json.loads(payload)
+	if type(payload) is dict :
+		delta_status = payload
+	elif payload is not None:
+		delta_status = json.loads(payload)
+
 	print("+++++++++++DELTA++++++++++")
-	print(str(payloadDict))
+	print(str(delta_status))
 	# print("property : " + str(payloadDict["state"]["property"]))
-	print("version : " + str(payloadDict["version"]))
+	print("version : " + str(delta_status["version"]))
 	print("++++++++++++++++++++++++++\n\n")
 
 
@@ -37,10 +44,13 @@ def customShadowCallback_Update(payload, responseStatus, token):
 	if responseStatus == "timeout":
 		print("Update request " + token + " time out!")
 	if responseStatus == "accepted":
-		payloadDict = json.loads(payload)
+		if type(payload) is str :
+			delta_status = json.loads(payload)
+		elif type(payload) is dict :
+			delta_status = payload
 		print("~~~~~~~~~~~~~~~~~~~~~~~")
 		print("Update request with token: " + token + " accepted!")
-		print("property: " + str(payloadDict["state"]["desired"]["property"]))
+		# print("property: " + str(payloadDict["state"]["desired"]["property"]))
 		print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
 	if responseStatus == "rejected":
 		print("Update request " + token + " rejected!")
@@ -60,6 +70,11 @@ myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)
 
 myAWSIoTMQTTShadowClient.connect()
 
+mc = myAWSIoTMQTTShadowClient.getMQTTConnection()
+mc.configureOfflinePublishQueueing(-1)
+
+# MQTTClient = myShadowClient.getMQTTConnection()
+# MQTTClient.configureOfflinePublishQueueing(yourQueueSize, yourDropBehavior)
 
 
 print(myAWSIoTMQTTShadowClient)
@@ -72,12 +87,26 @@ myDeviceShadow.shadowGet(customShadowCallback_delta, 5)
 # myDeviceShadow.shadowUnregisterDeltaCallback()
 print(myDeviceShadow)
 
+
+json_fopen = open('./device_init_state.json','r')
+json_str = json_fopen.read()
+device_init_state_json = json.loads(json_str)
+
+print(type(device_init_state_json))
 loopCount = 0
 while True:
-	JSONPayload = '{"state":{"desired":{"property":' + str(loopCount) + '}}}'
-	myDeviceShadow.shadowUpdate(JSONPayload, customShadowCallback_Update, 5)
+	# JSONPayload = '{"state":{"desired":{"property":' + str(loopCount) + '}}}'
+	# JSONPayload = device_init_state_json
+	print(delta_status)
+	# JSONPayload = json_str
+	if type(delta_status) is dict:
+		delta_status['state'] = device_init_state_json['state']
+		print(delta_status)
+
+		myDeviceShadow.shadowUpdate(delta_status, customShadowCallback_Update, 5)
 	loopCount += 1
-	time.sleep(1)
+	print("LOOP COUNT : " + str(loopCount))
+	time.sleep(5)
 
 
 

@@ -1,0 +1,44 @@
+{
+	"state" : {
+		"desired" : {
+			"PH" : "",
+			"EC" : "",
+			"CO2" : "",
+			"AIR_TEMP" : "",
+			"AIR_HUMIDITY" : "",
+			"WATER_TEMP" : "",
+			"BRIGHTNESS" : "",
+			"AIR_FAN" : "",
+			"AIR_PUMP" : "",
+			"LED" : "",
+			"PH_MINUS_PUMP" : "",
+			"PH_PLUS_PUMP" : "",
+			"SOLUTION_A_PUMP" : "",
+			"SOLUTION_B_PUMP" : "",
+			"VENTIL_FAN" : "",
+			"WATER_PUMP" : "",
+			"CAMERA_TOP" : "",
+			"CAMERA_SIDE" : ""
+		},
+		"reported" : {
+			"PH" : "",
+			"EC" : "",
+			"CO2" : "",
+			"AIR_TEMP" : "",
+			"AIR_HUMIDITY" : "",
+			"WATER_TEMP" : "",
+			"BRIGHTNESS" : "",
+			"AIR_FAN" : "",
+			"AIR_PUMP" : "",
+			"LED" : "",
+			"PH_MINUS_PUMP" : "",
+			"PH_PLUS_PUMP" : "",
+			"SOLUTION_A_PUMP" : "",
+			"SOLUTION_B_PUMP" : "",
+			"VENTIL_FAN" : "",
+			"WATER_PUMP" : "",
+			"CAMERA_TOP" : "",
+			"CAMERA_SIDE" : ""
+		}
+	}
+}
