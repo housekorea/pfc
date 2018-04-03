@@ -5,7 +5,7 @@ import termios
 from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino
-from cv import pfc_cv_measurer
+#from cv import pfc_cv_measurer
 
 class usb_cam:
 	SKIP_FRAME = 2
@@ -28,7 +28,7 @@ class usb_cam:
 			else :
 				break
 			time.sleep(1)
-		self.call_cv_process(self.PATH + fc_name)
+		# self.call_cv_process(self.PATH + fc_name)
 
 	def call_cv_process(self,file_name):
 		cv_measurer = pfc_cv_measurer.pfc_cv_measurer(coin_px=52, coin_mm=24, max_contours=10, opath=file_name,carea=600, min_side=50)

@@ -17,15 +17,15 @@
 #define EC_IN A12
 #define PH_IN A13
 //ACUTATORS
-#define PH_MINUS_PUMP false
-#define PH_PLUS_PUMP false
-#define WATER_PUMP false
+#define PH_MINUS_PUMP 11
+#define PH_PLUS_PUMP 12
+#define WATER_PUMP 15
 #define AIR_FAN 1
 #define LED 0
 #define AIR_PUMP 2
 #define VENTIL_FAN false
-#define SOL_A_PUMP false
-#define SOL_B_PUMP false
+#define SOL_A_PUMP 14
+#define SOL_B_PUMP 13
 #define HUMIDIFIER false
 
 //LCD KEYPAD
@@ -127,13 +127,15 @@ void setup() {
     digitalWrite(ch16_relay[i],HIGH);
   }
 
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("PFC V2");
-  lcd.setCursor(0,1);
-  lcd.print("#NERDFARMERS");
-  last_millis = millis(); 
+//  lcd.begin(16,2);
+//  lcd.setCursor(0,0);
+//  lcd.print("PFC V2");
+//  lcd.setCursor(0,1);
+//  lcd.print("#NERDFARMERS");
 
+
+  // Variable to reset automatically
+  last_millis = millis(); 
   reset_st_time = millis();
   
 
@@ -142,6 +144,18 @@ void setup() {
 
 
 void loop() {
+
+//   int i = 0;
+   
+//   for(i=0; i<5; i++)
+//   {
+//     digitalWrite(ch16_relay[15-(i-1)],HIGH);
+//     digitalWrite(ch16_relay[15-i],LOW);
+//     delay(3000);
+//   }
+//    digitalWrite(ch16_relay[15],LOW);
+
+
 
 //  int i =0;
 //  for(i=0;i<16; i++)
@@ -159,8 +173,9 @@ void loop() {
 //    delay(1500);
 //    
 //  }
-    
-   
+      // always on LED
+//      digitalWrite(ch16_relay[LED],LOW);
+//      digitalWrite(ch16_relay[AIR_FAN],LOW);
 
 //
 //      int ds18temp = getDS18temp(DS18_IN);
