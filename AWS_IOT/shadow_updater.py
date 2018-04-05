@@ -23,6 +23,19 @@ logger.addHandler(streamHandler)
 
 
 delta_status = None
+
+#Delete Callback to delete JSON DOC
+def customShadowCallback_Delete(payload, responseStatus, token):
+	if responseStatus == "timeout":
+		print("Delete request " + token + " time out!")
+	if responseStatus == "accepted":
+		print("~~~~~~~~~~~~~~~~~~~~~~~")
+		print("Delete request with token: " + token + " accepted!")
+		print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
+	if responseStatus == "rejected":
+		print("Delete request " + token + " rejected!")
+
+
 #Custom Shadow Callback
 def customShadowCallback_delta(payload, responseStatus, token):
 	global delta_status
@@ -45,8 +58,10 @@ def customShadowCallback_Update(payload, responseStatus, token):
 		print("Update request " + token + " time out!")
 	if responseStatus == "accepted":
 		if type(payload) is str :
+			print("payload is the string")
 			delta_status = json.loads(payload)
 		elif type(payload) is dict :
+			print("payload is the dict")
 			delta_status = payload
 		print("~~~~~~~~~~~~~~~~~~~~~~~")
 		print("Update request with token: " + token + " accepted!")
@@ -80,7 +95,7 @@ mc.configureOfflinePublishQueueing(-1)
 print(myAWSIoTMQTTShadowClient)
 myDeviceShadow = myAWSIoTMQTTShadowClient.createShadowHandlerWithName("PFC_v_0001", True)
 # Shadow operations
-myDeviceShadow.shadowGet(customShadowCallback_delta, 5)
+# myDeviceShadow.shadowGet(customShdadowCallback_delta, 5)
 # myDeviceShadow.shadowUpdate(myJSONPayload, customShadowCallback_delta, 5)
 # myDeviceShadow.shadowDelete(customShadowCallback_delta, 5)
 # myDeviceShadow.shadowRegisterDeltaCallback(customShadowCallback_delta)
@@ -91,24 +106,49 @@ print(myDeviceShadow)
 json_fopen = open('./device_init_state.json','r')
 json_str = json_fopen.read()
 device_init_state_json = json.loads(json_str)
+device_init_state_json['state']['desired']['PH'] = 6.5
+device_init_state_json['state']['desired']['EC'] = 4.0
+device_init_state_json['state']['desired']['WATER_TEMP']= 25
 
-print(type(device_init_state_json))
+device_init_state_json['state']['desired']['AIR_FAN'] = "ON"
+device_init_state_json['state']['desired']['AIR_PUMP'] = "ON"
+device_init_state_json['state']['desired']['LED'] = "ON"
+device_init_state_json['state']['desired']['VENTIL_FAN'] = "ON"
+device_init_state_json['state']['desired']['WATER_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['SOLUTION_A_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['SOLUTION_B_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['PH_PLUS_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['PH_MINUS_PUMP'] = "OFF"
+
+# device_init_state_json['state']['reported']['PH']= 6.5
+# device_init_state_json['state']['reported']['EC']= 7
+# device_init_state_json['state']['reported']['WATER_TEMP']= 7
+print(json.dumps(device_init_state_json))
+
 loopCount = 0
-while True:
-	# JSONPayload = '{"state":{"desired":{"property":' + str(loopCount) + '}}}'
-	# JSONPayload = device_init_state_json
-	print(delta_status)
-	# JSONPayload = json_str
-	if type(delta_status) is dict:
-		delta_status['state'] = device_init_state_json['state']
-		print(delta_status)
-
-		myDeviceShadow.shadowUpdate(delta_status, customShadowCallback_Update, 5)
-	loopCount += 1
-	print("LOOP COUNT : " + str(loopCount))
-	time.sleep(5)
+# Delte Json Document on the AWS THING SHADOW
+# myDeviceShadow.shadowDelete(customShadowCallback_Delete, 5)
+# Json to String
+delta_status = json.dumps(device_init_state_json)
+myDeviceShadow.shadowUpdate(delta_status, customShadowCallback_Update, 5)
 
 
+
+
+
+
+# while True:
+# 	# JSONPayload = '{"state":{"desired":{"property":' + str(loopCount) + '}}}'
+# 	# JSONPayload = device_init_state_json
+# 	print(delta_status)
+# 	# JSONPayload = json_str
+# 	if type(delta_status) is dict:
+# 		# delta_status['state'] = device_init_state_json['state']
+# 		delta_status = json.dumps(device_init_state_json)
+# 		myDeviceShadow.shadowUpdate(delta_status, customShadowCallback_Update, 5)
+# 	loopCount += 1
+# 	print("LOOP COUNT : " + str(loopCount))
+# 	time.sleep(5)
 
 
 

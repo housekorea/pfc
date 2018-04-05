@@ -11,10 +11,6 @@ import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from configure import pfc_conf
 from configure import pfc_mqtt_topic
-from command_mapper import command_mapper
-import subprocess, shlex
-from threading import Timer
-
 
 # Configure logging
 logger = logging.getLogger("AWSIoTPythonSDK.core")
@@ -24,16 +20,18 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 streamHandler.setFormatter(formatter)
 logger.addHandler(streamHandler)
 
-#Custom Shadow Callback
-def customShadowCallback_delta(payload, responseStatus, token):
-	print(responseStatus)
-	payloadDict = json.loads(payload)
-	print("+++++++++++DELTA++++++++++")
-	print(str(payloadDict))
-	# print("property : " + str(payloadDict["state"]["property"]))
-	print("version : " + str(payloadDict["version"]))
-	print("++++++++++++++++++++++++++\n\n")
 
+def customShadowCallback_get(payload, responseStatus, token):
+	global pfc_status
+	print(responseStatus)
+	print("Received Payload from the Shadow")
+	print(payload)
+	print(type(payload))
+	pfc_status = json.loads(payload)
+	print('pfc_status loaded by the json format')
+	print(json.dumps(pfc_status, indent=4, sort_keys=True))
+	print(pfc_status['state']['desired'])
+	print(pfc_status['state']['delta'])
 
 
 shadow_host = "a1wxijaxbxg469.iot.ap-northeast-2.amazonaws.com"
@@ -49,20 +47,20 @@ myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)
 
 myAWSIoTMQTTShadowClient.connect()
 
+mc = myAWSIoTMQTTShadowClient.getMQTTConnection()
+mc.configureOfflinePublishQueueing(-1)
+
+# MQTTClient = myShadowClient.getMQTTConnection()
+# MQTTClient.configureOfflinePublishQueueing(yourQueueSize, yourDropBehavior)
 
 
 print(myAWSIoTMQTTShadowClient)
 myDeviceShadow = myAWSIoTMQTTShadowClient.createShadowHandlerWithName("PFC_v_0001", True)
-# Shadow operations
-myDeviceShadow.shadowGet(customShadowCallback_delta, 5)
-# myDeviceShadow.shadowUpdate(myJSONPayload, customShadowCallback_delta, 5)
-# myDeviceShadow.shadowDelete(customShadowCallback_delta, 5)
-myDeviceShadow.shadowRegisterDeltaCallback(customShadowCallback_delta)
-# myDeviceShadow.shadowUnregisterDeltaCallback()
-print(myDeviceShadow)
 
-while True:
-	time.sleep(1)
+
+
+myDeviceShadow.shadowGet(customShadowCallback_get,10)
+
 
 
 
