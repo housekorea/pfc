@@ -36,6 +36,7 @@ class pfc_cv_measurer:
 	COLOR_DIFF = 30
 	PLANT_COLOR = (198,228,82)
 	PLANT_COLOR = (102,7,111)
+	PLANT_COLOR = (97,111,33)
 	BOUNDARIES = []
 
 	# 클래스 인스턴스시에 이미 CV 프로세스를 진행할 이미지가 접근가능하다.
@@ -258,4 +259,4 @@ class pfc_cv_measurer:
 		print ("Saved Images : " + splt_image_file_name[0] + "_" + str(i)+"_"+str(k) + "." + splt_image_file_name[1])
 
 if __name__ == '__main__':
-	pfc_cv_measurer = pfc_cv_measurer(coin_px=92, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180126_162136.jpg",carea=200, min_side=5)
+	pfc_cv_measurer = pfc_cv_measurer(coin_px=92, coin_mm=24, max_contours=10, opath="/Users/house/DEV/pfc_v2/cv/ex_imgs/20180405_155058.jpg",carea=200, min_side=5)

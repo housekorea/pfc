@@ -123,22 +123,27 @@ class PFC_shadow_actuator_sync:
 							print("Exception Occured")
 						finally :
 							None
-			# break; #break the for Loop
+
+			self.PFC_SHADOW_STATUS['state']['reported'] = {}
 			for act_name in self.actuators:
 				if self.actuators[act_name]['sync'] is not True:
-					print("not Synced to " + act_name)
+					print("Not Synced to " + act_name)
 				else :
-					self.PFC_SHADOW_STATUS['state']['reported'][act_name] = self.actuators[act_name]['value']
+					if self.actuators[act_name]['value'] in ["ON","OFF"]:
+						self.PFC_SHADOW_STATUS['state']['reported'][act_name] = self.actuators[act_name]['value']
 
-
+			# print(json.dumps(self.PFC_SHADOW_STATUS,indent=4, sort_keys=4))
 
 			#Report to the AWS_IOT Shadow Thing
 			try :
 				self.connection_AWS_IOT()
-				return_code = self.PFC_SHADOW.shadowUpdate('{"state" : {"desired" : ' +json.dumps(self.PFC_SHADOW_STATUS['state']['desired'])+', "reported" :'+json.dumps(self.PFC_SHADOW_STATUS['state']['reported']) +'}}', self.reportShadow, 60)
-			except :
-				print("[AWS IOT]occured Error on the reported process")
+				print(">>>>>>>>> Final Result")
+				print('{"state" : {"reported" :'+json.dumps(self.PFC_SHADOW_STATUS['state']['reported']) +'}}')
 
+				return_code = self.PFC_SHADOW.shadowUpdate('{"state" : {"reported" :'+json.dumps(self.PFC_SHADOW_STATUS['state']['reported']) +'}}', self.reportShadow, 60)
+			except Exception,e:
+				print("[AWS IOT]occured Error on the reported process")
+				print(str(e))
 			# print(json.dumps(self.PFC_SHADOW_STATUS,indent=4,sort_keys=True))
 			# self.reportShadow()
 

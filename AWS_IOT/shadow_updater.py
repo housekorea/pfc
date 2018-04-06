@@ -15,7 +15,7 @@ from command_mapper import command_mapper
 
 # Configure logging
 logger = logging.getLogger("AWSIoTPythonSDK.core")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 streamHandler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 streamHandler.setFormatter(formatter)
@@ -63,12 +63,15 @@ def customShadowCallback_Update(payload, responseStatus, token):
 		elif type(payload) is dict :
 			print("payload is the dict")
 			delta_status = payload
+		print(payload)
+		print(token)
 		print("~~~~~~~~~~~~~~~~~~~~~~~")
 		print("Update request with token: " + token + " accepted!")
 		# print("property: " + str(payloadDict["state"]["desired"]["property"]))
 		print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
 	if responseStatus == "rejected":
 		print("Update request " + token + " rejected!")
+	myAWSIoTMQTTShadowClient.disconnect()
 
 
 
@@ -106,9 +109,9 @@ print(myDeviceShadow)
 json_fopen = open('./device_init_state.json','r')
 json_str = json_fopen.read()
 device_init_state_json = json.loads(json_str)
-device_init_state_json['state']['desired']['PH'] = 6.5
-device_init_state_json['state']['desired']['EC'] = 4.0
-device_init_state_json['state']['desired']['WATER_TEMP']= 25
+# device_init_state_json['state']['desired']['PH'] = 30
+# device_init_state_json['state']['desired']['EC'] = 30
+# device_init_state_json['state']['desired']['WATER_TEMP']= 25
 
 device_init_state_json['state']['desired']['AIR_FAN'] = "ON"
 device_init_state_json['state']['desired']['AIR_PUMP'] = "ON"
@@ -123,16 +126,16 @@ device_init_state_json['state']['desired']['PH_MINUS_PUMP'] = "OFF"
 # device_init_state_json['state']['reported']['PH']= 6.5
 # device_init_state_json['state']['reported']['EC']= 7
 # device_init_state_json['state']['reported']['WATER_TEMP']= 7
-print(json.dumps(device_init_state_json))
+# print(json.dumps(device_init_state_json))
 
 loopCount = 0
 # Delte Json Document on the AWS THING SHADOW
 # myDeviceShadow.shadowDelete(customShadowCallback_Delete, 5)
+
 # Json to String
-delta_status = json.dumps(device_init_state_json)
-myDeviceShadow.shadowUpdate(delta_status, customShadowCallback_Update, 5)
-
-
+# delta_status = json.dumps(device_init_state_json)
+print('{"state" : {"reported" :'+json.dumps(device_init_state_json['state']['desired']) +'}}')
+myDeviceShadow.shadowUpdate('{"state" : {"desired" :'+json.dumps(device_init_state_json['state']['desired']) +'}}', customShadowCallback_Update, 30)
 
 
 
