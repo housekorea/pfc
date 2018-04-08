@@ -113,6 +113,7 @@ class PFC_shadow_actuator_sync:
 							result_act = re.search('^result=([0,1,2]){1}\/.*$', stdout)
 							if result_act is not None:
 								if result_act.group(1) == "1" and pfc_v == "ON":
+
 									self.actuators[pfc_n]['sync'] = True
 								elif result_act.group(1) == "0" and pfc_v == "OFF":
 									self.actuators[pfc_n]['sync'] = True
@@ -131,6 +132,13 @@ class PFC_shadow_actuator_sync:
 				else :
 					if self.actuators[act_name]['value'] in ["ON","OFF"]:
 						self.PFC_SHADOW_STATUS['state']['reported'][act_name] = self.actuators[act_name]['value']
+						# Important!
+						#	In the Peristaltic Pump case , "python scirpt of the pump" has a automatically off the pump after delay to supply liquid. So Finally, this pump's status is the "OFF" is real.
+						#	Following codes change the "OFF" state in this case.
+						#
+						if (act_name in ['SOLUTION_A_PUMP','SOLUTION_B_PUMP','PH_PLUS_PUMP','PH_MINUS_PUMP']) and self.actuators[act_name]['value'] == "ON" :
+							self.PFC_SHADOW_STATUS['state']['reported'][act_name] = "OFF"
+
 
 			# print(json.dumps(self.PFC_SHADOW_STATUS,indent=4, sort_keys=4))
 

@@ -78,6 +78,8 @@ if __name__ == '__main__':
 
 	if order == 'on':
 		value = ph_plus_pump.on()
+		time.sleep(3.5)
+		value_off = ph_plus_pump.off()
 	elif order == 'off':
 		value = ph_plus_pump.off()
 	else :

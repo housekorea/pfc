@@ -191,7 +191,7 @@ void loop() {
 //  if(millis() - reset_st_time >= 43200000)
 //  if(millis() - reset_st_time >= 1000 * 5)
   // Reset codes interval every 60 minutes.
-  if(millis() - reset_st_time >= 3600000)
+  if(millis() - reset_st_time >= 1200000)
   {
      Serial.println("RESET----");
      Serial.println(millis());
@@ -362,6 +362,9 @@ void loop() {
       digitalWrite(ch16_relay[PH_MINUS_PUMP],LOW);
       Serial.println("on");
 
+      delay(3300); // every 5 second supply 7.5ml , 3.3second for 5ml.
+      digitalWrite(ch16_relay[PH_MINUS_PUMP],HIGH);
+      Serial.println("off on automatically");
     }
     else if ( !strcmp(pfc_order_arr, "off_ph_minus_pump"))
     {
@@ -373,7 +376,9 @@ void loop() {
     {
       digitalWrite(ch16_relay[PH_PLUS_PUMP],LOW);
       Serial.println("on");
-
+      delay(3300); // every 5 second supply 7.5ml , 3.3second for 5ml.
+      digitalWrite(ch16_relay[PH_PLUS_PUMP],HIGH);
+      Serial.println("off on automatically");
     }
     else if ( !strcmp(pfc_order_arr, "off_ph_plus_pump"))
     {
