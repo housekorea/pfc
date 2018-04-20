@@ -76,7 +76,7 @@ def customShadowCallback_Update(payload, responseStatus, token):
 
 
 shadow_host = "a1wxijaxbxg469.iot.ap-northeast-2.amazonaws.com"
-myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(pfc_conf.PFC_AWS_IOT_CLIENT_ID)
+myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(pfc_mqtt_topic.AWS_SHADOW_THING_NAME)
 myAWSIoTMQTTShadowClient.configureEndpoint(shadow_host, 8883)
 # myAWSIoTMQTTShadowClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
 myAWSIoTMQTTShadowClient.configureCredentials(pfc_conf.CA_PATH, pfc_conf.PRIVATE_KEY_PATH, pfc_conf.CERTIFICATE_PATH)
@@ -84,10 +84,7 @@ myAWSIoTMQTTShadowClient.configureCredentials(pfc_conf.CA_PATH, pfc_conf.PRIVATE
 
 myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10)
 myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5)
-
-
 myAWSIoTMQTTShadowClient.connect()
-
 mc = myAWSIoTMQTTShadowClient.getMQTTConnection()
 mc.configureOfflinePublishQueueing(-1)
 
@@ -114,14 +111,14 @@ device_init_state_json = json.loads(json_str)
 # device_init_state_json['state']['desired']['WATER_TEMP']= 25
 
 device_init_state_json['state']['desired']['AIR_FAN'] = "ON"
-device_init_state_json['state']['desired']['AIR_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['AIR_PUMP'] = "ON"
 device_init_state_json['state']['desired']['LED'] = "ON"
-device_init_state_json['state']['desired']['VENTIL_FAN'] = "ON"
+device_init_state_json['state']['desired']['VENTIL_FAN'] = "OFF"
 device_init_state_json['state']['desired']['WATER_PUMP'] = "OFF"
-device_init_state_json['state']['desired']['SOLUTION_A_PUMP'] = "OFF"
-device_init_state_json['state']['desired']['SOLUTION_B_PUMP'] = "OFF"
-device_init_state_json['state']['desired']['PH_PLUS_PUMP'] = "OFF"
-device_init_state_json['state']['desired']['PH_MINUS_PUMP'] = "OFF"
+# device_init_state_json['state']['desired']['SOLUTION_A_PUMP'] = "OFF"
+# device_init_state_json['state']['desired']['SOLUTION_B_PUMP'] = "OFF"
+# device_init_state_json['state']['desired']['PH_PLUS_PUMP'] = "OFF"
+# device_init_state_json['state']['desired']['PH_MINUS_PUMP'] = "OFF"
 
 # device_init_state_json['state']['reported']['PH']= 6.5
 # device_init_state_json['state']['reported']['EC']= 7
@@ -134,7 +131,7 @@ loopCount = 0
 
 # Json to String
 # delta_status = json.dumps(device_init_state_json)
-print('{"state" : {"reported" :'+json.dumps(device_init_state_json['state']['desired']) +'}}')
+print('{"state" : {"desired" :'+json.dumps(device_init_state_json['state']['desired']) +'}}')
 myDeviceShadow.shadowUpdate('{"state" : {"desired" :'+json.dumps(device_init_state_json['state']['desired']) +'}}', customShadowCallback_Update, 30)
 
 # prev_status = "OFF"

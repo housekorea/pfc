@@ -54,7 +54,7 @@ myAWSIoTMQTTShadowClient.connect()
 print(myAWSIoTMQTTShadowClient)
 myDeviceShadow = myAWSIoTMQTTShadowClient.createShadowHandlerWithName("PFC_v_0001", True)
 # Shadow operations
-myDeviceShadow.shadowGet(customShadowCallback_delta, 5)
+# myDeviceShadow.shadowGet(customShadowCallback_delta, 5)
 # myDeviceShadow.shadowUpdate(myJSONPayload, customShadowCallback_delta, 5)
 # myDeviceShadow.shadowDelete(customShadowCallback_delta, 5)
 myDeviceShadow.shadowRegisterDeltaCallback(customShadowCallback_delta)

@@ -52,22 +52,26 @@ class PFC_shadow_actuator_sync:
 		except Exception, e:
 			print(str(e))
 			print "exception occured in connection to AWS IOT"
-			print "Script ShudtDown"
+			print " = > Script ShudtDown"
 			sys.exit()
 
 
-		self.PFC_SHADOW.shadowGet(self.shadowGet, 60)
+		self.PFC_SHADOW.shadowGet(self.shadowGetCallback, 60)
 		# myAWSIoTMQTTShadowClient.disconnect()
+		init_timestamp = time.time()
 		while True:
 			if self.is_disconnect_iot_shadow == True:
 				self.syncActuator()
 				break;
+			time.sleep(100)
+			if( time.time() - init_timestamp > 300):
+				sys.exit()
 
 
 
-	def shadowGet(self,payload,responseStatus,token):
-		print(">>>>>>>>>>>>> ShadowGet Handler")
-		print(responseStatus)
+	def shadowGetCallback(self,payload,responseStatus,token):
+		print(">>>>>>>>>>>>> ShadowGet Callback")
+		print("Response status : " + str(responseStatus))
 
 		if responseStatus == "accepted":
 			self.PFC_SHADOW_STATUS = json.loads(payload)
@@ -168,8 +172,6 @@ class PFC_shadow_actuator_sync:
 			print("Update request " + token + " rejected!")
 			self.IOT_SHADOW_CLIENT.disconnect()
 			return 0
-
-		# self.PFC_SHADOW.shadowGet(self.shadowGet, 60)
 
 
 if __name__ == '__main__':
