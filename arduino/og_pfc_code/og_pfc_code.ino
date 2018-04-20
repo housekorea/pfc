@@ -122,7 +122,7 @@ void loop() {
 //  //Reset codes inteval every 12 hours.//  //Reset codes inteval every 12 hours.
 //  if(millis() - reset_st_time >= 43200000)
 //  if(millis() - reset_st_time >= 1000 * 5)
-  // Reset codes interval every 60 minutes.
+  // Reset codes interval every 20 minutes.
   if(millis() - reset_st_time >= 1200000)
   {
      Serial.println("RESET----");
@@ -131,9 +131,9 @@ void loop() {
      softwareReset(WDTO_60MS);
   }
 
-
-  
-
+//
+//  digitalWrite(ch16_relay[LED],LOW);
+//  digitalWrite(ch16_relay[AIR_FAN],LOW);
   if (Serial.available() > 0 ) {
     String pfc_order;
     pfc_order = Serial.readString();

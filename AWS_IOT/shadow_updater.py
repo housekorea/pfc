@@ -113,15 +113,15 @@ device_init_state_json = json.loads(json_str)
 # device_init_state_json['state']['desired']['EC'] = 30
 # device_init_state_json['state']['desired']['WATER_TEMP']= 25
 
-device_init_state_json['state']['desired']['AIR_FAN'] = "OFF"
+device_init_state_json['state']['desired']['AIR_FAN'] = "ON"
 device_init_state_json['state']['desired']['AIR_PUMP'] = "OFF"
-device_init_state_json['state']['desired']['LED'] = "OFF"
-device_init_state_json['state']['desired']['VENTIL_FAN'] = "OFF"
+device_init_state_json['state']['desired']['LED'] = "ON"
+device_init_state_json['state']['desired']['VENTIL_FAN'] = "ON"
 device_init_state_json['state']['desired']['WATER_PUMP'] = "OFF"
-device_init_state_json['state']['desired']['SOLUTION_A_PUMP'] = "ON"
-device_init_state_json['state']['desired']['SOLUTION_B_PUMP'] = "ON"
-device_init_state_json['state']['desired']['PH_PLUS_PUMP'] = "ON"
-device_init_state_json['state']['desired']['PH_MINUS_PUMP'] = "ON"
+device_init_state_json['state']['desired']['SOLUTION_A_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['SOLUTION_B_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['PH_PLUS_PUMP'] = "OFF"
+device_init_state_json['state']['desired']['PH_MINUS_PUMP'] = "OFF"
 
 # device_init_state_json['state']['reported']['PH']= 6.5
 # device_init_state_json['state']['reported']['EC']= 7

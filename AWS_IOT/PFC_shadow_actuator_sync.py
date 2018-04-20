@@ -35,9 +35,8 @@ class PFC_shadow_actuator_sync:
 		self.init_AWS_IOT()
 
 	def connection_AWS_IOT(self):
-		shadow_host = "a1wxijaxbxg469.iot.ap-northeast-2.amazonaws.com"
-		myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(pfc_conf.PFC_AWS_IOT_CLIENT_ID)
-		myAWSIoTMQTTShadowClient.configureEndpoint(shadow_host, 8883)
+		myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(pfc_mqtt_topic.AWS_SHADOW_THING_NAME)
+		myAWSIoTMQTTShadowClient.configureEndpoint(pfc_mqtt_topic.AWS_ENDPOINT, 8883)
 		myAWSIoTMQTTShadowClient.configureCredentials(pfc_conf.CA_PATH, pfc_conf.PRIVATE_KEY_PATH, pfc_conf.CERTIFICATE_PATH)
 		myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(30)
 		myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(30)
@@ -45,12 +44,13 @@ class PFC_shadow_actuator_sync:
 		mc = myAWSIoTMQTTShadowClient.getMQTTConnection()
 		mc.configureOfflinePublishQueueing(-1)
 		self.IOT_SHADOW_CLIENT = myAWSIoTMQTTShadowClient
-		self.PFC_SHADOW = myAWSIoTMQTTShadowClient.createShadowHandlerWithName("PFC_v_0001", True)
+		self.PFC_SHADOW = myAWSIoTMQTTShadowClient.createShadowHandlerWithName(pfc_mqtt_topic.AWS_SHADOW_THING_NAME, True)
 
 	def init_AWS_IOT(self):
 		try :
 			self.connection_AWS_IOT()
-		except :
+		except Exception, e:
+			print(str(e))
 			print "exception occured in connection to AWS IOT"
 			print "Script ShudtDown"
 			sys.exit()

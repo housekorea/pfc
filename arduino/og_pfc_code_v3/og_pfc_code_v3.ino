@@ -145,6 +145,8 @@ void setup() {
 
 void loop() {
 
+  digitalWrite(ch16_relay[LED],LOW);
+  digitalWrite(ch16_relay[AIR_FAN],LOW);
 //   int i = 0;
    
 //   for(i=0; i<5; i++)
@@ -191,13 +193,13 @@ void loop() {
 //  if(millis() - reset_st_time >= 43200000)
 //  if(millis() - reset_st_time >= 1000 * 5)
   // Reset codes interval every 60 minutes.
-  if(millis() - reset_st_time >= 1200000)
-  {
-     Serial.println("RESET----");
-     Serial.println(millis());
-     delay(100);
-     softwareReset(WDTO_60MS);
-  }
+//  if(millis() - reset_st_time >= 1200000)
+//  {
+//     Serial.println("RESET----");
+//     Serial.println(millis());
+//     delay(100);
+//     softwareReset(WDTO_60MS);
+//  }
 
   
   if (Serial.available() > 0 ) {
