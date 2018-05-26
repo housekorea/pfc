@@ -145,8 +145,6 @@ void setup() {
 
 void loop() {
 
-  digitalWrite(ch16_relay[LED],LOW);
-  digitalWrite(ch16_relay[AIR_FAN],LOW);
 //   int i = 0;
    
 //   for(i=0; i<5; i++)
@@ -176,8 +174,9 @@ void loop() {
 //    
 //  }
       // always on LED
-//      digitalWrite(ch16_relay[LED],LOW);
-//      digitalWrite(ch16_relay[AIR_FAN],LOW);
+      digitalWrite(ch16_relay[LED],LOW);
+      digitalWrite(ch16_relay[AIR_FAN],LOW);
+      digitalWrite(ch16_relay[AIR_PUMP],LOW);
 
 //
 //      int ds18temp = getDS18temp(DS18_IN);
@@ -192,7 +191,7 @@ void loop() {
 //  //Reset codes inteval every 12 hours.//  //Reset codes inteval every 12 hours.
 //  if(millis() - reset_st_time >= 43200000)
 //  if(millis() - reset_st_time >= 1000 * 5)
-  // Reset codes interval every 60 minutes.
+  // Reset codes interval every 20 minutes.
 //  if(millis() - reset_st_time >= 1200000)
 //  {
 //     Serial.println("RESET----");
@@ -295,7 +294,18 @@ void loop() {
       // LDR
       unsigned int ldr_val = getLDR(LDR_IN);
       // CO2
-      int co2_ppm = getCo2ppm(CO2_IN);
+     int percentage;
+      float volts;
+//      int co2_ppm = getCo2ppm(CO2_IN);
+      volts = MGRead(MG_PIN);
+      percentage = MGGetPercentage(volts,CO2Curve);
+
+//      if (percentage == -1) {
+//        Serial.print( "<400" );
+//      } else {
+//        Serial.print(percentage);
+//      }
+      int co2_ppm = percentage;
       // DS18B20
        int ds18_temp = getDS18temp(DS18_IN);
       // EC

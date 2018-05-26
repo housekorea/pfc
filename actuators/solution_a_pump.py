@@ -8,6 +8,8 @@ import os
 import termios
 from datetime import datetime
 
+
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pfc_connection_arduino import pfc_connection_arduino
 
@@ -34,7 +36,8 @@ class solution_a_pump:
 
 
 	def on(self):
-		self.MESS[self.ACT_INDICATOR] = 1
+		self.MESS[self.ACT_INDICATO
+		R] = 1
 		self.I2C_BUS.write_i2c_block_data(self.SLAVE_ADDRESS, int(self.ACT_INDICATOR), self.MESS)
 		time.sleep(0.5)
 		receive_data = self.I2C_BUS.read_i2c_block_data(self.SLAVE_ADDRESS,0)

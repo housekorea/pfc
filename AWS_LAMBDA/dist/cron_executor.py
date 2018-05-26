@@ -28,69 +28,50 @@ def lambda_handler(event, context):
     # all_sensors_cr = "*/5 * * * *"
 
     sches = {
-        "publish_local_ip": ["55 * * * *","LOCAL_IP","LOCAL_IP","LOCAL_IP"],
-        "led_on":["* 4-23 * * *","ON","LED","ACTUATOR"],
-        # "led_on":["0-58/2 * * * *","ON","LED","ACTUATOR"],
-        "led_off":["15,45 0-3 * * *","OFF","LED","ACTUATOR"],
-        # "led_off":["1-59/2 * * * *","OFF","LED","ACTUATOR"],
-        "air_pump_on":["40,42 * * * *","ON","AIR_PUMP","ACTUATOR"],
-        "air_pump_off":["50,52 * * * *","OFF","AIR_PUMP","ACTUATOR"],
+        # "publish_local_ip": ["55 * * * *","LOCAL_IP","LOCAL_IP","LOCAL_IP"],
+        "led_on":["*/10 4-23 * * *","ON","LED","ACTUATOR"],
+        "led_off":["*/10 0-3 * * *","OFF","LED","ACTUATOR"],
+        "air_pump_on":["40 * * * *","ON","AIR_PUMP","ACTUATOR"],
+        "air_pump_off":["50 * * * *","OFF","AIR_PUMP","ACTUATOR"],
         # "ventil_fan_on":["20,22 * * * *","ON","VENTIL_FAN","ACTUATOR"],
         # "ventil_fan_off":["50,52 * * * *","OFF","VENTIL_FAN","ACTUATOR"],
         "ventil_fan_on":["10,12 * * * *","ON","VENTIL_FAN","ACTUATOR"],
         "ventil_fan_off":["20,22 * * * *","OFF","VENTIL_FAN","ACTUATOR"],
-        "air_fan_on":["10,30,50 * * * *","ON","AIR_FAN","ACTUATOR"],
-        "air_fan_off":["0,20,40 * * * * ","OFF","AIR_FAN","ACTUATOR"],
-        "water_pump_on" : ["30,50 8 * * *", "ON", "WATER_PUMP","ACTUATOR"],
-        "water_pump_off" : ["32,51,53 8,9,17 * * *", "OFF", "WATER_PUMP","ACTUATOR"],
-        "usb_cam":["*/10 * * * *","CAPTURE","USB_CAM_TOP","SENSOR"],
-        "all_sensor":["*/10 * * * *","GET","ALL_SENSOR","SENSOR"],
-        "s3_img_uploader":["5,45 */12 * * *", "UPLOAD", "S3_UPLOAD","DATALAKE" ]
+        # "air_fan_on":["10,30,50 * * * *","ON","AIR_FAN","ACTUATOR"],
+        # "air_fan_off":["0,20,40 * * * * ","OFF","AIR_FAN","ACTUATOR"],
+
+        "air_fan_on":["*/2 * * * *","ON","AIR_FAN","ACTUATOR"],
+        "air_fan_off":["1-59/2 * * * * ","OFF","AIR_FAN","ACTUATOR"],
+
+        "water_pump_on" : ["5 */2 * * *", "ON", "WATER_PUMP","ACTUATOR"],
+        "water_pump_off" : ["8 */2 * * *", "OFF", "WATER_PUMP","ACTUATOR"],
+        # "usb_cam":["*/10 * * * *","CAPTURE","USB_CAM_TOP","SENSOR"],
+        # "all_sensor":["*/10 * * * *","GET","ALL_SENSOR","SENSOR"],
+        # "s3_img_uploader":["5,45 */12 * * *", "UPLOAD", "S3_UPLOAD","DATALAKE" ]
     }
     current_dt = datetime.datetime.now(seoul_tz)
     client = boto3.client('iot-data', region_name='ap-northeast-2')
-    print(str(current_dt))
+    thing_shadow = client.get_thing_shadow(thingName='PFC_v_0001')
+    # print(str(current_dt))
+    update_jsonState = {'state' : { 'desired' : {}}}
+
     for key in sches:
         temp_cron = croniter(str(sches[key][0]),current_dt)
         temp_prev = temp_cron.get_prev(datetime.datetime)
         print(str(key) + "/" + str(temp_prev))
         is_reserved = (abs(temp_prev - current_dt) < datetime.timedelta(minutes=2))
         if is_reserved == True:
-            print(">>>> Publish")
             TYPE = sches[key][3]
             TARGET = sches[key][2]
             ORDER = sches[key][1]
+            update_jsonState['state']['desired'][TARGET] = ORDER
 
-            response = client.publish(
-                payload=json.dumps({
-                    "PFC_SERIAL" : "00000000",
-                    "DEVICE_DT" : str(datetime.datetime.now(seoul_tz)),
-                    "ORDER" : ORDER,
-                    "TARGET" : TARGET,
-                    "TYPE" : TYPE,
-                    "ORDER_DT" : str(datetime.datetime.now(seoul_tz)),
-                 }),
-                topic = 'EZFARM/PFC/V1/DEV',
-                qos=1
-                )
-
-
-
-    # Change topic, qos and payload
-    # response = client.publish(
-    #     payload=json.dumps({
-    #         "PFC_SERIAL" : "CLOUDWATCH_LAMBDA_ORDER",
-    #         "DEVICE_DT" : "",
-    #         "ORDER" : "GET",
-    #         "TARGET" : "ALL_SENSOR",
-    #         "TYPE" : "SENSOR",
-    #         "ORDER_DT" : "",
-    #         "DEVICE_DT" : "",
-    #     }),
-    #     topic = 'EZFARM/PFC/V1/DEV/00000001/order_subscribe',
-    #     qos=1
-    # )
-
+    print("Shadow Update")
+    print(">>>>>>> " + json.dumps(update_jsonState))
+    client.update_thing_shadow(
+        thingName = 'PFC_v_0001',
+        payload=json.dumps(update_jsonState)
+    )
 
 
 
