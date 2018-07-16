@@ -43,9 +43,10 @@ struct config_reset_cnt_struct
 #define HUMIDIFIER_1 9
 #define HUMIDIFERR_2 10
 
-int ch16_relay[16] = {38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53};
-// 1,3,5,7,9,11,13,15 | 38,40,42,44,46,48,50,52
-// 2,4,6,8,10,12,14,16 | 39,41,43,45,47,49,51,53
+
+int ch16_relay[16] = {26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41};
+// 1,3,5,7,9,11,13,15 | 26,28,30,32,34,36,38,40
+// 2,4,6,8,10,12,14,16 | 27,29,31,33,35,37,39,41
 
 //LCD KEYPAD
 #define btnRIGHT
@@ -133,18 +134,20 @@ void setup() {
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
   RESET_TIMEOUT = (unsigned long)10 *  (unsigned long)60 * (unsigned long)1000; 
-//  RESET_TIMEOUT = (unsigned long)50 * (unsigned long)1000; 
 
-//  eeprom_reset_struct.reset_cnt = 3922;
+  Serial.println(">>>>>>>>>>>>");
+  Serial.println("[Arduino Mega] Start");
+  Serial.println(">>>>>>>>>>>>");
   EEPROM_readAnything(EEPROM_RESET_ADDR,eeprom_reset_struct);
-  Serial.print("[EEPROM RESET CNT] on EEPROM MEMORY : ");
-  Serial.println(eeprom_reset_struct.reset_cnt);
   if (eeprom_reset_struct.reset_cnt > 60,000)
   {
     eeprom_reset_struct.reset_cnt = 0;
   }
   eeprom_reset_struct.reset_cnt += 1;
   EEPROM_writeAnything(EEPROM_RESET_ADDR, eeprom_reset_struct);
+  Serial.print("[EEPROM RESET CNT] on EEPROM MEMORY : ");
+  Serial.println(eeprom_reset_struct.reset_cnt);
+  
 //  EEPROM_writeAnything(EEPROM_RESET_ADDR,eeprom_reset_struct);
 
 
@@ -328,6 +331,7 @@ void sendMillis(){
 
   unsigned long cur_msec = millis();
   Blynk.virtualWrite(V20, cur_msec / 1000);
+  Blynk.virtualWrite(V22, eeprom_reset_struct.reset_cnt);
 }
 
 void sendProbeSensor() {
@@ -647,10 +651,11 @@ void softwareReset( uint8_t prescaller) {
   while(1) {}
 }
 
-//V38,V39,V40,V41,V42,V43,V44,V45,V46,V47,V48,V49,V50,V51,V52,V53
-BLYNK_WRITE(V38)
+
+//V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41
+BLYNK_WRITE(V26)
 {
-  int pin_num = 38;
+  int pin_num = 26;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -663,9 +668,9 @@ BLYNK_WRITE(V38)
   }
 }
 
-BLYNK_WRITE(V39)
+BLYNK_WRITE(V27)
 {
-  int pin_num = 39;
+  int pin_num = 27;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -677,9 +682,9 @@ BLYNK_WRITE(V39)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V40)
+BLYNK_WRITE(V28)
 {
-  int pin_num = 40;
+  int pin_num = 28;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -691,9 +696,9 @@ BLYNK_WRITE(V40)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V41)
+BLYNK_WRITE(V29)
 {
-  int pin_num = 41;
+  int pin_num = 29;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -705,9 +710,9 @@ BLYNK_WRITE(V41)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V42)
+BLYNK_WRITE(V30)
 {
-  int pin_num = 42;
+  int pin_num = 30;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -719,9 +724,9 @@ BLYNK_WRITE(V42)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V43)
+BLYNK_WRITE(V31)
 {
-  int pin_num = 43;
+  int pin_num = 31;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -747,9 +752,9 @@ BLYNK_WRITE(V44)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V45)
+BLYNK_WRITE(V32)
 {
-  int pin_num = 45;
+  int pin_num = 32;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -761,9 +766,9 @@ BLYNK_WRITE(V45)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V46)
+BLYNK_WRITE(V33)
 {
-  int pin_num = 46;
+  int pin_num = 33;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
@@ -775,9 +780,9 @@ BLYNK_WRITE(V46)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V47)
+BLYNK_WRITE(V34)
 {
-  int pin_num = 47;
+  int pin_num = 34;
   pinMode(pin_num,OUTPUT);
   int pin_val = param.asInt();
   if(pin_val == 1)
