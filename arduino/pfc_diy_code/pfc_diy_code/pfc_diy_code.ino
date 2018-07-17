@@ -13,7 +13,8 @@
 #include <avr/wdt.h>
 #include <EEPROM.h>
 #include <EEPROMAnything.h>
-
+#include <SPI.h>
+#include <SD.h>
 
 //EEPROM Settings
 #define EEPROM_RESET_ADDR 0x58
@@ -70,6 +71,9 @@ char auth[] = "ffa88c6b016e4c30986a005d57bdc709"; // PFC_0001
 //Set password to "" for open networks.
 char ssid[] = "FabLab_2.4G";
 char pass[] = "innovationpark";
+
+//char ssid[] = "lcp";
+//char pass[] = "travelshot";
 ESP8266 wifi(&ESP_SERIAL);
 
 BlynkTimer bl_timer;
@@ -81,6 +85,15 @@ int last_connect_start = 0;
 unsigned long RESET_TIMEOUT; // Every 10 min.
 unsigned long arduino_smsec;
 WidgetLCD blynk_lcd(V21);
+
+//SD card
+File micro_sd_file;
+int sd_card_pin = 53;
+boolean is_sd_card_init = false;
+
+
+
+
 
 
 BLYNK_CONNECTED() {
@@ -119,7 +132,8 @@ BLYNK_APP_DISCONNECTED()
 
 
 void setup() {
-
+  
+//  wdt_enable(WDTO_15MS);
 
   
   lcd.begin(16,2);
@@ -134,7 +148,7 @@ void setup() {
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
   RESET_TIMEOUT = (unsigned long)10 *  (unsigned long)60 * (unsigned long)1000; 
-
+  
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
   Serial.println(">>>>>>>>>>>>");
@@ -147,11 +161,16 @@ void setup() {
   EEPROM_writeAnything(EEPROM_RESET_ADDR, eeprom_reset_struct);
   Serial.print("[EEPROM RESET CNT] on EEPROM MEMORY : ");
   Serial.println(eeprom_reset_struct.reset_cnt);
-  
-//  EEPROM_writeAnything(EEPROM_RESET_ADDR,eeprom_reset_struct);
 
-
-  
+  if (!SD.begin(sd_card_pin))
+  {
+    Serial.println("[SD Card]Initialization Failed"); 
+    is_sd_card_init = true;
+  }
+  else
+  {
+    micro_sd_file = SD.open("pfc_log.txt",FILE_WRITE);
+  }
 
 
   for(int i=0; i<16; i++)
@@ -197,7 +216,8 @@ void setup() {
   Blynk.begin(auth, wifi, ssid, pass);
 
   bl_timer.setInterval(3000L,sendMillis);
-  bl_timer.setInterval(30000L, sendDhtSensor);
+  //bl_timer.setInterval(30000L, sendDhtSensor);
+  bl_timer.setInterval(10000L, sendDhtSensor);
   bl_timer.setInterval(30*60*1000L,sendEmailReport);
   
   pinMode(3, OUTPUT);
@@ -205,8 +225,20 @@ void setup() {
   
 }
 
+unsigned long last_msec = millis();
 void loop() {
   //  Serial.println(BUFFER_SIZE);
+
+
+
+//  byte blynk_logs[8];
+//  if(blynk_logs = BLYNK_DEBUG_ALL.availableForWrite())
+//  {
+//    Serial.println(blynk_logs);
+//  }
+
+
+
 
   if(millis() - arduino_smsec > RESET_TIMEOUT)
   {
@@ -216,40 +248,45 @@ void loop() {
     softwareReset(WDTO_60MS); 
   }
 
-  if(!Blynk.connected())
-  {
-
-    if(count_blynk_fail == 0)
-    {
-      discon_msec = millis();
-    }
-    float cur_msec = (millis() - discon_msec)/1000;
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("WIFI Disconnect");
-    lcd.setCursor(0,1);
-    lcd.print('"'+String(cur_msec) + '"' +" Elapsed");
-    if (count_blynk_fail % 10 == 0)
-    {
-      Serial.print("[Disconnected]Not Connected Blynk :");
-      Serial.println(count_blynk_fail);
-      
-    }
-    delay(50);
-    count_blynk_fail+=1;
-    
-    if(count_blynk_fail > 100)
-    {
-      Blynk.begin(auth, wifi, ssid, pass);
-    }
-  }
-  else
-  {
     Blynk.run();
     bl_timer.run();
-   
-   }
+  
+//  if(millis() - last_msec > 10000)
+//  {
+//    Serial.println(millis() - last_msec / 1000);
+//    last_msec =millis();
+//  }
 
+//  if(!Blynk.connected())
+//  {
+
+//    if(count_blynk_fail == 0)
+//    {
+//      discon_msec = millis();
+//    }
+//    float cur_msec = (millis() - discon_msec)/1000;
+//    lcd.clear();
+//    lcd.setCursor(0,0);
+//    lcd.print("WIFI Disconnect");
+//    lcd.setCursor(0,1);
+//    lcd.print('"'+String(cur_msec) + '"' +" Elapsed");
+//    if (count_blynk_fail % 10 == 0)
+//    {
+//      Serial.print("[Disconnected]Not Connected Blynk :");
+//      Serial.println(count_blynk_fail);
+//      
+//    }
+//    delay(50);
+//    count_blynk_fail+=1;
+//    
+//    if(count_blynk_fail > 100)
+//    {
+//      Blynk.begin(auth, wifi, ssid, pass);
+//    }
+//  }
+
+  
+  
   
   //  while(Serial.available()){
   //    Serial2.write(Serial.read());
@@ -642,13 +679,15 @@ void softwareReset( uint8_t prescaller) {
 //  blynk_lcd.print(0,0, "Software Reset");
 //  blynk_lcd.print(0,1, millis());
 
-  delay(1000);
+  delay(100);
   // start watchdog with the provided prescaller
-  wdt_enable( prescaller);
+  wdt_enable(prescaller);
+
   // wait for the prescaller time to expire
   // without sending the reset signal by using
-  // the wdt_reset() method
-  while(1) {}
+//  the wdt_reset() method
+//  wdt_reset();
+  while(1) {};
 }
 
 
