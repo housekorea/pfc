@@ -1,7 +1,8 @@
 #define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-//#define BLYNK_DEBUG Serial
-#define BLYNK_MAX_SENDBYTES 500 // set Limit Blynk Symbol Number(include Subject + body)
-
+#define BLYNK_DEBUG_ALL Serial
+#define BLYNK_MAX_SENDBYTES 1024 // set Limit Blynk Symbol Number(include Subject + body)
+#define BLYNK_MAX_READBYTES  4096
+#define BLYNK_MSG_LIMIT 200
 #include <DHT.h>
 #include <OneWire.h>
 #include <Wire.h>
@@ -9,6 +10,19 @@
 #include <LiquidCrystal.h>
 #include <ESP8266_Lib.h>
 #include <BlynkSimpleShieldEsp8266.h>
+#include <avr/wdt.h>
+#include <EEPROM.h>
+#include <EEPROMAnything.h>
+#include <SPI.h>
+#include <SD.h>
+
+
+//EEPROM Settings
+#define EEPROM_RESET_ADDR 0x58
+struct config_reset_cnt_struct
+{
+  unsigned int reset_cnt;
+} eeprom_reset_struct;
 
 
 //SENSORS
@@ -32,9 +46,10 @@
 #define HUMIDIFIER_1 9
 #define HUMIDIFERR_2 10
 
-int ch16_relay[16] = {38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53};
-// 1,3,5,7,9,11,13,15 | 38,40,42,44,46,48,50,52
-// 2,4,6,8,10,12,14,16 | 39,41,43,45,47,49,51,53
+int ch16_relay[16] = {26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41};
+// 1,3,5,7,9,11,13,15 | 26,28,30,32,34,36,38,40
+// 2,4,6,8,10,12,14,16 | 27,29,31,33,35,37,39,41
+
 
 //LCD KEYPAD
 #define btnRIGHT
@@ -53,7 +68,6 @@ LiquidCrystal lcd(12,13,8,9,10,11);
 
 //You should get Auth Token in the Blynk App.
 //Go to the Project Settings (nut icon).
-//char auth[] = "ffa88c6b016e4c30986a005d57bdc709"; // PFC_0001
 char auth[] = "b1b31fe06fe445d18bbc01284dcaedbd"; // PFC_0002
 //Your WiFi credentials.
 //Set password to "" for open networks.
@@ -62,14 +76,38 @@ char pass[] = "innovationpark";
 ESP8266 wifi(&ESP_SERIAL);
 
 BlynkTimer bl_timer;
-unsigned long count_blynk_fail = 0;
-float discon_msec = 0;
-unsigned long last_connect_start = 0;
+int count_blynk_fail = 0;
+float discon_msec = 0.0;
+int last_connect_start = 0;
+
+//Software Reset 
+unsigned long RESET_TIMEOUT; // Every 10 min.
+unsigned long arduino_smsec;
+WidgetLCD blynk_lcd(V21);
+
+//SD card
+File micro_sd_file;
+int sd_card_pin = 53;
+boolean is_sd_card_init = false;
+
+
+
+
+
+
 
 
 BLYNK_CONNECTED() {
   // Request Blynk server to re-send latest values for all pins
-  Blynk.syncAll();
+  //Blynk.syncAll();
+
+  // Manual Sync without "Blnk.syncAll()" => It invoke "buffer overflow!"
+  int virtual_relay[] = {V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41};
+  for(int i=0; i< sizeof(virtual_relay); i++)
+  {
+    Blynk.syncVirtual(virtual_relay[i]);
+    delay(10);
+  }
 
   // You can also update individual virtual pins like this:
   //Blynk.syncVirtual(V0, V2);
@@ -78,9 +116,9 @@ BLYNK_CONNECTED() {
   //  int value = millis() / 1000;
   //  Blynk.virtualWrite(V2, value);
   Serial.println("[Function Call]Called BLYNK_CONNECTED");
-  count_blynk_fail = 0;
+  count_blynk_fail = (unsigned long)0;
 
-  last_connect_start = millis(); 
+//  last_connect_start = millis(); 
 //  bl_timer.setTimeout(1000L,LCD_display_connected);
 }
 
@@ -95,23 +133,55 @@ BLYNK_APP_DISCONNECTED()
 
 
 void setup() {
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("[PFC]");
-  lcd.setCursor(0,1);
-  lcd.print("SetUp Now.....");
+  
+//  wdt_enable(WDTO_15MS);
+
+  
+//  lcd.begin(16,2);
+//  lcd.setCursor(0,0);
+//  lcd.print("[PFC]");
+//  lcd.setCursor(0,1);
+//  lcd.print("SetUp Now.....");
+
+  arduino_smsec = millis();
 
   Serial.begin(9600);
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
+  RESET_TIMEOUT = (unsigned long)10 *  (unsigned long)60 * (unsigned long)1000; 
+  
+  Serial.println(">>>>>>>>>>>>");
+  Serial.println("[Arduino Mega] Start");
+  Serial.println(">>>>>>>>>>>>");
 
 
+  
+  EEPROM_readAnything(EEPROM_RESET_ADDR,eeprom_reset_struct);
+  if (eeprom_reset_struct.reset_cnt > 60,000)
+  {
+    eeprom_reset_struct.reset_cnt = 0;
+  }
+  eeprom_reset_struct.reset_cnt += 1;
+  EEPROM_writeAnything(EEPROM_RESET_ADDR, eeprom_reset_struct);
+  Serial.print("[EEPROM RESET CNT] on EEPROM MEMORY : ");
+  Serial.println(eeprom_reset_struct.reset_cnt);
+  
 //
+//  if (!SD.begin(sd_card_pin))
+//  {
+//    Serial.println("[SD Card]Initialization Failed"); 
+//    is_sd_card_init = true;
+//  }
+//  else
+//  {
+//    micro_sd_file = SD.open("pfc_log.txt",FILE_WRITE);
+//  }
+
+
 //  for(int i=0; i<16; i++)
 //  {
 //    pinMode(ch16_relay[i],OUTPUT);
-//    digitalWrite(ch16_relay[i],LOW);
 //  }
 
 //  int ri = 0;
@@ -133,66 +203,95 @@ void setup() {
 //    delay(200);
 //  }
 
-  for(int i=0; i<16;i++)
-  {
-    digitalWrite(ch16_relay[i],HIGH);
-    if(i==0)
-    {
-      digitalWrite(ch16_relay[15],LOW); 
-    }
-    else
-    {
-      digitalWrite(ch16_relay[i-1],LOW);      
-    }
-    delay(50);
-  }
+//  for(int i=0; i<16;i++)
+//  {
+//    digitalWrite(ch16_relay[i],HIGH);
+//    if(i==0)
+//    {
+//      digitalWrite(ch16_relay[15],LOW); 
+//    }
+//    else
+//    {
+//      digitalWrite(ch16_relay[i-1],LOW);      
+//    }
+//    delay(50);
+//  }
 
 
  
   Blynk.begin(auth, wifi, ssid, pass);
 
-//  bl_timer.setInterval(1000L, sendMillis);
-  bl_timer.setInterval(30000L, sendDhtSensor);
-//  bl_timer.setInterval(30*60*1000L,sendEmailReport);
+  bl_timer.setInterval(3000L,sendMillis);
+  //bl_timer.setInterval(30000L, sendDhtSensor);
+  //bl_timer.setInterval(30*60*1000L,sendEmailReport);
   
   pinMode(3, OUTPUT);
 
   
 }
 
+unsigned long last_msec = millis();
 void loop() {
   //  Serial.println(BUFFER_SIZE);
 
 
-  if(!Blynk.connected())
-  {
 
-    if(count_blynk_fail == 0)
-    {
-      discon_msec = millis();
-    }
-    float cur_msec = (millis() - discon_msec)/1000;
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("WIFI Disconnect");
-    lcd.setCursor(0,1);
-    lcd.print('"'+String(cur_msec) + '"' +" Elapsed");
-    Serial.println("[Disconnected]Not Connected Blynk");
-    delay(500);
-    count_blynk_fail+=1;
-    
-    if(count_blynk_fail > 7)
-    {
-      Blynk.begin(auth, wifi, ssid, pass);
-    }
-  }
-  else
+//  byte blynk_logs[8];
+//  if(blynk_logs = BLYNK_DEBUG_ALL.availableForWrite())
+//  {
+//    Serial.println(blynk_logs);
+//  }
+
+
+
+
+  if(millis() - arduino_smsec > RESET_TIMEOUT)
   {
+    Serial.println(RESET_TIMEOUT);
+    Serial.println(millis());
+    Serial.println(arduino_smsec);
+    softwareReset(WDTO_60MS); 
+  }
+
     Blynk.run();
     bl_timer.run();
-   
-   }
+  
+//  if(millis() - last_msec > 10000)
+//  {
+//    Serial.println(millis() - last_msec / 1000);
+//    last_msec =millis();
+//  }
 
+//  if(!Blynk.connected())
+//  {
+
+//    if(count_blynk_fail == 0)
+//    {
+//      discon_msec = millis();
+//    }
+//    float cur_msec = (millis() - discon_msec)/1000;
+//    lcd.clear();
+//    lcd.setCursor(0,0);
+//    lcd.print("WIFI Disconnect");
+//    lcd.setCursor(0,1);
+//    lcd.print('"'+String(cur_msec) + '"' +" Elapsed");
+//    if (count_blynk_fail % 10 == 0)
+//    {
+//      Serial.print("[Disconnected]Not Connected Blynk :");
+//      Serial.println(count_blynk_fail);
+//      
+//    }
+//    delay(50);
+//    count_blynk_fail+=1;
+//    
+//    if(count_blynk_fail > 100)
+//    {
+//      Blynk.begin(auth, wifi, ssid, pass);
+//    }
+//  }
+
+  
+  
   
   //  while(Serial.available()){
   //    Serial2.write(Serial.read());
@@ -240,13 +339,6 @@ void loop() {
   //  Serial.println();
   //  Serial.println("----------------");
 }
-void sendMillis()
-{
-
-  unsigned long mil = millis() / 1000;
-  Blynk.virtualWrite(V0,mil);
-  Serial.println(mil);
-}
 
 void LCD_display_connected()
 {
@@ -275,6 +367,13 @@ void sendEmailReport() {
   mail_message +="\r\n\r\n From PFC on EZFARM";
   
   Blynk.email("hkh9737@naver.com", "[{DEVICE_NAME}]Alarm _ From Blynk", mail_message);
+}
+
+void sendMillis(){
+
+  unsigned long cur_msec = millis();
+  Blynk.virtualWrite(V20, cur_msec / 1000);
+  Blynk.virtualWrite(V22, eeprom_reset_struct.reset_cnt);
 }
 
 void sendProbeSensor() {
@@ -576,11 +675,169 @@ float averageArray(int* arr, int number)
 }
 
 
-void setATCommand(char *command)
-{
+void softwareReset( uint8_t prescaller) {
+  Serial.println(">>>>>>>>>>>>>>>>>>>>>>>");
+  Serial.println(">>>>[Software Reset] From Arduino Mega 2560");
+  Serial.println(">>>>>>>>>>>>>>>>>>>>>>>");
 
+//  blynk_lcd.clear();
+//  blynk_lcd.print(0,0, "Software Reset");
+//  blynk_lcd.print(0,1, millis());
+
+  delay(100);
+  // start watchdog with the provided prescaller
+  wdt_enable(prescaller);
+
+  // wait for the prescaller time to expire
+  // without sending the reset signal by using
+//  the wdt_reset() method
+//  wdt_reset();
+  while(1) {};
 }
 
+
+//V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41
+BLYNK_WRITE(V26)
+{
+  int pin_num = 26;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+
+BLYNK_WRITE(V27)
+{
+  int pin_num = 27;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V28)
+{
+  int pin_num = 28;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V29)
+{
+  int pin_num = 29;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V30)
+{
+  int pin_num = 30;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V31)
+{
+  int pin_num = 31;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V44)
+{
+  int pin_num = 44;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V32)
+{
+  int pin_num = 32;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V33)
+{
+  int pin_num = 33;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V34)
+{
+  int pin_num = 34;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
 
 
 

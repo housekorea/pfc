@@ -101,7 +101,7 @@ BLYNK_CONNECTED() {
   //Blynk.syncAll();
 
   // Manual Sync without "Blnk.syncAll()" => It invoke "buffer overflow!"
-  int virtual_relay[] = {V38,V39,V40,V41,V42,V43,V44,V45,V46,V47,V48,V49,V50,V51,V52,V53};
+  int virtual_relay[] = {V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41};
   for(int i=0; i< sizeof(virtual_relay); i++)
   {
     Blynk.syncVirtual(virtual_relay[i]);
