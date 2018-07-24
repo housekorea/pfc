@@ -145,73 +145,11 @@ void setup() {
 
 void loop() {
 
-//   int i = 0;
-   
-//   for(i=0; i<5; i++)
-//   {
-//     digitalWrite(ch16_relay[15-(i-1)],HIGH);
-//     digitalWrite(ch16_relay[15-i],LOW);
-//     delay(3000);
-//   }
-//    digitalWrite(ch16_relay[15],LOW);
-
-
-
-//  int i =0;
-//  for(i=0;i<16; i++)
-//  {
-//    if(i > 0 )
-//    {
-//      digitalWrite(ch16_relay[i-1],HIGH);     
-//    }
-//    else if(i==0)
-//    {
-//      digitalWrite(ch16_relay[15],HIGH);
-//
-//    }
-//    digitalWrite(ch16_relay[i],LOW);
-//    delay(1500);
-//    
-//  }
-      // always on LED
-      digitalWrite(ch16_relay[LED],LOW);
-      digitalWrite(ch16_relay[AIR_FAN],LOW);
-      digitalWrite(ch16_relay[AIR_PUMP],LOW);
-
-//
-//      int ds18temp = getDS18temp(DS18_IN);
-//      float ec_cms = getEC(EC_IN, ds18temp);
-//      Serial.print(ds18temp);
-//      Serial.print('/');
-//      Serial.println(ec_cms);
-//      delay(1000);
-
- 
-
-//  //Reset codes inteval every 12 hours.//  //Reset codes inteval every 12 hours.
-//  if(millis() - reset_st_time >= 43200000)
-//  if(millis() - reset_st_time >= 1000 * 5)
-  // Reset codes interval every 20 minutes.
-//  if(millis() - reset_st_time >= 1200000)
-//  {
-//     Serial.println("RESET----");
-//     Serial.println(millis());
-//     delay(100);
-//     softwareReset(WDTO_60MS);
-//  }
-
   
   if (Serial.available() > 0 ) {
     String pfc_order;
     pfc_order = Serial.readString();
     const char *pfc_order_arr = pfc_order.c_str();
-//    
-//       size_t Size = strlen(str);
-//    return Size;
-//    
-//    Serial.println(strlen(pfc_order_arr));
-    
-
     
     Serial.print("order=");
     Serial.print(pfc_order);

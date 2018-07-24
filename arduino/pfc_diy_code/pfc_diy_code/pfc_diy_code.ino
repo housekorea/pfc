@@ -87,12 +87,11 @@ unsigned long arduino_smsec;
 WidgetLCD blynk_lcd(V21);
 
 //SD card
-File micro_sd_file;
+
 int sd_card_pin = 53;
 boolean is_sd_card_init = false;
-
-
-
+#define SD_LOG_FILE  "pfclog.txt"
+File sd_file;
 
 
 
@@ -133,7 +132,6 @@ BLYNK_APP_DISCONNECTED()
 
 void setup() {
   
-//  wdt_enable(WDTO_15MS);
 
   
   lcd.begin(16,2);
@@ -166,11 +164,15 @@ void setup() {
   {
     Serial.println("[SD Card]Initialization Failed"); 
     is_sd_card_init = true;
+    delay(50);
+    softwareReset(WDTO_60MS); 
   }
   else
   {
-    micro_sd_file = SD.open("pfc_log.txt",FILE_WRITE);
+    Serial.println("[SD Card]Initialization Success");
+ 
   }
+
 
 
   for(int i=0; i<16; i++)
@@ -216,9 +218,8 @@ void setup() {
   Blynk.begin(auth, wifi, ssid, pass);
 
   bl_timer.setInterval(3000L,sendMillis);
-  //bl_timer.setInterval(30000L, sendDhtSensor);
-  bl_timer.setInterval(10000L, sendDhtSensor);
-  bl_timer.setInterval(30*60*1000L,sendEmailReport);
+  bl_timer.setInterval(30000L, sendDhtSensor);
+  //bl_timer.setInterval(30*60*1000L,sendEmailReport);
   
   pinMode(3, OUTPUT);
 
@@ -245,6 +246,11 @@ void loop() {
     Serial.println(RESET_TIMEOUT);
     Serial.println(millis());
     Serial.println(arduino_smsec);
+    String log_data = String("[RESET START]") + String(millis());
+    writeSD(log_data);
+
+    delay(100);
+
     softwareReset(WDTO_60MS); 
   }
 
@@ -369,13 +375,24 @@ void sendMillis(){
   unsigned long cur_msec = millis();
   Blynk.virtualWrite(V20, cur_msec / 1000);
   Blynk.virtualWrite(V22, eeprom_reset_struct.reset_cnt);
+
+  // Current Millis() , EEPROM RESET COUNT , BLYNK Connected status
+//  Serial.print("Blynk Status : ");
+//  Serial.println(Blynk.connected());
+//  Serial.print("EEPROM COUNT :" );
+//  Serial.println(eeprom_reset_struct.reset_cnt);
+
+  String log_data = String("[SendMillis]") + String(millis()) + "," + String(eeprom_reset_struct.reset_cnt) + "," + String(Blynk.connected());
+  writeSD(log_data);
 }
 
 void sendProbeSensor() {
   // PH , EC
   // V6 = PH
   // V7 = EC
-  
+  String log_data = String("[SendProbeSensor]") + String(millis()) +String("__START");
+  writeSD(log_data);
+    
   float ph_val = getPH();
   float ds18_val = getDS18B20();
   float ec_val = getEC(ds18_val);
@@ -392,11 +409,17 @@ void sendProbeSensor() {
   Blynk.virtualWrite(V5, ds18_val);
   Blynk.virtualWrite(V6, ph_val);
   Blynk.virtualWrite(V7, ec_val);
+  log_data = String("[SendProbeSensor]") + String(millis()) +String("__END");
+  writeSD(log_data);
 
-  bl_timer.setTimeout(1000, LCD_display_connected);
+
+  //bl_timer.setTimeout(1000, LCD_display_connected);
 }
 
 void sendAirSensor() {
+  String log_data = String("[SendAirSensor]") + String(millis()) +String("__START");
+  writeSD(log_data);
+
   //Co2, LDR
   float co2_con = getCO2();
   unsigned int ldr_val = getLDR();
@@ -407,11 +430,17 @@ void sendAirSensor() {
   Blynk.virtualWrite(V3, co2_con);
   Blynk.virtualWrite(V4, ldr_val);
 
+  log_data = String("[SendAirSensor]") + String(millis()) +String("__END");
+  writeSD(log_data);
+
   bl_timer.setTimeout(1200, sendProbeSensor);
 }
 
 void sendDhtSensor() {
   //Humidity,Temperature,DS18B20
+  String log_data = String("[SendDhtSensor]") + String(millis()) +String("__START");
+  writeSD(log_data);
+
 
   float *dht_data = getDHT();
   Serial.print("Humidity: ");
@@ -422,7 +451,9 @@ void sendDhtSensor() {
 
   Blynk.virtualWrite(V1, dht_data[0]);
   Blynk.virtualWrite(V2, dht_data[1]);
-
+  log_data = String("[SendDhtSensor]") + String(millis()) + String("__END");
+  writeSD(log_data);
+  
   bl_timer.setTimeout(1200, sendAirSensor);
 
   //  Blynk.virtualWrite(V5,millis());
@@ -834,7 +865,26 @@ BLYNK_WRITE(V34)
   }
 }
 
+void writeSD(String log_data)
+{
 
+  
+  sd_file = SD.open(SD_LOG_FILE,FILE_WRITE);
+
+
+  if(sd_file)
+  {
+    sd_file.println(log_data);  
+    delay(10);
+    sd_file.close();
+  }
+  else
+  {
+    Serial.println("[SD CARD] Couldn't open SD Card");  
+  }
+  
+
+}
 
 
 
