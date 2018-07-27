@@ -1,5 +1,5 @@
-#define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-#define BLYNK_DEBUG_ALL Serial
+//#define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
+//#define BLYNK_DEBUG_ALL Serial
 #define BLYNK_MAX_SENDBYTES 1024 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
 #define BLYNK_MSG_LIMIT 200
@@ -409,6 +409,24 @@ void sendProbeSensor() {
   Blynk.virtualWrite(V5, ds18_val);
   Blynk.virtualWrite(V6, ph_val);
   Blynk.virtualWrite(V7, ec_val);
+
+
+  // WebHook with Blynk => It will throw to the Data Lake server
+  Blynk.virtualWrite(V50, 
+    "http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?water_temp=" + String(ds18_val)
+    + "&ph=" + String(ph_val)
+    + "&ec=" + String(ec_val)
+  );
+  Serial.println("http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?water_temp=" + String(ds18_val)
+    + "&ph=" + String(ph_val)
+    + "&ec=" + String(ec_val));
+
+    
+  
   log_data = String("[SendProbeSensor]") + String(millis()) +String("__END");
   writeSD(log_data);
 
@@ -429,6 +447,20 @@ void sendAirSensor() {
   Serial.println(co2_con);
   Blynk.virtualWrite(V3, co2_con);
   Blynk.virtualWrite(V4, ldr_val);
+
+  // WebHook with Blynk => It will throw to the Data Lake server
+  Blynk.virtualWrite(V51, 
+    "http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?co2=" + String(co2_con)
+    + "&ldr=" + String(ldr_val)
+  );
+  Serial.println("http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    "http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?co2=" + String(co2_con)
+    + "&ldr=" + String(ldr_val));
 
   log_data = String("[SendAirSensor]") + String(millis()) +String("__END");
   writeSD(log_data);
@@ -453,7 +485,20 @@ void sendDhtSensor() {
   Blynk.virtualWrite(V2, dht_data[1]);
   log_data = String("[SendDhtSensor]") + String(millis()) + String("__END");
   writeSD(log_data);
-  
+
+  // WebHook with Blynk => It will throw to the Data Lake server
+  Blynk.virtualWrite(V52, 
+    "http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?air_temp=" + String(dht_data[1])
+    + "&air_hum=" + String(ldht_data[0])
+  );
+  Serial.println("http://210.92.91.225:5000/v1/" 
+    "http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?air_temp=" + String(dht_data[1])
+    + "&air_hum=" + String(ldht_data[0]));
+      
   bl_timer.setTimeout(1200, sendAirSensor);
 
   //  Blynk.virtualWrite(V5,millis());

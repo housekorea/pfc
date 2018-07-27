@@ -1,5 +1,5 @@
 #define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-#define BLYNK_DEBUG_ALL Serial
+//#define BLYNK_DEBUG_ALL Serial
 #define BLYNK_MAX_SENDBYTES 1024 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
 #define BLYNK_MSG_LIMIT 200
@@ -15,6 +15,8 @@
 #include <EEPROMAnything.h>
 #include <SPI.h>
 #include <SD.h>
+#include <WiFi.h>
+
 
 
 //EEPROM Settings
@@ -71,8 +73,9 @@ LiquidCrystal lcd(12,13,8,9,10,11);
 char auth[] = "b1b31fe06fe445d18bbc01284dcaedbd"; // PFC_0002
 //Your WiFi credentials.
 //Set password to "" for open networks.
-char ssid[] = "FabLab_2.4G";
-char pass[] = "innovationpark";
+//char ssid[] = "FabLab_2.4G";
+char ssid[] = "inno-park";
+char pass[] = "";
 ESP8266 wifi(&ESP_SERIAL);
 
 BlynkTimer bl_timer;
@@ -98,6 +101,22 @@ boolean is_sd_card_init = false;
 
 
 BLYNK_CONNECTED() {
+  Serial.println("[Function Call]Called BLYNK_CONNECTED");
+
+
+//  IPAddress server(210,92,91,225);
+//  WiFiClient client;
+//   //if (client.connect(server,5000)){
+//   if (client.connect("horticulture.ezfarm.co.kr",5000)){
+//    Serial.println("210.92.91.225 connected");
+//    client.println("GET /v1/all_data HTTP/1.0");
+//    client.println();
+//   }
+//   else
+//   {
+//    Serial.println("210.92.91.225 not connected");
+//   }
+   
   // Request Blynk server to re-send latest values for all pins
   //Blynk.syncAll();
 
@@ -115,7 +134,7 @@ BLYNK_CONNECTED() {
   // Let's write your hardware uptime to Virtual Pin 2
   //  int value = millis() / 1000;
   //  Blynk.virtualWrite(V2, value);
-  Serial.println("[Function Call]Called BLYNK_CONNECTED");
+
   count_blynk_fail = (unsigned long)0;
 
 //  last_connect_start = millis(); 
@@ -149,7 +168,7 @@ void setup() {
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
-  RESET_TIMEOUT = (unsigned long)10 *  (unsigned long)60 * (unsigned long)1000; 
+  RESET_TIMEOUT = (unsigned long)30 *  (unsigned long)60 * (unsigned long)1000; 
   
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
@@ -166,6 +185,12 @@ void setup() {
   EEPROM_writeAnything(EEPROM_RESET_ADDR, eeprom_reset_struct);
   Serial.print("[EEPROM RESET CNT] on EEPROM MEMORY : ");
   Serial.println(eeprom_reset_struct.reset_cnt);
+
+
+
+
+
+ 
   
 //
 //  if (!SD.begin(sd_card_pin))
@@ -221,13 +246,13 @@ void setup() {
  
   Blynk.begin(auth, wifi, ssid, pass);
 
-  bl_timer.setInterval(3000L,sendMillis);
+  bl_timer.setInterval(5000L,sendMillis);
   //bl_timer.setInterval(30000L, sendDhtSensor);
   //bl_timer.setInterval(30*60*1000L,sendEmailReport);
   
   pinMode(3, OUTPUT);
 
-  
+
 }
 
 unsigned long last_msec = millis();
@@ -374,6 +399,27 @@ void sendMillis(){
   unsigned long cur_msec = millis();
   Blynk.virtualWrite(V20, cur_msec / 1000);
   Blynk.virtualWrite(V22, eeprom_reset_struct.reset_cnt);
+
+  float ds18_val = 25.32;
+  float ph_val = 6.2;
+  float ec_val = 3.6;
+
+  // WebHook 
+  Blynk.virtualWrite(V50, 
+    "http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?water_temp=" + String(ds18_val)
+    + "&ph=" + String(ph_val)
+    + "&ec=" + String(ec_val)
+  );
+  Serial.println("http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/"
+    + "?water_temp=" + String(ds18_val)
+    + "&ph=" + String(ph_val)
+    + "&ec=" + String(ec_val));
+
+
+
 }
 
 void sendProbeSensor() {
