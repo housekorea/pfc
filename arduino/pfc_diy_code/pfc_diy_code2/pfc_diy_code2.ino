@@ -1,5 +1,5 @@
 #define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-//#define BLYNK_DEBUG_ALL Serial
+#define BLYNK_DEBUG_ALL Serial
 #define BLYNK_MAX_SENDBYTES 1024 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
 #define BLYNK_MSG_LIMIT 200
@@ -73,9 +73,9 @@ LiquidCrystal lcd(12,13,8,9,10,11);
 char auth[] = "b1b31fe06fe445d18bbc01284dcaedbd"; // PFC_0002
 //Your WiFi credentials.
 //Set password to "" for open networks.
-//char ssid[] = "FabLab_2.4G";
-char ssid[] = "inno-park";
-char pass[] = "";
+char ssid[] = "FabLab_2.4G";
+char pass[] = "innovationpark";
+
 ESP8266 wifi(&ESP_SERIAL);
 
 BlynkTimer bl_timer;
@@ -84,7 +84,7 @@ float discon_msec = 0.0;
 int last_connect_start = 0;
 
 //Software Reset 
-unsigned long RESET_TIMEOUT; // Every 10 min.
+unsigned long RESET_TIMEOUT; // Every 300 min.
 unsigned long arduino_smsec;
 WidgetLCD blynk_lcd(V21);
 
@@ -168,7 +168,7 @@ void setup() {
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
-  RESET_TIMEOUT = (unsigned long)30 *  (unsigned long)60 * (unsigned long)1000; 
+  RESET_TIMEOUT = (unsigned long)300 *  (unsigned long)60 * (unsigned long)1000; 
   
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
@@ -404,19 +404,19 @@ void sendMillis(){
   float ph_val = 6.2;
   float ec_val = 3.6;
 
-  // WebHook 
-  Blynk.virtualWrite(V50, 
-    "http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    + "?water_temp=" + String(ds18_val)
-    + "&ph=" + String(ph_val)
-    + "&ec=" + String(ec_val)
-  );
-  Serial.println("http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    + "?water_temp=" + String(ds18_val)
-    + "&ph=" + String(ph_val)
-    + "&ec=" + String(ec_val));
+  // WebHook with Blynk => It will throw to the Data Lake server
+//  Blynk.virtualWrite(V50, 
+//    "http://210.92.91.225:5000/v1/" 
+//    + String(auth) +"/insert/"
+//    + "?water_temp=" + String(ds18_val)
+//    + "&ph=" + String(ph_val)
+//    + "&ec=" + String(ec_val)
+//  );
+//  Serial.println("http://210.92.91.225:5000/v1/" 
+//    + String(auth) +"/insert/"
+//    + "?water_temp=" + String(ds18_val)
+//    + "&ph=" + String(ph_val)
+//    + "&ec=" + String(ec_val));
 
 
 
@@ -504,21 +504,43 @@ float getDS18B20()
 {
   OneWire oneWire(DS18_IN);
   DallasTemperature sensors(&oneWire);
-  float temp = 0 ;
-  float temp_arr[5] = {0.0};
+  float temp = 0;
+  float temp_arr[10] = {0.0};
   float min_v = 0;
   float max_v = 0;
   float amount = 0;
-  int max_iter = 5;
-  sensors.requestTemperatures();
-  temp = sensors.getTempCByIndex(0);
-  min_v = temp;
-  max_v = temp;
+  int max_iter = 10;
+
+  for(int in_i = 0; in_i < 20; in_i++)
+  {
+    sensors.requestTemperatures();
+    temp = sensors.getTempCByIndex(0);
+    if(temp >= 60 || temp <= -50)
+    {
+      continue;
+    }
+    else
+    {
+      min_v = temp;
+      max_v = temp;
+      break;
+    }
+  }
 
   for (int in_i = 0; in_i < max_iter; in_i++)
   {
     sensors.requestTemperatures();
     temp = sensors.getTempCByIndex(0);
+    
+    if(temp >= 60 || temp <= -50)
+    {
+      in_i--;
+//      Serial.println("Abnomaly temp Skipped : " + String(temp));
+      continue;
+    }
+  
+//    Serial.println("[" + String(in_i) + "]" + temp);
+
 
     if (temp < min_v )
     {

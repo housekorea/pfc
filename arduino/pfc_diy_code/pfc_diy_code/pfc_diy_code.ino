@@ -1,8 +1,8 @@
-//#define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
+#define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
 //#define BLYNK_DEBUG_ALL Serial
-#define BLYNK_MAX_SENDBYTES 1024 // set Limit Blynk Symbol Number(include Subject + body)
+#define BLYNK_MAX_SENDBYTES 2048 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
-#define BLYNK_MSG_LIMIT 200
+#define BLYNK_MSG_LIMIT 300
 #include <DHT.h>
 #include <OneWire.h>
 #include <Wire.h>
@@ -15,6 +15,8 @@
 #include <EEPROMAnything.h>
 #include <SPI.h>
 #include <SD.h>
+
+#define WRITESD_DEBUG 0
 
 //EEPROM Settings
 #define EEPROM_RESET_ADDR 0x58
@@ -82,7 +84,7 @@ float discon_msec = 0.0;
 int last_connect_start = 0;
 
 //Software Reset 
-unsigned long RESET_TIMEOUT; // Every 10 min.
+unsigned long RESET_TIMEOUT; // Every 20 min.
 unsigned long arduino_smsec;
 WidgetLCD blynk_lcd(V21);
 
@@ -98,13 +100,17 @@ File sd_file;
 BLYNK_CONNECTED() {
   // Request Blynk server to re-send latest values for all pins
   //Blynk.syncAll();
+  Serial.println("[Function Call]Called BLYNK_CONNECTED");
+  count_blynk_fail = (unsigned long)0;
 
   // Manual Sync without "Blnk.syncAll()" => It invoke "buffer overflow!"
   int virtual_relay[] = {V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41};
-  for(int i=0; i< sizeof(virtual_relay); i++)
+  for(int i=0; i< (sizeof(virtual_relay) / sizeof(int)); i++)
   {
+//    Serial.println("LENGTH(virtual_realy)" + String(sizeof(virtual_relay)/ sizeof(int)));
+//    Serial.println("Sync : " + String(virtual_relay[i]));
     Blynk.syncVirtual(virtual_relay[i]);
-    delay(10);
+    delay(30);
   }
 
   // You can also update individual virtual pins like this:
@@ -113,8 +119,9 @@ BLYNK_CONNECTED() {
   // Let's write your hardware uptime to Virtual Pin 2
   //  int value = millis() / 1000;
   //  Blynk.virtualWrite(V2, value);
-  Serial.println("[Function Call]Called BLYNK_CONNECTED");
-  count_blynk_fail = (unsigned long)0;
+
+  String log_data = String("[BLYNK Connected]") + String(millis());
+  writeSD(log_data);
 
 //  last_connect_start = millis(); 
 //  bl_timer.setTimeout(1000L,LCD_display_connected);
@@ -134,18 +141,20 @@ void setup() {
   
 
   
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("[PFC]");
-  lcd.setCursor(0,1);
-  lcd.print("SetUp Now.....");
+//  lcd.begin(16,2);
+//  lcd.setCursor(0,0);
+//  lcd.print("[PFC]");
+//  lcd.setCursor(0,1);
+//  lcd.print("SetUp Now.....");
+
+
   arduino_smsec = millis();
 
   Serial.begin(9600);
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
-  RESET_TIMEOUT = (unsigned long)10 *  (unsigned long)60 * (unsigned long)1000; 
+  RESET_TIMEOUT = (unsigned long)30 *  (unsigned long)60 * (unsigned long)1000; 
   
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
@@ -163,12 +172,16 @@ void setup() {
   if (!SD.begin(sd_card_pin))
   {
     Serial.println("[SD Card]Initialization Failed"); 
-    is_sd_card_init = true;
-    delay(50);
-    softwareReset(WDTO_60MS); 
   }
   else
   {
+//    sd_file = SD.open(SD_LOG_FILE);
+//
+//    while (sd_file.available()) {
+//      Serial.write(sd_file.read());
+//    }
+//    String log_data = ">>>>>>>>>>>>>>>> Starting No." + String(eeprom_reset_struct.reset_cnt);
+//    writeSD(log_data);
     Serial.println("[SD Card]Initialization Success");
  
   }
@@ -180,46 +193,14 @@ void setup() {
     pinMode(ch16_relay[i],OUTPUT);
   }
 
-//  int ri = 0;
-//  while(true)
-//  {
-//    digitalWrite(ch16_relay[ri],HIGH);
-//    if(ri==0)
-//    {
-//      digitalWrite(ch16_relay[15],LOW);
-//    }
-//    else
-//    {
-//      digitalWrite(ch16_relay[ri-1],LOW);
-//    }
-//    if(ri++ == 16)
-//    {
-//      ri=0;
-//    }
-//    delay(200);
-//  }
 
-//  for(int i=0; i<16;i++)
-//  {
-//    digitalWrite(ch16_relay[i],HIGH);
-//    if(i==0)
-//    {
-//      digitalWrite(ch16_relay[15],LOW); 
-//    }
-//    else
-//    {
-//      digitalWrite(ch16_relay[i-1],LOW);      
-//    }
-//    delay(50);
-//  }
-
-
- 
+  // Blynk Start  
   Blynk.begin(auth, wifi, ssid, pass);
 
+  // Blynk Interval Event Attach
   bl_timer.setInterval(3000L,sendMillis);
   bl_timer.setInterval(30000L, sendDhtSensor);
-  //bl_timer.setInterval(30*60*1000L,sendEmailReport);
+  bl_timer.setInterval(30*60*1000L,sendEmailReport);
   
   pinMode(3, OUTPUT);
 
@@ -227,6 +208,7 @@ void setup() {
 }
 
 unsigned long last_msec = millis();
+
 void loop() {
   //  Serial.println(BUFFER_SIZE);
 
@@ -239,6 +221,15 @@ void loop() {
 //  }
 
 
+  // Time Interval writing SD Card log
+//  if(millis() - last_msec > 10000)
+//  {
+//    
+//    String log_data = String("[millis]") + String(millis());
+//    Serial.println(log_data);
+//    writeSD(log_data);
+//    last_msec = millis();
+//  }
 
 
   if(millis() - arduino_smsec > RESET_TIMEOUT)
@@ -370,6 +361,9 @@ void sendEmailReport() {
   Blynk.email("hkh9737@naver.com", "[{DEVICE_NAME}]Alarm _ From Blynk", mail_message);
 }
 
+
+
+
 void sendMillis(){
 
   unsigned long cur_msec = millis();
@@ -394,9 +388,11 @@ void sendProbeSensor() {
   writeSD(log_data);
     
   float ph_val = getPH();
+  writeSD("getPH() complete.");
   float ds18_val = getDS18B20();
+  writeSD("getDS18B20() complete.");
   float ec_val = getEC(ds18_val);
-  
+  writeSD("getEC() complete.");
 
   Serial.print("DS18B20: " );
   Serial.println(ds18_val);
@@ -419,7 +415,7 @@ void sendProbeSensor() {
     + "&ph=" + String(ph_val)
     + "&ec=" + String(ec_val)
   );
-  Serial.println("http://210.92.91.225:5000/v1/" 
+  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?water_temp=" + String(ds18_val)
     + "&ph=" + String(ph_val)
@@ -440,7 +436,9 @@ void sendAirSensor() {
 
   //Co2, LDR
   float co2_con = getCO2();
+  writeSD("getCo2() complete.");
   unsigned int ldr_val = getLDR();
+  writeSD("geLDR() complete.");
   Serial.print("Ligth Density Resistor : ");
   Serial.println(ldr_val);
   Serial.print("Co2 : ");
@@ -455,10 +453,8 @@ void sendAirSensor() {
     + "?co2=" + String(co2_con)
     + "&ldr=" + String(ldr_val)
   );
-  Serial.println("http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    "http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
+  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
+    + String(auth) +"/insert/" 
     + "?co2=" + String(co2_con)
     + "&ldr=" + String(ldr_val));
 
@@ -475,6 +471,7 @@ void sendDhtSensor() {
 
 
   float *dht_data = getDHT();
+  writeSD("getDHT complete.");
   Serial.print("Humidity: ");
   Serial.println(dht_data[0]);
   Serial.print("Temperature: ");
@@ -491,13 +488,12 @@ void sendDhtSensor() {
     "http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?air_temp=" + String(dht_data[1])
-    + "&air_hum=" + String(ldht_data[0])
+    + "&air_hum=" + String(dht_data[0])
   );
-  Serial.println("http://210.92.91.225:5000/v1/" 
-    "http://210.92.91.225:5000/v1/" 
+  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?air_temp=" + String(dht_data[1])
-    + "&air_hum=" + String(ldht_data[0]));
+    + "&air_hum=" + String(dht_data[0]));
       
   bl_timer.setTimeout(1200, sendAirSensor);
 
@@ -529,21 +525,43 @@ float getDS18B20()
 {
   OneWire oneWire(DS18_IN);
   DallasTemperature sensors(&oneWire);
-  float temp = 0 ;
-  float temp_arr[5] = {0.0};
+  float temp = 0;
+  float temp_arr[10] = {0.0};
   float min_v = 0;
   float max_v = 0;
   float amount = 0;
-  int max_iter = 5;
-  sensors.requestTemperatures();
-  temp = sensors.getTempCByIndex(0);
-  min_v = temp;
-  max_v = temp;
+  int max_iter = 10;
+
+  for(int in_i = 0; in_i < 20; in_i++)
+  {
+    sensors.requestTemperatures();
+    temp = sensors.getTempCByIndex(0);
+    if(temp >= 60 || temp <= -50)
+    {
+      continue;
+    }
+    else
+    {
+      min_v = temp;
+      max_v = temp;
+      break;
+    }
+  }
 
   for (int in_i = 0; in_i < max_iter; in_i++)
   {
     sensors.requestTemperatures();
     temp = sensors.getTempCByIndex(0);
+    
+    if(temp >= 60 || temp <= -50)
+    {
+      in_i--;
+//      Serial.println("Abnomaly temp Skipped : " + String(temp));
+      continue;
+    }
+  
+//    Serial.println("[" + String(in_i) + "]" + temp);
+
 
     if (temp < min_v )
     {
@@ -912,6 +930,10 @@ BLYNK_WRITE(V34)
 
 void writeSD(String log_data)
 {
+  if( ! WRITESD_DEBUG ) 
+  {
+    return; 
+  }
 
   
   sd_file = SD.open(SD_LOG_FILE,FILE_WRITE);
