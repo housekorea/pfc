@@ -44,7 +44,7 @@ class BlynkTransportShieldEsp8266
         if (mux_id != BLYNK_ESP8266_MUX) {
             return;
         }
-        //BLYNK_LOG4("Got: ", len, ", Free: ", buffer.free());
+        // BLYNK_LOG4("Got: ", len, ", Free: ", buffer.free());
         if (buffer.free() < len) {
           BLYNK_LOG1(BLYNK_F("Buffer overflow"));
           return;
@@ -142,6 +142,7 @@ public:
         }*/
         if (!wifi->kick()) {
              BLYNK_LOG1(BLYNK_F("ESP is not responding"));
+             wdt_enable(WDTO_1S);
              //TODO: BLYNK_LOG_TROUBLE(BLYNK_F("esp8266-not-responding"));
              return false;
         }
@@ -163,6 +164,7 @@ public:
             BLYNK_LOG1(my_ip);
         } else {
             BLYNK_LOG1(BLYNK_F("Failed to connect WiFi"));
+            wdt_enable(WDTO_1S);
             return false;
         }
         BLYNK_LOG1(BLYNK_F("Connected to WiFi"));
@@ -189,13 +191,13 @@ public:
     {
         config(esp8266, auth, domain, port);
         connectWiFi(ssid, pass);
-//        while(this->connect() != true) {} //Original
-        while(this->connect() != true) {
-            BLYNK_LOG1(BLYNK_F("[connectWifi Fail] It would try softwarereset"));
-            delay(1000);
-            wdt_enable(WDTO_60MS);
-            while(1) {};
-        }
+       while(this->connect() != true) {} //Original
+       // while(this->connect() != true) {
+       //      BLYNK_LOG1(BLYNK_F("[connectWifi Fail] It would try softwarereset"));
+       //      delay(1000);
+       //      wdt_enable(WDTO_60MS);
+       //      while(1) {};
+       //  }
     }
 
 private:
