@@ -1,5 +1,5 @@
 #define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-#define BLYNK_DEBUG_ALL Serial
+//#define BLYNK_DEBUG_ALL Serial
 #define BLYNK_MAX_SENDBYTES 2048 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
 #define BLYNK_MSG_LIMIT 300
@@ -188,21 +188,34 @@ void setup() {
 
 
 
-  for(int i=0; i<16; i++)
+//  for(int i=0; i<16; i++)
+//  {
+//    pinMode(ch16_relay[i],OUTPUT);
+//  }
+
+
+  // Blynk Start(Automatic)
+//  Blynk.begin(auth, wifi, ssid, pass);
+  // Blynk Start(Manually)
+  Blynk.config(wifi, auth,BLYNK_DEFAULT_DOMAIN,BLYNK_DEFAULT_PORT);  // Attempt general connection to network
+  if (Blynk.connectWiFi(ssid, pass)) {  // If connected to WiFi...
+    Blynk.connect();  // ...connect to Server
+  }
+  else
   {
-    pinMode(ch16_relay[i],OUTPUT);
+    Serial.println("[Blynk.connecteWiFi(ssid,pass)] Failed");
+    delay(5000);
+    wdt_enable(WDTO_1S);
   }
 
 
-  // Blynk Start  
-  Blynk.begin(auth, wifi, ssid, pass);
-
   // Blynk Interval Event Attach
+  bl_timer.setInterval(5000L, checkBlynk);
   bl_timer.setInterval(3000L,sendMillis);
   bl_timer.setInterval(30000L, sendDhtSensor);
-  bl_timer.setInterval(30*60*1000L,sendEmailReport);
-  bl_timer.setInterval(5000L, checkBlynk);
-  
+//  bl_timer.setInterval(60*1000L,sendEmailReport);
+
+  Serial.println("[Setup] Blynk Timer setted");
   pinMode(3, OUTPUT);
 
   
@@ -250,11 +263,11 @@ void loop() {
 //  }
 
   
-//  if(millis() - last_msec > 10000)
-//  {
-//    Serial.println(millis() - last_msec / 1000);
-//    last_msec =millis();
-//  }
+  if(millis() - last_msec > 30000)
+  {
+    Serial.println("[Elapsed Time in Loop()]" +  String(millis() - last_msec / 1000));
+    last_msec =millis();
+  }
 
 //  if(!Blynk.connected())
 //  {
@@ -351,6 +364,7 @@ void sendDiscon(){
 }
 
 void sendEmailReport() {
+  Serial.println("[SendEMailReport] Start");
   float *dht_data = getDHT();
   float ds18_val = getDS18B20();
   float co2_con = getCO2();
@@ -361,6 +375,7 @@ void sendEmailReport() {
   mail_message +="\r\n\r\n From PFC on EZFARM";
   
   Blynk.email("hkh9737@naver.com", "[{DEVICE_NAME}]Alarm _ From Blynk", mail_message);
+  Serial.println("[SendEMailReport] End");
 }
 
 
@@ -956,6 +971,7 @@ void writeSD(String log_data)
 }
 
 void checkBlynk(){  
+// Serial.println("[CheckBlynk()]" + String(millis()));
  if(!Blynk.connected()){
     Serial.println("[CheckBlynk()] Not connected to Blynk server"); 
     wdt_enable(WDTO_1S);
