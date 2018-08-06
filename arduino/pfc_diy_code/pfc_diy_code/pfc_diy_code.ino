@@ -1,5 +1,5 @@
 #define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-//#define BLYNK_DEBUG_ALL Serial
+#define BLYNK_DEBUG_ALL Serial
 #define BLYNK_MAX_SENDBYTES 2048 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
 #define BLYNK_MSG_LIMIT 300
@@ -84,7 +84,7 @@ float discon_msec = 0.0;
 int last_connect_start = 0;
 
 //Software Reset 
-unsigned long RESET_TIMEOUT; // Every 20 min.
+unsigned long RESET_TIMEOUT; // Every 10 min.
 unsigned long arduino_smsec;
 WidgetLCD blynk_lcd(V21);
 
@@ -110,7 +110,7 @@ BLYNK_CONNECTED() {
 //    Serial.println("LENGTH(virtual_realy)" + String(sizeof(virtual_relay)/ sizeof(int)));
 //    Serial.println("Sync : " + String(virtual_relay[i]));
     Blynk.syncVirtual(virtual_relay[i]);
-    delay(30);
+    delay(10);
   }
 
   // You can also update individual virtual pins like this:
@@ -154,7 +154,7 @@ void setup() {
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
-  RESET_TIMEOUT = (unsigned long)30 *  (unsigned long)60 * (unsigned long)1000; 
+  RESET_TIMEOUT = (unsigned long)10 *  (unsigned long)60 * (unsigned long)1000; 
   
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
@@ -201,6 +201,7 @@ void setup() {
   bl_timer.setInterval(3000L,sendMillis);
   bl_timer.setInterval(30000L, sendDhtSensor);
   bl_timer.setInterval(30*60*1000L,sendEmailReport);
+  bl_timer.setInterval(5000L, checkBlynk);
   
   pinMode(3, OUTPUT);
 
@@ -210,6 +211,11 @@ void setup() {
 unsigned long last_msec = millis();
 
 void loop() {
+    Blynk.run();
+    bl_timer.run();
+ 
+  
+  
   //  Serial.println(BUFFER_SIZE);
 
 
@@ -232,21 +238,17 @@ void loop() {
 //  }
 
 
-  if(millis() - arduino_smsec > RESET_TIMEOUT)
-  {
-    Serial.println(RESET_TIMEOUT);
-    Serial.println(millis());
-    Serial.println(arduino_smsec);
-    String log_data = String("[RESET START]") + String(millis());
-    writeSD(log_data);
+//  if(millis() - arduino_smsec > RESET_TIMEOUT)
+//  {
+//    Serial.println(RESET_TIMEOUT);
+//    Serial.println(millis());
+//    Serial.println(arduino_smsec);
+//    String log_data = String("[RESET START]") + String(millis());
+//    writeSD(log_data);
+//    delay(100);
+//    softwareReset(WDTO_60MS); 
+//  }
 
-    delay(100);
-
-    softwareReset(WDTO_60MS); 
-  }
-
-    Blynk.run();
-    bl_timer.run();
   
 //  if(millis() - last_msec > 10000)
 //  {
@@ -953,5 +955,11 @@ void writeSD(String log_data)
 
 }
 
+void checkBlynk(){  
+ if(!Blynk.connected()){
+    Serial.println("[CheckBlynk()] Not connected to Blynk server"); 
+    wdt_enable(WDTO_1S);
+  }
+} 
 
 
