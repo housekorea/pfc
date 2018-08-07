@@ -1,5 +1,5 @@
 #define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-//#define BLYNK_DEBUG_ALL Serial
+#define BLYNK_DEBUG_ALL Serial
 #define BLYNK_MAX_SENDBYTES 2048 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
 #define BLYNK_MSG_LIMIT 300
@@ -16,7 +16,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-#define WRITESD_DEBUG 0
+#define WRITESD_DEBUG 1
 
 //EEPROM Settings
 #define EEPROM_RESET_ADDR 0x58
@@ -92,7 +92,7 @@ WidgetLCD blynk_lcd(V21);
 
 int sd_card_pin = 53;
 boolean is_sd_card_init = false;
-#define SD_LOG_FILE  "pfclog.txt"
+#define SD_LOG_FILE  "blynklog.log"
 File sd_file;
 
 
@@ -154,7 +154,7 @@ void setup() {
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
-  RESET_TIMEOUT = (unsigned long)10 *  (unsigned long)60 * (unsigned long)1000; 
+  RESET_TIMEOUT = (unsigned long)120 *  (unsigned long)60 * (unsigned long)1000; 
   
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
@@ -180,7 +180,7 @@ void setup() {
 //    while (sd_file.available()) {
 //      Serial.write(sd_file.read());
 //    }
-//    String log_data = ">>>>>>>>>>>>>>>> Starting No." + String(eeprom_reset_struct.reset_cnt);
+    String log_data = ">>>>>>>>>>>>>>>> Starting No." + String(eeprom_reset_struct.reset_cnt);
 //    writeSD(log_data);
     Serial.println("[SD Card]Initialization Success");
  
@@ -197,6 +197,7 @@ void setup() {
   // Blynk Start(Automatic)
 //  Blynk.begin(auth, wifi, ssid, pass);
   // Blynk Start(Manually)
+  wifi.setDHCP(1,1,1);
   Blynk.config(wifi, auth,BLYNK_DEFAULT_DOMAIN,BLYNK_DEFAULT_PORT);  // Attempt general connection to network
   if (Blynk.connectWiFi(ssid, pass)) {  // If connected to WiFi...
     Blynk.connect();  // ...connect to Server
@@ -212,7 +213,7 @@ void setup() {
   // Blynk Interval Event Attach
   bl_timer.setInterval(5000L, checkBlynk);
   bl_timer.setInterval(3000L,sendMillis);
-  bl_timer.setInterval(30000L, sendDhtSensor);
+  bl_timer.setInterval(10000L, sendDhtSensor);
 //  bl_timer.setInterval(60*1000L,sendEmailReport);
 
   Serial.println("[Setup] Blynk Timer setted");
@@ -222,10 +223,31 @@ void setup() {
 }
 
 unsigned long last_msec = millis();
+unsigned int ReCnctFlag = 0;
+unsigned int ReCnctCount = 0;
 
 void loop() {
-    Blynk.run();
     bl_timer.run();
+
+    if(Blynk.connected()){
+      Blynk.run();
+    }
+    else if (ReCnctFlag == 0 ){
+      ReCnctFlag = 1;
+      Serial.println("Starting reconnection timer in 30 seconds...");
+      bl_timer.setTimeout(30000L, [](){
+        ReCnctFlag = 0;
+        ReCnctCount++;
+        Serial.print("Attempting reconne ction #");
+        Serial.println(ReCnctCount);
+        wifi.setDHCP(1,1,1);
+        Blynk.config(wifi, auth, BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT);
+        Blynk.connect();
+        if(Blynk.connectWiFi(ssid,pass)){
+          Blynk.connect();
+        }
+      });
+    }
  
   
   
@@ -251,16 +273,16 @@ void loop() {
 //  }
 
 
-//  if(millis() - arduino_smsec > RESET_TIMEOUT)
-//  {
-//    Serial.println(RESET_TIMEOUT);
-//    Serial.println(millis());
-//    Serial.println(arduino_smsec);
-//    String log_data = String("[RESET START]") + String(millis());
+  if(millis() - arduino_smsec > RESET_TIMEOUT)
+  {
+    Serial.println(RESET_TIMEOUT);
+    Serial.println(millis());
+    Serial.println(arduino_smsec);
+    String log_data = String("[RESET START]") + String(millis());
 //    writeSD(log_data);
-//    delay(100);
-//    softwareReset(WDTO_60MS); 
-//  }
+    delay(100);
+    softwareReset(WDTO_60MS); 
+  }
 
   
   if(millis() - last_msec > 30000)
@@ -423,18 +445,15 @@ void sendProbeSensor() {
   Blynk.virtualWrite(V6, ph_val);
   Blynk.virtualWrite(V7, ec_val);
 
-
   // WebHook with Blynk => It will throw to the Data Lake server
   Blynk.virtualWrite(V50, 
-    "http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    + "?water_temp=" + String(ds18_val)
+    "http://210.92.91.225:5000/v1/" + String(auth) +"/insert/" + "?wt=" + String(ds18_val)
     + "&ph=" + String(ph_val)
     + "&ec=" + String(ec_val)
   );
   Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
-    + "?water_temp=" + String(ds18_val)
+    + "?wt=" + String(ds18_val)
     + "&ph=" + String(ph_val)
     + "&ec=" + String(ec_val));
 
@@ -478,7 +497,7 @@ void sendAirSensor() {
   log_data = String("[SendAirSensor]") + String(millis()) +String("__END");
   writeSD(log_data);
 
-  bl_timer.setTimeout(1200, sendProbeSensor);
+  bl_timer.setTimeout(3000L, sendProbeSensor);
 }
 
 void sendDhtSensor() {
@@ -497,22 +516,25 @@ void sendDhtSensor() {
 
   Blynk.virtualWrite(V1, dht_data[0]);
   Blynk.virtualWrite(V2, dht_data[1]);
-  log_data = String("[SendDhtSensor]") + String(millis()) + String("__END");
-  writeSD(log_data);
+
+
 
   // WebHook with Blynk => It will throw to the Data Lake server
   Blynk.virtualWrite(V52, 
     "http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
-    + "?air_temp=" + String(dht_data[1])
-    + "&air_hum=" + String(dht_data[0])
+    + "?at=" + String(dht_data[1])
+    + "&ah=" + String(dht_data[0])
   );
   Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
-    + "?air_temp=" + String(dht_data[1])
-    + "&air_hum=" + String(dht_data[0]));
-      
-  bl_timer.setTimeout(1200, sendAirSensor);
+    + "?at=" + String(dht_data[1])
+    + "&ah=" + String(dht_data[0]));
+
+  log_data = String("[SendDhtSensor]") + String(millis()) + String("__END");
+  writeSD(log_data);
+
+  bl_timer.setTimeout(3000L, sendAirSensor);
 
   //  Blynk.virtualWrite(V5,millis());
 }
