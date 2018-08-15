@@ -1,5 +1,5 @@
 #define BLYNK_PRINT Serial // Blynk Print Serial. This "define" should place on top of sketch
-#define BLYNK_DEBUG_ALL Serial
+//#define BLYNK_DEBUG_ALL Serial
 #define BLYNK_MAX_SENDBYTES 2048 // set Limit Blynk Symbol Number(include Subject + body)
 #define BLYNK_MAX_READBYTES  4096
 #define BLYNK_MSG_LIMIT 300
@@ -16,7 +16,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-#define WRITESD_DEBUG 1
+#define WRITESD_DEBUG 0
 
 //EEPROM Settings
 #define EEPROM_RESET_ADDR 0x58
@@ -154,7 +154,7 @@ void setup() {
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
-  RESET_TIMEOUT = (unsigned long)120 *  (unsigned long)60 * (unsigned long)1000; 
+  RESET_TIMEOUT = (unsigned long)720 *  (unsigned long)60 * (unsigned long)1000; 
   
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
@@ -213,7 +213,7 @@ void setup() {
   // Blynk Interval Event Attach
   bl_timer.setInterval(5000L, checkBlynk);
   bl_timer.setInterval(3000L,sendMillis);
-  bl_timer.setInterval(10000L, sendDhtSensor);
+  bl_timer.setInterval(60000L, sendDhtSensor);
 //  bl_timer.setInterval(60*1000L,sendEmailReport);
 
   Serial.println("[Setup] Blynk Timer setted");
@@ -285,7 +285,7 @@ void loop() {
   }
 
   
-  if(millis() - last_msec > 30000)
+  if(millis() - last_msec > 60000)
   {
     Serial.println("[Elapsed Time in Loop()]" +  String(millis() - last_msec / 1000));
     last_msec =millis();

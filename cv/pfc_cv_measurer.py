@@ -126,6 +126,7 @@ class pfc_cv_measurer:
 		print("Extracted COLOR code : BGR ")
 		print(center)
 		print(np.bincount(label.flatten()))
+		
 
 		center = np.uint8(center)
 		process_image = center[label.flatten()]
