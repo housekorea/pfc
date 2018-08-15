@@ -157,6 +157,7 @@ public:
         }
         if (!wifi->setOprToStation()) {
             BLYNK_LOG1(BLYNK_F("Failed to set STA mode"));
+            wdt_enable(WDTO_1S);
             return false;
         }
         if (wifi->joinAP(ssid, pass)) {
