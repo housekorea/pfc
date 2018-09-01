@@ -67,11 +67,12 @@ LiquidCrystal lcd(12,13,8,9,10,11);
 
 //You should get Auth Token in the Blynk App.
 //Go to the Project Settings (nut icon).
-char auth[] = "c020b212b460458892401fc34783e43d"; // PFC_0002
+char auth[] = "3fefadea3529476c80af5077c9e3df2d"; // PFC_0002
 //char auth[] = "997ce32260204bbfb7f0fed67d72be7d";
 //Your WiFi credentials.
 //Set password to "" for open networks.
 char ssid[] = "FabLab_2.4G";
+//char ssid[] = "inno-park";
 char pass[] = "innovationpark";
 
 //char ssid[] = "lcp";
@@ -966,6 +967,102 @@ BLYNK_WRITE(V34)
     digitalWrite(pin_num,LOW);    
   }
 }
+BLYNK_WRITE(V35)
+{
+  int pin_num = 35;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}BLYNK_WRITE(V36)
+{
+  int pin_num = 36;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V37)
+{
+  int pin_num = 37;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}BLYNK_WRITE(V38)
+{
+  int pin_num = 38;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V39)
+{
+  int pin_num = 39;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}BLYNK_WRITE(V40)
+{
+  int pin_num = 40;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V41)
+{
+  int pin_num = 41;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+
 
 void writeSD(String log_data)
 {

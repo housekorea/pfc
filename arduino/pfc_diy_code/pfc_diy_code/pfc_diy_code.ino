@@ -16,7 +16,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-#define WRITESD_DEBUG 0
+#define WRITESD_DEBUG 1
 
 //EEPROM Settings
 #define EEPROM_RESET_ADDR 0x58
@@ -279,15 +279,17 @@ void loop() {
     Serial.println(millis());
     Serial.println(arduino_smsec);
     String log_data = String("[RESET START]") + String(millis());
-//    writeSD(log_data);
+    writeSD(log_data);
     delay(100);
     softwareReset(WDTO_60MS); 
   }
 
   
-  if(millis() - last_msec > 60000)
+  if(millis() - last_msec > 600000)
   {
     Serial.println("[Elapsed Time in Loop()]" +  String(millis() - last_msec / 1000));
+    String log_data = String("[Elapsed_time]") + String(millis() - last_msec / 1000);
+    writeSD(log_data);
     last_msec =millis();
   }
 
@@ -451,6 +453,7 @@ void sendProbeSensor() {
     + "&ph=" + String(ph_val)
     + "&ec=" + String(ec_val)
   );
+  
   Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?wt=" + String(ds18_val)
