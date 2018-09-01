@@ -1,9 +1,14 @@
 # PFC(Personal Food Computer) by KgwangHee Han.
 
 
-![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/pfc_v3.jpg) 
-
-
+<p align="center">
+  <img width="400" src="https://github.com/housekorea/pfc/blob/master/doc/pfc_v2_diykit.jpeg">
+  <h3 align="center">Recent PFC DIY KIT(V2)</h3>
+</p> 
+<p align="center">
+  <img width="400" src="https://github.com/housekorea/pfc/blob/master/doc/pfc_v3.jpg">  
+  <h3 align="center">Original PFC V1</h3>
+</p>
 
 This repository's purpose is to distribute others who have interest in building there own PFC. It was first developed by MIT Media Lab Open Inititiative. Thanks to their efforts, I can start this exciting project(Along with my belief that we also have a possibility to beacome #NerdFarmer!). If you want to make your own PFC, you can absolutely fork this repsitory.(I hope that this repository is helpful!) 
 
@@ -51,6 +56,10 @@ This repository have four directories.(It is still in development and I will sum
 
 ### 3. Computer Vision.
 
+![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/2018-08-16_22:20:01_13_COL_KCL_CV.jpg) 
+![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/2018-08-16_22:20:01_13_TRANSITION_IMAGES.jpg) 
+
+
  I have great expectations about the role of **"Computer Vision"**, it gives an opportunity on various applications ranging from recognizing symptoms for disease to measuring crops size or status. At this time I used openCV3 library with python2 programing language. You can check it in my sourcecodes that image processing uses OpenCV library to detect plant and measure their size. Also our openAG forum opened a specific thread to discuss about how to make this image processing plays important role of our PFC model. You can check various and great ideas of usecases of "Computer Vision" by visiting our therad 
  Probably, on my PFC's computer vision headed to the next stage for Machine Learning more specialize Image Processing. I hope that a number of smart guys joined this Computer Vision thread, and share their knowledge and experience through cooperation.
 
@@ -74,6 +83,12 @@ Any questions or suggestions is welcomed on my repository.
 
 
 ### AWS Service Architecture for PFC(In development)
+
+<p align="center">
+  <img width="600" src="https://github.com/housekorea/pfc/blob/master/doc/aws_pt.png">  
+ <a href='https://www.youtube.com/watch?v=R8VVJ4uDW0I'><h3>AWS Summit Seoul 2018 Presention</h3></a>
+</p>
+<hr>
 ![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/aws%20service%20architecture.png) 
 
 I considered AWS architecture for IoT feature in the PFC project. AWS has good features and many service protocols are related with machine learning. This is just a initial diagram to integrated AWS Architecture. through some experiment with AWS, I would modify and add it.
