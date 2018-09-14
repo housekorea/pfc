@@ -29,6 +29,9 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+
+//  Serial.println(ESP_SERIAL.available());
+  
   while(Serial.available()){
     ESP_SERIAL.write(Serial.read());
   }

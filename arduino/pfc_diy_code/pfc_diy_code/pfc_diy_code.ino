@@ -175,8 +175,8 @@ void setup() {
   }
   else
   {
-//    sd_file = SD.open(SD_LOG_FILE);
-//
+    sd_file = SD.open(SD_LOG_FILE);
+
 //    while (sd_file.available()) {
 //      Serial.write(sd_file.read());
 //    }
@@ -212,7 +212,7 @@ void setup() {
 
   // Blynk Interval Event Attach
   bl_timer.setInterval(5000L, checkBlynk);
-  bl_timer.setInterval(3000L,sendMillis);
+  bl_timer.setInterval(5000L,sendMillis);
   bl_timer.setInterval(60000L, sendDhtSensor);
 //  bl_timer.setInterval(60*1000L,sendEmailReport);
 
@@ -417,8 +417,8 @@ void sendMillis(){
 //  Serial.print("EEPROM COUNT :" );
 //  Serial.println(eeprom_reset_struct.reset_cnt);
 
-  String log_data = String("[SendMillis]") + String(millis()) + "," + String(eeprom_reset_struct.reset_cnt) + "," + String(Blynk.connected());
-  writeSD(log_data);
+//  String log_data = String("[SendMillis]") + String(millis()) + "," + String(eeprom_reset_struct.reset_cnt) + "," + String(Blynk.connected());
+//  writeSD(log_data);
 }
 
 void sendProbeSensor() {
@@ -1000,6 +1000,10 @@ void checkBlynk(){
  if(!Blynk.connected()){
     Serial.println("[CheckBlynk()] Not connected to Blynk server"); 
     wdt_enable(WDTO_1S);
+  }
+  else
+  {
+//    Serial.println("[CheckBlynk()] Blynk connected"); 
   }
 } 
 
