@@ -461,33 +461,49 @@ float getDS18B20()
 
 float getCO2()
 {
+  int samplingInterval = 50; // 50ms를 주기로 하여 데이터를 측정
+  int numReadings = 10;
+  float co2Array[numReadings] = {0.0};
+  int co2ArrayIndex=0;
+  unsigned long funcTime = millis();
   //Co2 센서 데이터 읽기
-  int co2_vol = analogRead(CO2_IN); // 0~1023
-  float voltage = co2_vol * ( 5000 / 1024.0 ); 
+  int co2_vol=0;
+  float voltage=0; 
   // 아두이노의 analogRead() 2^10 으로 표현되며 (0~1023 의 범위를 가진다.) 즉 5볼트의 아날로그 최대 전압을 기준하였을 떄 5(volt)/1024(2^10)= 0.0049 mv 라는 값을 가진다. 
   // 현재 구입한 Co2의 모델은 5000 ppm 까지 최대 측정가능한 모듈로서, 디지털과 아날로그 데이터간의 "비율"을 구한다.
-  
-  if (voltage == 0 )
+
+  while(millis() - funcTime < 1500)
   {
-    // 아날로그로 측정한 전압값이 "0"일 경우는 오류
-    Serial.println("Fault");
-    return 0;
+    co2_vol = analogRead(CO2_IN);
+    voltage = co2_vol * (5000 / 1024.0);
+    if (voltage == 0 )
+    {
+      // 아날로그로 측정한 전압값이 "0"일 경우는 오류
+     Serial.println("Voltage Value is Zero.");
+     continue;
+    }
+    else if (voltage < 400)
+   {
+      // 아날로그로 측정한 전압값이 400 미만인 경우는 Co2 센서가 아직 활성화되지 않은 상태(pre-heating)
+      Serial.println("Co2 Sensor preheating");
+      continue;
+    }
+    else
+    {
+      //    Serial.print("Co2 Voltage : " );
+      //    Serial.println(voltage);
+      int voltage_diference = voltage - 400;
+      float concentration = voltage_diference * 50.0 / 16.0; // Co2 센서의 레퍼런스 데이터를 반영하여 연산
+      co2Array[co2ArrayIndex] = concentration;
+      co2ArrayIndex++;
+      if(co2ArrayIndex == numReadings)
+      {
+        co2ArrayIndex=0;
+      }
+    }
+    delay(samplingInterval);
   }
-  else if (voltage < 400)
-  {
-    // 아날로그로 측정한 전압값이 400 미만인 경우는 Co2 센서가 아직 활성화되지 않은 상태(pre-heating)
-    Serial.println("preheating");
-    return 0;
-  }
-  else
-  {
-    //    Serial.print("Co2 Voltage : " );
-    //    Serial.println(voltage);
-    int voltage_diference = voltage - 400;
-    float concentration = voltage_diference * 50.0 / 16.0; // Co2 센서의 레퍼런스 데이터를 반영하여 연산
-    return concentration;
-  }
-  // 평균값 측정 로직을 추가가 필요함
+  return averageArray(co2Array, numReadings);
  
 }
 

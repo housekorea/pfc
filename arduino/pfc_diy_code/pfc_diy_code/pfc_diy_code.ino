@@ -16,7 +16,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-#define WRITESD_DEBUG 1
+#define WRITESD_DEBUG 0
 
 //EEPROM Settings
 #define EEPROM_RESET_ADDR 0x58
@@ -149,7 +149,7 @@ void setup() {
 
 
   arduino_smsec = millis();
-
+  analogReference(DEFAULT); // 아날로그 Input 기준전압 설정
   Serial.begin(9600);
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
@@ -217,8 +217,6 @@ void setup() {
 //  bl_timer.setInterval(60*1000L,sendEmailReport);
 
   Serial.println("[Setup] Blynk Timer setted");
-  pinMode(3, OUTPUT);
-
   
 }
 
@@ -227,148 +225,34 @@ unsigned int ReCnctFlag = 0;
 unsigned int ReCnctCount = 0;
 
 void loop() {
-    bl_timer.run();
+   bl_timer.run(); // Setup() 함수에서 등록한 BlynkTimer 함수를 실행.
 
-    if(Blynk.connected()){
-      Blynk.run();
-    }
-    else if (ReCnctFlag == 0 ){
-      ReCnctFlag = 1;
-      Serial.println("Starting reconnection timer in 30 seconds...");
-      bl_timer.setTimeout(30000L, [](){
-        ReCnctFlag = 0;
-        ReCnctCount++;
-        Serial.print("Attempting reconne ction #");
-        Serial.println(ReCnctCount);
-        wifi.setDHCP(1,1,1);
-        Blynk.config(wifi, auth, BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT);
-        Blynk.connect();
-        if(Blynk.connectWiFi(ssid,pass)){
-          Blynk.connect();
-        }
-      });
-    }
- 
-  
-  
-  //  Serial.println(BUFFER_SIZE);
-
-
-
-//  byte blynk_logs[8];
-//  if(blynk_logs = BLYNK_DEBUG_ALL.availableForWrite())
-//  {
-//    Serial.println(blynk_logs);
-//  }
-
-
-  // Time Interval writing SD Card log
-//  if(millis() - last_msec > 10000)
-//  {
-//    
-//    String log_data = String("[millis]") + String(millis());
-//    Serial.println(log_data);
-//    writeSD(log_data);
-//    last_msec = millis();
-//  }
-
+  if(Blynk.connected()){ 
+    // Blynk의 Wi-Fi 접속이 된 경우에는 Blynk를 실행
+    Blynk.run();
+  }
 
   if(millis() - arduino_smsec > RESET_TIMEOUT)
   {
+    // 아두이노 구동시간이 특정 시간(Reset_timeout Interval)이 경과된 경우 software reset 실행.
     Serial.println(RESET_TIMEOUT);
     Serial.println(millis());
     Serial.println(arduino_smsec);
     String log_data = String("[RESET START]") + String(millis());
     writeSD(log_data);
     delay(100);
-    softwareReset(WDTO_60MS); 
+    softwareReset(WDTO_60MS); // 아두이노 리셋 실행.
   }
 
   
   if(millis() - last_msec > 600000)
   {
+    // 매 10분마다 아두이노의 경과 시간을 출력.(Serial 및 SD카드에 로그 기록)
     Serial.println("[Elapsed Time in Loop()]" +  String(millis() - last_msec / 1000));
     String log_data = String("[Elapsed_time]") + String(millis() - last_msec / 1000);
     writeSD(log_data);
     last_msec =millis();
   }
-
-//  if(!Blynk.connected())
-//  {
-
-//    if(count_blynk_fail == 0)
-//    {
-//      discon_msec = millis();
-//    }
-//    float cur_msec = (millis() - discon_msec)/1000;
-//    lcd.clear();
-//    lcd.setCursor(0,0);
-//    lcd.print("WIFI Disconnect");
-//    lcd.setCursor(0,1);
-//    lcd.print('"'+String(cur_msec) + '"' +" Elapsed");
-//    if (count_blynk_fail % 10 == 0)
-//    {
-//      Serial.print("[Disconnected]Not Connected Blynk :");
-//      Serial.println(count_blynk_fail);
-//      
-//    }
-//    delay(50);
-//    count_blynk_fail+=1;
-//    
-//    if(count_blynk_fail > 100)
-//    {
-//      Blynk.begin(auth, wifi, ssid, pass);
-//    }
-//  }
-
-  
-  
-  
-  //  while(Serial.available()){
-  //    Serial2.write(Serial.read());
-  //  }
-  //
-  //  while(Serial2.available()){
-  //    Serial.write(Serial2.read());
-  //  }
-
-  // put your main code here, to run repeatedly
-
-  //  String bl_message;
-  //
-  //  while(Serial.available()){
-  //    bl_message+=char(Serial.read());
-  //  }
-  //  if(!Serial.available()){
-  //    if(bl_message!="")
-  //    {
-  //      Serial.println("reply:"+bl_message);
-  //      bl_message="";
-  //    }
-  //  }
-
-  //
-  //
-  //  delay(3000);
-  //  float *dht_data = getDHT();
-  //  unsigned int ldr_val = getLDR();
-  //  float ds18_val = getDS18B20();
-  //  float co2_con = getCO2();
-  //  Serial.print("Humidity : ");
-  //  Serial.print(dht_data[0]);
-  //  Serial.print(", Temp : " );
-  //  Serial.print(dht_data[1]);
-  //  Serial.println();
-  //  Serial.print("LDR : " );
-  //  Serial.print(ldr_val);
-  //  Serial.println();
-  //  Serial.print("DS18B20 : ");
-  //  Serial.print(ds18_val);
-  //  Serial.println();
-  //  Serial.print("CO2 : " );
-  //  Serial.print(co2_con);
-  //  Serial.println();
-  //  Serial.println("----------------");
 }
 
 void LCD_display_connected()
@@ -383,27 +267,6 @@ void LCD_display_connected()
 //   lcd.print("On Internet!");    
   
 }
-void sendDiscon(){
-  Blynk.disconnect();
-}
-
-void sendEmailReport() {
-  Serial.println("[SendEMailReport] Start");
-  float *dht_data = getDHT();
-  float ds18_val = getDS18B20();
-  float co2_con = getCO2();
-  unsigned int ldr_val = getLDR();
-
-  String mail_message = "Dear NerdFarmer! \r\n PFC send to message to you!\r\n\r\n\r\n";
-  mail_message +="\tHumidity : "+String(dht_data[0]) +"\r\n\tTemperature:"+ String(dht_data[1]) + "\r\n\tCo2:" +String(co2_con) +"\r\n\tLDR :" + String(ldr_val) +"\r\n\tDS18B20" + String(ds18_val);
-  mail_message +="\r\n\r\n From PFC on EZFARM";
-  
-  Blynk.email("hkh9737@naver.com", "[{DEVICE_NAME}]Alarm _ From Blynk", mail_message);
-  Serial.println("[SendEMailReport] End");
-}
-
-
-
 
 void sendMillis(){
 
@@ -411,14 +274,6 @@ void sendMillis(){
   Blynk.virtualWrite(V20, cur_msec / 1000);
   Blynk.virtualWrite(V22, eeprom_reset_struct.reset_cnt);
 
-  // Current Millis() , EEPROM RESET COUNT , BLYNK Connected status
-//  Serial.print("Blynk Status : ");
-//  Serial.println(Blynk.connected());
-//  Serial.print("EEPROM COUNT :" );
-//  Serial.println(eeprom_reset_struct.reset_cnt);
-
-//  String log_data = String("[SendMillis]") + String(millis()) + "," + String(eeprom_reset_struct.reset_cnt) + "," + String(Blynk.connected());
-//  writeSD(log_data);
 }
 
 void sendProbeSensor() {
@@ -464,8 +319,6 @@ void sendProbeSensor() {
   
   log_data = String("[SendProbeSensor]") + String(millis()) +String("__END");
   writeSD(log_data);
-
-
   //bl_timer.setTimeout(1000, LCD_display_connected);
 }
 
@@ -565,17 +418,20 @@ unsigned int getLDR()
 
 float getDS18B20()
 {
-  OneWire oneWire(DS18_IN);
-  DallasTemperature sensors(&oneWire);
+  // 수온 센서 데이터 읽기 함수
+  OneWire oneWire(DS18_IN); // ds18bs20 함수의 OneWire 프로토콜 정의
+  DallasTemperature sensors(&oneWire); // 정의된 OneWire 프로토콜 센서를 온도함수로 읽어오기
   float temp = 0;
   float temp_arr[10] = {0.0};
   float min_v = 0;
   float max_v = 0;
   float amount = 0;
   int max_iter = 10;
+  int acc_iter = 0;
 
-  for(int in_i = 0; in_i < 20; in_i++)
+  for(int in_i = 0; in_i < 100; in_i++)
   {
+    // 최대 20번의 반복을 수행하여 센서의 정상값으로 최소,최대 센서데이터값을 초기화
     sensors.requestTemperatures();
     temp = sensors.getTempCByIndex(0);
     if(temp >= 60 || temp <= -50)
@@ -592,6 +448,14 @@ float getDS18B20()
 
   for (int in_i = 0; in_i < max_iter; in_i++)
   {
+    //반복문을 통해서 매 50ms 주기로 수온센서의 데이터를 읽어서 평균값을 반환.
+
+    acc_iter++;
+    if(acc_iter > 500)
+    {
+      //최대 500번 이상 수온센서 데이터 읽기를 시도했음에도, 올바른 정상범위의 온도데이터를 읽지 못할경우 "0"을 반환하고 함수실행종료
+      return 0;
+    }
     sensors.requestTemperatures();
     temp = sensors.getTempCByIndex(0);
     
@@ -616,30 +480,55 @@ float getDS18B20()
     amount += temp;
     delay(50);
   }
-  float avg = (amount - min_v - max_v) / (max_iter - 2);
+  float avg = (amount - min_v - max_v) / (max_iter - 2); //수온의 최소값,최대값을 배제한 정상 범위내의 관측데이터의 평균값을 반환
   return avg;
 }
 
 float getCO2()
 {
-  int co2_vol = analogRead(CO2_IN);
-  float voltage = co2_vol * ( 5000 / 1024.0 );
-  if (voltage == 0 )
+  int samplingInterval = 50; // 50ms를 주기로 하여 데이터를 측정
+  int numReadings = 10;
+  float co2Array[numReadings] = {0.0};
+  int co2ArrayIndex=0;
+  unsigned long funcTime = millis();
+  //Co2 센서 데이터 읽기
+  int co2_vol=0;
+  float voltage=0; 
+  // 아두이노의 analogRead() 2^10 으로 표현되며 (0~1023 의 범위를 가진다.) 즉 5볼트의 아날로그 최대 전압을 기준하였을 떄 5(volt)/1024(2^10)= 0.0049 mv 라는 값을 가진다. 
+  // 현재 구입한 Co2의 모델은 5000 ppm 까지 최대 측정가능한 모듈로서, 디지털과 아날로그 데이터간의 "비율"을 구한다.
+
+  while(millis() - funcTime < 1500)
   {
-    Serial.println("Fault");
+    co2_vol = analogRead(CO2_IN);
+    voltage = co2_vol * (5000 / 1024.0);
+    if (voltage == 0 )
+    {
+      // 아날로그로 측정한 전압값이 "0"일 경우는 오류
+     Serial.println("Voltage Value is Zero.");
+     continue;
+    }
+    else if (voltage < 400)
+   {
+      // 아날로그로 측정한 전압값이 400 미만인 경우는 Co2 센서가 아직 활성화되지 않은 상태(pre-heating)
+      Serial.println("Co2 Sensor preheating");
+      continue;
+    }
+    else
+    {
+      //    Serial.print("Co2 Voltage : " );
+      //    Serial.println(voltage);
+      int voltage_diference = voltage - 400;
+      float concentration = voltage_diference * 50.0 / 16.0; // Co2 센서의 레퍼런스 데이터를 반영하여 연산
+      co2Array[co2ArrayIndex] = concentration;
+      co2ArrayIndex++;
+      if(co2ArrayIndex == numReadings)
+      {
+        co2ArrayIndex=0;
+      }
+    }
+    delay(samplingInterval);
   }
-  else if (voltage < 400)
-  {
-    Serial.println("preheating");
-  }
-  else
-  {
-    //    Serial.print("Co2 Voltage : " );
-    //    Serial.println(voltage);
-    int voltage_diference = voltage - 400;
-    float concentration = voltage_diference * 50.0 / 16.0;
-    return concentration;
-  }
+  return averageArray(co2Array, numReadings);
 }
 
 float getEC(float temperature)
@@ -718,7 +607,7 @@ float getPH()
   int samplingInterval = 20;
   int printInterval = 900;
   int numReadings = 40;
-  int pHArray[numReadings];
+  float pHArray[numReadings];
   int pHArrayIndex = 0;
 
   unsigned long samplingTime = millis();
@@ -748,7 +637,7 @@ float getPH()
 }
 
 
-float averageArray(int* arr, int number)
+float averageArray(float* arr, int number)
 {
   int i;
   int max_v;
@@ -913,20 +802,7 @@ BLYNK_WRITE(V31)
     digitalWrite(pin_num,LOW);    
   }
 }
-BLYNK_WRITE(V44)
-{
-  int pin_num = 44;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
+
 BLYNK_WRITE(V32)
 {
   int pin_num = 32;
@@ -969,6 +845,106 @@ BLYNK_WRITE(V34)
     digitalWrite(pin_num,LOW);    
   }
 }
+BLYNK_WRITE(V35)
+{
+  int pin_num = 35;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V36)
+{
+  int pin_num = 36;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V37)
+{
+  int pin_num = 37;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V38)
+{
+  int pin_num = 38;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V39)
+{
+  int pin_num = 39;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V40)
+{
+  int pin_num = 40;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+BLYNK_WRITE(V41)
+{
+  int pin_num = 41;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,HIGH);
+  }
+  else
+  {
+    digitalWrite(pin_num,LOW);    
+  }
+}
+
+
 
 void writeSD(String log_data)
 {
