@@ -484,7 +484,7 @@ float getDS18B20()
 
 float getCO2()
 {
-  int samplingInterval = 100; // 50ms를 주기로 하여 데이터를 측정
+  int samplingInterval = 100; // 100ms를 주기로 하여 데이터를 측정
   int numReadings = 10;
   float co2Array[numReadings] = {0.0};
   int co2ArrayIndex=0;
