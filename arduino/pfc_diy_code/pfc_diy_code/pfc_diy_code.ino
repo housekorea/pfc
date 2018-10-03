@@ -74,8 +74,6 @@ char auth[] = "ffa88c6b016e4c30986a005d57bdc709"; // PFC_0001
 char ssid[] = "FabLab_2.4G";
 char pass[] = "innovationpark";
 
-//char ssid[] = "lcp";
-//char pass[] = "travelshot";
 ESP8266 wifi(&ESP_SERIAL);
 
 BlynkTimer bl_timer;
@@ -211,7 +209,7 @@ void setup() {
 
 
   // Blynk Interval Event Attach
-  bl_timer.setInterval(5000L, checkBlynk);
+  bl_timer.setInterval(5000L,checkBlynk);
   bl_timer.setInterval(5000L,sendMillis);
   bl_timer.setInterval(60000L, sendDhtSensor);
 //  bl_timer.setInterval(60*1000L,sendEmailReport);
@@ -486,7 +484,7 @@ float getDS18B20()
 
 float getCO2()
 {
-  int samplingInterval = 50; // 50ms를 주기로 하여 데이터를 측정
+  int samplingInterval = 100; // 50ms를 주기로 하여 데이터를 측정
   int numReadings = 10;
   float co2Array[numReadings] = {0.0};
   int co2ArrayIndex=0;
@@ -519,6 +517,7 @@ float getCO2()
       //    Serial.println(voltage);
       int voltage_diference = voltage - 400;
       float concentration = voltage_diference * 50.0 / 16.0; // Co2 센서의 레퍼런스 데이터를 반영하여 연산
+//      Serial.println(String(co2ArrayIndex) + "." + String(concentration));
       co2Array[co2ArrayIndex] = concentration;
       co2ArrayIndex++;
       if(co2ArrayIndex == numReadings)
@@ -528,7 +527,10 @@ float getCO2()
     }
     delay(samplingInterval);
   }
-  return averageArray(co2Array, numReadings);
+  
+  float avg_co2 = averageArray(co2Array, numReadings);
+//  Serial.println("Final Co2=" + String(avg_co2)); 
+  return avg_co2;
 }
 
 float getEC(float temperature)

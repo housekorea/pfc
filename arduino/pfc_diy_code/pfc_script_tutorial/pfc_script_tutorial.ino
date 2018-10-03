@@ -193,12 +193,12 @@ unsigned int ReCnctFlag = 0;
 unsigned int ReCnctCount = 0;
 
 void loop() {
-    bl_timer.run(); // Setup() 함수에서 등록한 BlynkTimer 함수를 실행.
+  bl_timer.run(); // Setup() 함수에서 등록한 BlynkTimer 함수를 실행.
 
-    if(Blynk.connected()){ 
-      // Blynk의 Wi-Fi 접속이 된 경우에는 Blynk를 실행
-      Blynk.run();
-    }
+  if(Blynk.connected()){ 
+    // Blynk의 Wi-Fi 접속이 된 경우에는 Blynk를 실행
+    Blynk.run();
+  }
 
   if(millis() - arduino_smsec > RESET_TIMEOUT)
   {
