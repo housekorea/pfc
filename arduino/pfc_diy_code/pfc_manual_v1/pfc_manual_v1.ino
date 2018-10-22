@@ -139,19 +139,27 @@ void setup() {
   analogReference(DEFAULT); // 아날로그 Input 기준전압 설정
   Serial.begin(9600);
 
+  for(int i=0; i < 16; i++)
+  {
+    pinMode(ch16_relay[i],OUTPUT);
+    digitalWrite(ch16_relay[i],HIGH);
+  }
 
 }
 
 unsigned long last_msec = millis();
 unsigned int ReCnctFlag = 0;
 unsigned int ReCnctCount = 0;
-String s_reads
+String s_reads;
 void loop() {
 
   if(Serial.available())
   {
     s_reads = Serial.readString();
-    Serial.println(s_read);
+    s_reads.trim();
+
+    Serial.println(s_reads);
+    execute_command(s_reads);
   }
   
 //Sensor Read List(Serial Command List)
@@ -189,6 +197,16 @@ void loop() {
 
 }
 
+void execute_relay_order(int ord)
+{
+  Serial.println("Execute relay order");
+  digitalWrite(ch16_relay[ord], LOW);
+  delay(3000);
+  digitalWrite(ch16_relay[ord],HIGH);
+  Serial.println("[ch16_relay test] order is " + String(ord));
+}
+
+
 void execute_command(String cmd)
 {
 //Sensor Read List(Serial Command List)
@@ -208,8 +226,24 @@ void execute_command(String cmd)
 // fan_air
 // fan_ventil
 // pump_air
+
+  Serial.println(cmd.toInt());
+  if(cmd.toInt() < 16)
+  {
+    if(cmd.toInt() == 0 && cmd.length() > 1)
+    {
+      false;   
+    }
+    else
+    {
+      execute_relay_order(cmd.toInt());
+
+      return true;
+      
+    }
+  }
  
-  if(cmd == "" || length(cmd) <= 3)
+  if(cmd == "" || cmd.length() <= 1)
   {
     Serial.println("Wrong Command");
     return false;
@@ -217,38 +251,44 @@ void execute_command(String cmd)
 
   if(cmd == "ph")
   {
-    float ph_data = getPH();    
+    float ph_data = getPH();
+    Serial.println("[Sensor]pH = " + String(ph_data));
+    
   }
   else if(cmd == "ec")
   {
     float w_temp = getDS18B20();
     float ec_data = getEC(w_temp); 
+    Serial.println("[Sensor]EC = " + String(ec_data));
   }
   else if(cmd == "co2")
   {
-    float co2_data = getCO2(); 
+    float co2_data = getCO2();
+    Serial.println("[Sensor]Co2 = " + String(co2_data)); 
   }
   else if(cmd == "air_temp")
   {
     float *dht_data =  getDHT();
     float air_temp_data = dht_data[1];
-
+    Serial.println("[Sensor]Air_temp = " + String(air_temp_data));
   }
   else if(cmd == "air_hum")
   {
     float *dht_data =  getDHT();
-    float air_hum_data = dht_data[0];    
+    float air_hum_data = dht_data[0];
+    Serial.println("[Sensor]Air_humidity = " + String(air_hum_data));        
   
   }
   else if(cmd == "water_temp")
   {
-    float w_temp = getDS18B20(); 
+    float w_temp = getDS18B20();
+    Serial.println("[Sensor]Water_temp = " + String(w_temp)); 
    
   }
   else if(cmd == "ldr")
   {
     unsigned int ldr_data = getLDR();
-  
+    Serial.println("[Sensor]LDR = " + String(ldr_data));
   }
 // pump_ph_plus
 // pump_ph_minus
@@ -261,65 +301,92 @@ void execute_command(String cmd)
 // LED
   else if(cmd == "pump_ph_plus")
   {
-    digitalWrite(PH_PLUS_PUMP,HIGH);
+    digitalWrite(ch16_relay[PH_PLUS_PUMP],HIGH);
     delay(PUMP_PH_PLUS_DELAY);
-    digitalWrite(PH_PLUS_PUMP,LOW);
+    digitalWrite(ch16_relay[PH_PLUS_PUMP],LOW);
+    Serial.println("[Actuator]" + cmd);
   }
   else if(cmd == "pump_ph_minus")
   {
-    digitalWrite(PH_MINUS_PUMP,HIGH);
+    digitalWrite(ch16_relay[PH_MINUS_PUMP],HIGH);
     delay(PUMP_PH_MINUS_DELAY);    
-    digitalWrite(PH_MINUS_PUMP,LOW);
+    digitalWrite(ch16_relay[PH_MINUS_PUMP],LOW);
+    Serial.println("[Actuator]" + cmd);
+
   }
   else if(cmd == "pump_water")
   {
-    digitalWrite(WATER_PUMP, HIGH);
+    digitalWrite(ch16_relay[WATER_PUMP], HIGH);
     delay(PUMP_WATER_DELAY);    
-    digitalWrite(WATER_PUMP, LOW);
+    digitalWrite(ch16_relay[WATER_PUMP], LOW);
+    Serial.println("[Actuator]" + cmd);
   }
   else if(cmd == "pump_solution_a")
   {
-    digitalWrite(SOL_A_PUMP,HIGH);
+    digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
     delay(PUMP_SOLUTION_A_DELAY);
-    digitalWrite(SOL_A_PUMP,LOW);
+    digitalWrite(ch16_relay[SOL_A_PUMP],LOW);
+    Serial.println("[Actuator]" + cmd);
+    
   }
   else if(cmd == "pump_solution_b")
   {
-    digitalWrite(SOL_B_PUMP,HIGH);
+    digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
     delay(PUMP_SOLUTION_B_DELAY);
-    digitalWrite(SOL_B_PUMP,LOW);
+    digitalWrite(ch16_relay[SOL_B_PUMP],LOW);
+    Serial.println("[Actuator]" + cmd);
+
   }
   else if(cmd == "on_fan_air")
   {
-    digitalWrite(AIR_FAN,HIGH);
+    digitalWrite(ch16_relay[AIR_FAN],HIGH);
+    Serial.println("[Actuator]" + cmd);
+    
   }
   else if(cmd == "off_fan_air")
   {
-    digitalWrite(AIR_FAN,LOW);
+    digitalWrite(ch16_relay[AIR_FAN],LOW);
+    Serial.println("[Actuator]" + cmd);
+    
   }
   else if(cmd == "on_fan_ventil")
   {
-    digitalWrite(VENTIL_FAN,HIGH);
+    digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
+    Serial.println("[Actuator]" + cmd);
+    
   }
   else if(cmd == "off_fan_ventil")
   {
-    digitalWrite(VENTIL_FAN,LOW);    
+    digitalWrite(ch16_relay[VENTIL_FAN],LOW);
+    Serial.println("[Actuator]" + cmd);
+       
   }
   else if(cmd == "on_pump_air")
   {
-    digitalWrite(AIR_PUMP, HIGH);
+    digitalWrite(ch16_relay[AIR_PUMP], HIGH);
+    Serial.println("[Actuator]" + cmd);
+
   }
   else if(cmd == "off_pump_air")
   {
-    digitalWrite(AIR_PUMP, LOW); 
+    digitalWrite(ch16_relay[AIR_PUMP], LOW);
+    Serial.println("[Actuator]" + cmd);
+     
   }
   else if(cmd == "on_LED")
   {
-    digitalWrite(LED,HIGH); 
+    digitalWrite(ch16_relay[LED],HIGH);
+    Serial.println("[Actuator]" + cmd);
+     
   }
   else if(cmd == "off_LED")
   {
-    digitalWrite(LED,LOW);
+    digitalWrite(ch16_relay[LED],LOW);
+    Serial.println("[Actuator]" + cmd);  
+  }
+  else
+  {
+    Serial.println("[Error] Command Not Exists");
   }
   
   
