@@ -47,6 +47,14 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 #define HUMIDIFIER_1 9 // 릴레이 제어번호
 #define HUMIDIFERR_2 10 // 릴레이 제어번호
 
+//Delay(Milli Seconds)
+#define PUMP_PH_PLUS_DELAY 3000
+#define PUMP_PH_MINUS_DELAY 3000
+#define PUMP_WATER_DELAY 30000
+#define PUMP_SOLUTION_A_DELAY 3000
+#define PUMP_SOLUTION_B_DELAY 3000
+
+
 
 int ch16_relay[16] = {26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41};// 릴레이 1번이 아두이노 디지털핀 26 ~ 릴레이 16번이 아두이노 디지털핀1
 // 1,3,5,7,9,11,13,15 | 26,28,30,32,34,36,38,40
@@ -126,66 +134,12 @@ BLYNK_APP_DISCONNECTED()// Blynk 스마트폰 앱이 Blynk IoT 서버 -> Arduino
 
 
 void setup() {
-// Setup() 함수는 아두이노 부팅후 초기 1회 실행 되는 함수. 즉, 변수나 데이터구조를 초기화하는 데 사용됨.
 
   arduino_smsec = millis(); // 아두이노가 동작된 시간(밀리세컨드) 저장
   analogReference(DEFAULT); // 아날로그 Input 기준전압 설정
   Serial.begin(9600);
 
 
-//  ESP_SERIAL.begin(ESP_BAUD);
-//  RESET_TIMEOUT = (unsigned long)720 *  (unsigned long)60 * (unsigned long)1000; //아두이노가 동작한지 12시간이 초과될경우 Softreset.
-//  
-//  Serial.println(">>>>>>>>>>>>");
-//  Serial.println("[Arduino Mega] Start");
-//  Serial.println(">>>>>>>>>>>>");  
-//  EEPROM_readAnything(EEPROM_RESET_ADDR,eeprom_reset_struct); // 아두이노 비휘발성 메모리 EEPROM에 아두이노 리셋횟수를 불러옴
-//  if (eeprom_reset_struct.reset_cnt > 100000) // EEPROM 에 명시적 입,출력 최대 가능횟수를 10만으로 설정.
-//  {
-//    eeprom_reset_struct.reset_cnt = 0;
-//  }
-//  eeprom_reset_struct.reset_cnt += 1;
-//  EEPROM_writeAnything(EEPROM_RESET_ADDR, eeprom_reset_struct); // EEPROM에 RESET 횟수 저장
-//  Serial.print("[EEPROM RESET CNT] on EEPROM MEMORY : ");
-//  Serial.println(eeprom_reset_struct.reset_cnt);
-//
-//  if (!SD.begin(sd_card_pin)) // SD 카드 초기화 설정 - 아두이노 메가에 SD카드가 연결되어 있을경우
-//  {
-//    Serial.println("[SD Card]Initialization Failed"); 
-//  }
-//  else
-//  {
-//    sd_file = SD.open(SD_LOG_FILE);
-//    while (sd_file.available()) {
-//      Serial.write(sd_file.read());
-//    }
-//    String log_data = ">>>>>>>>>>>>>>>> Starting No." + String(eeprom_reset_struct.reset_cnt);
-//    writeSD(log_data);
-//    Serial.println("[SD Card]Initialization Success");
-//   }
-
-
-//  wifi.setDHCP(1,1,1);
-//  Blynk.config(wifi, auth,BLYNK_DEFAULT_DOMAIN,BLYNK_DEFAULT_PORT);  // Attempt general connection to network
-//  if (Blynk.connectWiFi(ssid, pass)) {  // Blynk 와이파이 접속
-//    Blynk.connect();  // Blynk 서버 접속
-//  }
-//  else
-//  {
-//    Serial.println("[Blynk.connecteWiFi(ssid,pass)] Failed");
-//    delay(5000);
-//    wdt_enable(WDTO_1S); // Blynk 와이파이 접속실패시 5초 뒤("delay(5000)")에 Software Reset() 시행
-//  }
-//
-//
-//  // Blynk Interval Event Attach
-//  // Blynk 는 내장 BlynkTimer 함수를 통해서 주어진 "주기(Interval)" 마다 특정 함수를 호출하는 방식으로 운용됨
-//  bl_timer.setInterval(5000L, checkBlynk); // Blynk 접속 여부 판별
-//  bl_timer.setInterval(5000L,sendMillis); // Blynk에 현재 아두이노 실행시간 전송
-//  bl_timer.setInterval(60000L, sendDhtSensor); // Blynk에 DHT 센서 정보 전달
-//  Serial.println("[Setup] Blynk Timer setted");
-//
-  
 }
 
 unsigned long last_msec = millis();
@@ -212,6 +166,8 @@ void loop() {
 // pump_ph_plus
 // pump_ph_minus
 // pump_water
+// pump_solution_a
+// pump_solution_b
 // fan_air
 // fan_ventil
 // pump_air
@@ -220,25 +176,6 @@ void loop() {
 
 
 
-  
-//  bl_timer.run(); // Setup() 함수에서 등록한 BlynkTimer 함수를 실행.
-//
-//  if(Blynk.connected()){ 
-//    // Blynk의 Wi-Fi 접속이 된 경우에는 Blynk를 실행
-//    Blynk.run();
-//  }
-
-//  if(millis() - arduino_smsec > RESET_TIMEOUT)
-//  {
-//    // 아두이노 구동시간이 특정 시간(Reset_timeout Interval)이 경과된 경우 software reset 실행.
-//    Serial.println(RESET_TIMEOUT);
-//    Serial.println(millis());
-//    Serial.println(arduino_smsec);
-//    String log_data = String("[RESET START]") + String(millis());
-//    writeSD(log_data);
-//    delay(100);
-//    softwareReset(WDTO_60MS); // 아두이노 리셋 실행.
-//  }
 
   
   if(millis() - last_msec > 60000)
@@ -251,6 +188,143 @@ void loop() {
   }
 
 }
+
+void execute_command(String cmd)
+{
+//Sensor Read List(Serial Command List)
+// ph
+// ec
+// co2
+// air_temp
+// air_hum
+// water_temp
+// ldr
+//Actuator Control List(Serial Command List)
+// pump_ph_plus
+// pump_ph_minus
+// pump_water
+// pump_solution_a
+// pump_solution_b
+// fan_air
+// fan_ventil
+// pump_air
+ 
+  if(cmd == "" || length(cmd) <= 3)
+  {
+    Serial.println("Wrong Command");
+    return false;
+  }
+
+  if(cmd == "ph")
+  {
+    float ph_data = getPH();    
+  }
+  else if(cmd == "ec")
+  {
+    float w_temp = getDS18B20();
+    float ec_data = getEC(w_temp); 
+  }
+  else if(cmd == "co2")
+  {
+    float co2_data = getCO2(); 
+  }
+  else if(cmd == "air_temp")
+  {
+    float *dht_data =  getDHT();
+    float air_temp_data = dht_data[1];
+
+  }
+  else if(cmd == "air_hum")
+  {
+    float *dht_data =  getDHT();
+    float air_hum_data = dht_data[0];    
+  
+  }
+  else if(cmd == "water_temp")
+  {
+    float w_temp = getDS18B20(); 
+   
+  }
+  else if(cmd == "ldr")
+  {
+    unsigned int ldr_data = getLDR();
+  
+  }
+// pump_ph_plus
+// pump_ph_minus
+// pump_water
+// pump_solution_a
+// pump_solution_b
+// fan_air
+// fan_ventil
+// pump_air
+// LED
+  else if(cmd == "pump_ph_plus")
+  {
+    digitalWrite(PH_PLUS_PUMP,HIGH);
+    delay(PUMP_PH_PLUS_DELAY);
+    digitalWrite(PH_PLUS_PUMP,LOW);
+  }
+  else if(cmd == "pump_ph_minus")
+  {
+    digitalWrite(PH_MINUS_PUMP,HIGH);
+    delay(PUMP_PH_MINUS_DELAY);    
+    digitalWrite(PH_MINUS_PUMP,LOW);
+  }
+  else if(cmd == "pump_water")
+  {
+    digitalWrite(WATER_PUMP, HIGH);
+    delay(PUMP_WATER_DELAY);    
+    digitalWrite(WATER_PUMP, LOW);
+  }
+  else if(cmd == "pump_solution_a")
+  {
+    digitalWrite(SOL_A_PUMP,HIGH);
+    delay(PUMP_SOLUTION_A_DELAY);
+    digitalWrite(SOL_A_PUMP,LOW);
+  }
+  else if(cmd == "pump_solution_b")
+  {
+    digitalWrite(SOL_B_PUMP,HIGH);
+    delay(PUMP_SOLUTION_B_DELAY);
+    digitalWrite(SOL_B_PUMP,LOW);
+  }
+  else if(cmd == "on_fan_air")
+  {
+    digitalWrite(AIR_FAN,HIGH);
+  }
+  else if(cmd == "off_fan_air")
+  {
+    digitalWrite(AIR_FAN,LOW);
+  }
+  else if(cmd == "on_fan_ventil")
+  {
+    digitalWrite(VENTIL_FAN,HIGH);
+  }
+  else if(cmd == "off_fan_ventil")
+  {
+    digitalWrite(VENTIL_FAN,LOW);    
+  }
+  else if(cmd == "on_pump_air")
+  {
+    digitalWrite(AIR_PUMP, HIGH);
+  }
+  else if(cmd == "off_pump_air")
+  {
+    digitalWrite(AIR_PUMP, LOW); 
+  }
+  else if(cmd == "on_LED")
+  {
+    digitalWrite(LED,HIGH); 
+  }
+  else if(cmd == "off_LED")
+  {
+    digitalWrite(LED,LOW);
+  }
+  
+  
+}
+
 
 void LCD_display_connected()
 {
