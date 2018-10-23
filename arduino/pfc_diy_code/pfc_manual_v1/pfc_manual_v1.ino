@@ -34,16 +34,16 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 #define EC_IN A2 // Elcectricity Conductivity - 아날로그 핀번호
 #define PH_IN A3 // PH - 아날로그 핀번호
 
-//Actuators
-#define PH_MINUS_PUMP 0 // 릴레이 제어번호
+//Actuator
+#define PH_MINUS_PUMP 4 // 릴레이 제어번호
 #define PH_PLUS_PUMP 1 // 릴레이 제어번호
-#define WATER_PUMP 2 // 릴레이 제어번호
-#define AIR_FAN 3 // 릴레이 제어번호 - 내부팬
-#define LED 4 // 릴레이 제어번호
-#define AIR_PUMP 5 // 릴레이 제어번호
-#define VENTIL_FAN 6 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
-#define SOL_A_PUMP 7 // 릴레이 제어번호
-#define SOL_B_PUMP 8 // 릴레이 제어번호
+#define SOL_A_PUMP 2 // 릴레이 제어번호
+#define SOL_B_PUMP 3 // 릴레이 제어번호
+#define WATER_PUMP 0 // 릴레이 제어번호
+#define LED 5 // 릴레이 제어번호
+#define AIR_FAN 12 // 릴레이 제어번호 - 내부팬
+#define AIR_PUMP 8 // 릴레이 제어번호
+#define VENTIL_FAN 13 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
 #define HUMIDIFIER_1 9 // 릴레이 제어번호
 #define HUMIDIFERR_2 10 // 릴레이 제어번호
 
@@ -190,8 +190,8 @@ void loop() {
   {
     // 매 1분마다 아두이노의 경과 시간을 출력.(Serial 및 SD카드에 로그 기록)
     Serial.println("[Elapsed Time in Loop()]" +  String(millis() - last_msec / 1000));
-    String log_data = String("[Elapsed_time]") + String(millis() - last_msec / 1000);
-    writeSD(log_data);
+//    String log_data = String("[Elapsed_time]") + String(millis() - last_msec / 1000);
+//    writeSD(log_data);=
     last_msec =millis();
   }
 
@@ -227,7 +227,7 @@ void execute_command(String cmd)
 // fan_ventil
 // pump_air
 
-  Serial.println(cmd.toInt());
+//  Serial.println(cmd.toInt());
   if(cmd.toInt() < 16)
   {
     if(cmd.toInt() == 0 && cmd.length() > 1)
@@ -301,87 +301,87 @@ void execute_command(String cmd)
 // LED
   else if(cmd == "pump_ph_plus")
   {
-    digitalWrite(ch16_relay[PH_PLUS_PUMP],HIGH);
-    delay(PUMP_PH_PLUS_DELAY);
     digitalWrite(ch16_relay[PH_PLUS_PUMP],LOW);
+    delay(PUMP_PH_PLUS_DELAY);
+    digitalWrite(ch16_relay[PH_PLUS_PUMP],HIGH);
     Serial.println("[Actuator]" + cmd);
   }
   else if(cmd == "pump_ph_minus")
   {
-    digitalWrite(ch16_relay[PH_MINUS_PUMP],HIGH);
-    delay(PUMP_PH_MINUS_DELAY);    
     digitalWrite(ch16_relay[PH_MINUS_PUMP],LOW);
+    delay(PUMP_PH_MINUS_DELAY);    
+    digitalWrite(ch16_relay[PH_MINUS_PUMP],HIGH);
     Serial.println("[Actuator]" + cmd);
 
   }
   else if(cmd == "pump_water")
   {
-    digitalWrite(ch16_relay[WATER_PUMP], HIGH);
-    delay(PUMP_WATER_DELAY);    
     digitalWrite(ch16_relay[WATER_PUMP], LOW);
+    delay(PUMP_WATER_DELAY);    
+    digitalWrite(ch16_relay[WATER_PUMP], HIGH);
     Serial.println("[Actuator]" + cmd);
   }
   else if(cmd == "pump_solution_a")
   {
-    digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
-    delay(PUMP_SOLUTION_A_DELAY);
     digitalWrite(ch16_relay[SOL_A_PUMP],LOW);
+    delay(PUMP_SOLUTION_A_DELAY);
+    digitalWrite(ch16_relay[SOL_A_PUMP],HIGH);
     Serial.println("[Actuator]" + cmd);
     
   }
   else if(cmd == "pump_solution_b")
   {
-    digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
-    delay(PUMP_SOLUTION_B_DELAY);
     digitalWrite(ch16_relay[SOL_B_PUMP],LOW);
+    delay(PUMP_SOLUTION_B_DELAY);
+    digitalWrite(ch16_relay[SOL_B_PUMP],HIGH);
     Serial.println("[Actuator]" + cmd);
 
   }
   else if(cmd == "on_fan_air")
   {
-    digitalWrite(ch16_relay[AIR_FAN],HIGH);
+    digitalWrite(ch16_relay[AIR_FAN],LOW);
     Serial.println("[Actuator]" + cmd);
     
   }
   else if(cmd == "off_fan_air")
   {
-    digitalWrite(ch16_relay[AIR_FAN],LOW);
+    digitalWrite(ch16_relay[AIR_FAN],HIGH);
     Serial.println("[Actuator]" + cmd);
     
   }
   else if(cmd == "on_fan_ventil")
   {
-    digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
+    digitalWrite(ch16_relay[VENTIL_FAN],LOW);
     Serial.println("[Actuator]" + cmd);
     
   }
   else if(cmd == "off_fan_ventil")
   {
-    digitalWrite(ch16_relay[VENTIL_FAN],LOW);
+    digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
     Serial.println("[Actuator]" + cmd);
        
   }
   else if(cmd == "on_pump_air")
   {
-    digitalWrite(ch16_relay[AIR_PUMP], HIGH);
+    digitalWrite(ch16_relay[AIR_PUMP], LOW);
     Serial.println("[Actuator]" + cmd);
 
   }
   else if(cmd == "off_pump_air")
   {
-    digitalWrite(ch16_relay[AIR_PUMP], LOW);
+    digitalWrite(ch16_relay[AIR_PUMP], HIGH);
     Serial.println("[Actuator]" + cmd);
      
   }
   else if(cmd == "on_LED")
   {
-    digitalWrite(ch16_relay[LED],HIGH);
+    digitalWrite(ch16_relay[LED],LOW);
     Serial.println("[Actuator]" + cmd);
      
   }
   else if(cmd == "off_LED")
   {
-    digitalWrite(ch16_relay[LED],LOW);
+    digitalWrite(ch16_relay[LED],HIGH);
     Serial.println("[Actuator]" + cmd);  
   }
   else
