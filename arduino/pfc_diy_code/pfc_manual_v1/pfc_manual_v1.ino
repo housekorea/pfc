@@ -43,7 +43,7 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 #define LED 5 // 릴레이 제어번호
 #define AIR_FAN 12 // 릴레이 제어번호 - 내부팬
 #define AIR_PUMP 8 // 릴레이 제어번호
-#define VENTIL_FAN 13 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
+#define VENTIL_FAN 11 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
 #define HUMIDIFIER_1 9 // 릴레이 제어번호
 #define HUMIDIFERR_2 10 // 릴레이 제어번호
 
@@ -189,7 +189,7 @@ void loop() {
   if(millis() - last_msec > 60000)
   {
     // 매 1분마다 아두이노의 경과 시간을 출력.(Serial 및 SD카드에 로그 기록)
-    Serial.println("[Elapsed Time in Loop()]" +  String(millis() - last_msec / 1000));
+    Serial.println("[Elapsed Time in Loop()] " +  String(millis() - last_msec / 1000));
 //    String log_data = String("[Elapsed_time]") + String(millis() - last_msec / 1000);
 //    writeSD(log_data);=
     last_msec =millis();
