@@ -11,7 +11,7 @@
 #include <LiquidCrystal.h> // LCD 디스플레이용 라이브러리 추가
 #include <ESP8266_Lib.h> // Blynk에서 배포한 ESP8266 기본 라이브러리 추가
 #include <BlynkSimpleShieldEsp8266.h> // Blynk에서 배포한 BlynkSimpleShieldESP8266 라이브러리
-#include <avr/wdt.h> //아두이노 WatchDog 라이브러리, 소프트웨어 리셋하기 위한 라이브러리
+#include <avr/wdt.h>
 #include <EEPROM.h> // 아두이노 내부에 비휘발성 메모리를 입,출력하기 위한 라이브러리
 #include <EEPROMAnything.h> // EEPROM 입,출력을 용이하게 하기위한 함수
 #include <SPI.h> // Serial Peripheral Interface 를 위한 라이브러리
@@ -35,17 +35,17 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 #define PH_IN A3 // PH - 아날로그 핀번호
 
 //Actuator
-#define PH_MINUS_PUMP 4 // 릴레이 제어번호
-#define PH_PLUS_PUMP 1 // 릴레이 제어번호
-#define SOL_A_PUMP 2 // 릴레이 제어번호
-#define SOL_B_PUMP 3 // 릴레이 제어번호
-#define WATER_PUMP 0 // 릴레이 제어번호
-#define LED 5 // 릴레이 제어번호
-#define AIR_FAN 12 // 릴레이 제어번호 - 내부팬
-#define AIR_PUMP 8 // 릴레이 제어번호
-#define VENTIL_FAN 11 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
-#define HUMIDIFIER_1 9 // 릴레이 제어번호
-#define HUMIDIFERR_2 10 // 릴레이 제어번호
+#define PH_MINUS_PUMP 1 // 릴레이 제어번호
+#define PH_PLUS_PUMP 2 // 릴레이 제어번호
+#define WATER_PUMP 3 // 릴레이 제어번호
+#define SOL_B_PUMP 4 // 릴레이 제어번호
+#define SOL_A_PUMP 5 // 릴레이 제어번호
+#define LED 10 // 릴레이 제어번호
+#define AIR_FAN 11 // 릴레이 제어번호 - 내부팬
+#define VENTIL_FAN 12 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
+#define AIR_PUMP 13 // 릴레이 제어번호
+#define HUMIDIFIER_1 14 // 릴레이 제어번호
+#define HUMIDIFERR_2 15 // 릴레이 제어번호
 
 //Delay(Milli Seconds)
 #define PUMP_PH_PLUS_DELAY 3000
@@ -145,6 +145,11 @@ void setup() {
     digitalWrite(ch16_relay[i],HIGH);
   }
 
+  // Default LED on
+  digitalWrite(ch16_relay[LED],LOW);
+  digitalWrite(ch16_relay[AIR_FAN],LOW);
+  digitalWrite(ch16_relay[VENTIL_FAN],LOW);
+  digitalWrite(ch16_relay[AIR_PUMP],LOW);
 }
 
 unsigned long last_msec = millis();
