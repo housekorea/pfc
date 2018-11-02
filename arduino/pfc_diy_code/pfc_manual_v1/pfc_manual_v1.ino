@@ -378,13 +378,13 @@ void execute_command(String cmd)
     Serial.println("[Actuator]" + cmd);
      
   }
-  else if(cmd == "on_LED")
+  else if(cmd == "on_led")
   {
     digitalWrite(ch16_relay[LED],LOW);
     Serial.println("[Actuator]" + cmd);
      
   }
-  else if(cmd == "off_LED")
+  else if(cmd == "off_led")
   {
     digitalWrite(ch16_relay[LED],HIGH);
     Serial.println("[Actuator]" + cmd);  
