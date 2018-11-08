@@ -47,6 +47,9 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 #define HUMIDIFIER_1 14 // 릴레이 제어번호
 #define HUMIDIFERR_2 15 // 릴레이 제어번호
 
+
+
+
 //Delay(Milli Seconds)
 #define PUMP_PH_PLUS_DELAY 3000
 #define PUMP_PH_MINUS_DELAY 3000
@@ -133,6 +136,19 @@ BLYNK_APP_DISCONNECTED()// Blynk 스마트폰 앱이 Blynk IoT 서버 -> Arduino
 
 
 
+// Setup for time interval code for Actuators
+boolean led_status = true;
+boolean air_fan_status = true;
+boolean ventil_fan_status = true;
+boolean air_pump_status = true;
+unsigned long led_interval = 60 * 60 * 1000;
+unsigned long air_fan_interval = 5 * 60 * 1000;
+unsigned long ventil_fan_interval = 5 * 60 * 1000;
+unsigned long air_pump_interval = 30 * 1000;
+
+
+//unsigned long interval_time = millis();
+
 void setup() {
 
   arduino_smsec = millis(); // 아두이노가 동작된 시간(밀리세컨드) 저장
@@ -167,6 +183,7 @@ void loop() {
     execute_command(s_reads);
   }
   
+  
 //Sensor Read List(Serial Command List)
 // ph
 // ec
@@ -186,10 +203,6 @@ void loop() {
 // pump_air
 
 
-
-
-
-
   
   if(millis() - last_msec > 60000)
   {
@@ -200,7 +213,75 @@ void loop() {
     last_msec =millis();
   }
 
+  execute_time_interval();
 }
+
+void execute_time_interval()
+{
+
+
+  
+  if(millis() >= led_interval)
+  {
+    led_interval = millis() + led_interval;
+    if(led_status == true)
+    {
+      digitalWrite(ch16_relay[LED],HIGH);
+      led_status = false;
+    }
+    else
+    {
+      digitalWrite(ch16_relay[LED],LOW);      
+      led_status = true;
+    }
+  }
+  if(millis() >= air_fan_interval)
+  {
+    air_fan_interval = millis() + air_fan_interval;
+    if(air_fan_status == true)
+    {
+      digitalWrite(ch16_relay[AIR_FAN],HIGH);
+      air_fan_status = false;
+    }
+    else
+    {
+      digitalWrite(ch16_relay[AIR_FAN],LOW);      
+      air_fan_status = true;
+    }    
+  }
+  if(millis() >= ventil_fan_interval)
+  {
+    ventil_fan_interval = millis() + ventil_fan_interval;
+    if(ventil_fan_status == true)
+    {
+      digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
+      ventil_fan_status = false;
+    }
+    else
+    {
+      digitalWrite(ch16_relay[VENTIL_FAN],LOW);      
+      ventil_fan_status = true;
+    }    
+  }
+  if(millis() >= air_pump_interval)
+  {
+    air_pump_interval = millis() + air_pump_interval;
+    if(air_pump_status == true)
+    {
+      digitalWrite(ch16_relay[AIR_PUMP],HIGH);
+      air_pump_status = false;
+    }
+    else
+    {
+      digitalWrite(ch16_relay[AIR_PUMP],LOW);      
+      air_pump_status = true;
+    }    
+  }
+
+  
+}
+
+
 
 void execute_relay_order(int ord)
 {

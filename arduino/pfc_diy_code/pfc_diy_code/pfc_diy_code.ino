@@ -302,12 +302,12 @@ void sendProbeSensor() {
 
   // WebHook with Blynk => It will throw to the Data Lake server
   Blynk.virtualWrite(V50, 
-    "http://210.92.91.239:5000/v1/" + String(auth) +"/insert/" + "?wt=" + String(ds18_val)
+    "http://210.92.91.225:5000/v1/" + String(auth) +"/insert/" + "?wt=" + String(ds18_val)
     + "&ph=" + String(ph_val)
     + "&ec=" + String(ec_val)
   );
   
-  Serial.println("[WebHook]http://210.92.91.239:5000/v1/" 
+  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?wt=" + String(ds18_val)
     + "&ph=" + String(ph_val)
@@ -338,12 +338,12 @@ void sendAirSensor() {
 
   // WebHook with Blynk => It will throw to the Data Lake server
   Blynk.virtualWrite(V51, 
-    "http://210.92.91.239:5000/v1/" 
+    "http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?co2=" + String(co2_con)
     + "&ldr=" + String(ldr_val)
   );
-  Serial.println("[WebHook]http://210.92.91.239:5000/v1/" 
+  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/" 
     + "?co2=" + String(co2_con)
     + "&ldr=" + String(ldr_val));
@@ -375,12 +375,12 @@ void sendDhtSensor() {
 
   // WebHook with Blynk => It will throw to the Data Lake server
   Blynk.virtualWrite(V52, 
-    "http://210.92.91.239:5000/v1/" 
+    "http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?at=" + String(dht_data[1])
     + "&ah=" + String(dht_data[0])
   );
-  Serial.println("[WebHook]http://210.92.91.239:5000/v1/" 
+  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
     + String(auth) +"/insert/"
     + "?at=" + String(dht_data[1])
     + "&ah=" + String(dht_data[0]));
