@@ -141,20 +141,26 @@ boolean led_status = true;
 boolean air_fan_status = true;
 boolean ventil_fan_status = true;
 boolean air_pump_status = true;
-unsigned long led_interval = 60 * 60 * 1000;
-unsigned long air_fan_interval = 5 * 60 * 1000;
-unsigned long ventil_fan_interval = 5 * 60 * 1000;
-unsigned long air_pump_interval = 30 * 1000;
 
+
+unsigned long led_interval=3600000;
+unsigned long air_fan_interval=600000;
+unsigned long ventil_fan_interval=600000;
+unsigned long air_pump_interval=300000;
+
+unsigned long led_next_time = led_interval;
+unsigned long air_fan_next_time = air_fan_interval;
+unsigned long ventil_fan_next_time = ventil_fan_interval;
+unsigned long air_pump_next_time = air_pump_interval;
 
 //unsigned long interval_time = millis();
 
 void setup() {
 
+
   arduino_smsec = millis(); // 아두이노가 동작된 시간(밀리세컨드) 저장
   analogReference(DEFAULT); // 아날로그 Input 기준전압 설정
   Serial.begin(9600);
-
   for(int i=0; i < 16; i++)
   {
     pinMode(ch16_relay[i],OUTPUT);
@@ -172,6 +178,7 @@ unsigned long last_msec = millis();
 unsigned int ReCnctFlag = 0;
 unsigned int ReCnctCount = 0;
 String s_reads;
+
 void loop() {
 
   if(Serial.available())
@@ -218,12 +225,14 @@ void loop() {
 
 void execute_time_interval()
 {
+//  Serial.println("Execute_time_interval : " + String(millis()));
 
-
-  
-  if(millis() >= led_interval)
+  if(millis() >= led_next_time)
   {
-    led_interval = millis() + led_interval;
+   
+    led_next_time = millis() + led_interval;
+    Serial.println("LED touch");
+//    Serial.println("[LED INTERVAL]NEXT INTERVAL : " + String(led_next_time));
     if(led_status == true)
     {
       digitalWrite(ch16_relay[LED],HIGH);
@@ -235,9 +244,12 @@ void execute_time_interval()
       led_status = true;
     }
   }
-  if(millis() >= air_fan_interval)
+  
+  if(millis() >= air_fan_next_time)
   {
-    air_fan_interval = millis() + air_fan_interval;
+    air_fan_next_time = millis() + air_fan_interval;
+    Serial.println("air_fan touch");
+//    Serial.println("[AIR_FAN INTERVAL]NEXT INTERVAL : " + String(air_fan_next_time));    
     if(air_fan_status == true)
     {
       digitalWrite(ch16_relay[AIR_FAN],HIGH);
@@ -249,9 +261,11 @@ void execute_time_interval()
       air_fan_status = true;
     }    
   }
-  if(millis() >= ventil_fan_interval)
+  if(millis() >= ventil_fan_next_time)
   {
-    ventil_fan_interval = millis() + ventil_fan_interval;
+    ventil_fan_next_time = millis() + ventil_fan_interval;
+    Serial.println("ventil fan touch");
+//    Serial.println("[VENTIL_FAN INTERVAL]NEXT INTERVAL : " + String(ventil_fan_next_time));    
     if(ventil_fan_status == true)
     {
       digitalWrite(ch16_relay[VENTIL_FAN],HIGH);
@@ -263,9 +277,11 @@ void execute_time_interval()
       ventil_fan_status = true;
     }    
   }
-  if(millis() >= air_pump_interval)
+  if(millis() >= air_pump_next_time)
   {
-    air_pump_interval = millis() + air_pump_interval;
+    air_pump_next_time = millis() + air_pump_interval;
+    Serial.println("air_pump touch");
+//    Serial.println("[AIR_PUMP INTERVAL]NEXT INTERVAL : " + String(air_pump_next_time));    
     if(air_pump_status == true)
     {
       digitalWrite(ch16_relay[AIR_PUMP],HIGH);
