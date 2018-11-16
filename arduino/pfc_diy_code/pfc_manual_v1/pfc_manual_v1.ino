@@ -38,8 +38,8 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 #define PH_MINUS_PUMP 1 // 릴레이 제어번호
 #define PH_PLUS_PUMP 2 // 릴레이 제어번호
 #define WATER_PUMP 3 // 릴레이 제어번호
-#define SOL_B_PUMP 4 // 릴레이 제어번호
-#define SOL_A_PUMP 5 // 릴레이 제어번호
+#define SOL_A_PUMP 4 // 릴레이 제어번호
+#define SOL_B_PUMP 5 // 릴레이 제어번호
 #define LED 10 // 릴레이 제어번호
 #define AIR_FAN 11 // 릴레이 제어번호 - 내부팬
 #define VENTIL_FAN 12 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
