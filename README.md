@@ -89,7 +89,9 @@ Any questions or suggestions is welcomed on my repository.
  <a href='https://www.youtube.com/watch?v=R8VVJ4uDW0I'><h3>AWS Summit Seoul 2018 Presention</h3></a>
 </p>
 <hr>
+
 ![Capture Shots](https://github.com/housekorea/pfc/blob/master/doc/aws%20service%20architecture.png) 
+
 
 I considered AWS architecture for IoT feature in the PFC project. AWS has good features and many service protocols are related with machine learning. This is just a initial diagram to integrated AWS Architecture. through some experiment with AWS, I would modify and add it.
 
