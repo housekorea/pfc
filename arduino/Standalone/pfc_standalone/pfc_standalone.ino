@@ -1,4 +1,5 @@
-
+//Gihtub(https://github.com/housekorea/pfc) include below codes. 
+//NerdFarmers KwangHee Han.
 #include <DHT.h> // DHT11 온습도 센서 라이브러리 추가
 #include <OneWire.h> // DS18BS20 수온센서 "OneWire" 라이브러리 추가
 #include <Wire.h> // I2C 통신용 라이브러리 추가
