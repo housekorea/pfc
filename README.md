@@ -1,5 +1,10 @@
 # PFC(Personal Food Computer) by KgwangHee Han.
 
+<p align="center">
+  <img width="600" src="https://github.com/housekorea/pfc/blob/master/doc/aws_pt.png">  
+ <a href='https://www.youtube.com/watch?v=ef_BVQALSWI&feature=youtu.be'><h3>Media Interview</h3></a>
+</p>
+<hr>
 
 <p align="center">
   <img width="400" src="https://github.com/housekorea/pfc/blob/master/doc/pfc_v2_diykit.jpeg">
