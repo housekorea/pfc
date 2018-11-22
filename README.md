@@ -1,19 +1,14 @@
 # PFC(Personal Food Computer) by KgwangHee Han.
 
 <p align="center">
-  <img width="600" src="https://github.com/housekorea/pfc/blob/master/doc/aws_pt.png">  
+  <img width="600" src="https://img.youtube.com/vi/ef_BVQALSWI/hqdefault.jpg">  
  <a href='https://www.youtube.com/watch?v=ef_BVQALSWI&feature=youtu.be'><h3>Media Interview</h3></a>
 </p>
-<hr>
 
 <p align="center">
   <img width="400" src="https://github.com/housekorea/pfc/blob/master/doc/pfc_v2_diykit.jpeg">
   <h3 align="center">Recent PFC DIY KIT(V2)</h3>
 </p> 
-<p align="center">
-  <img width="400" src="https://github.com/housekorea/pfc/blob/master/doc/pfc_v3.jpg">  
-  <h3 align="center">Original PFC V1</h3>
-</p>
 
 This repository's purpose is to distribute others who have interest in building there own PFC. It was first developed by MIT Media Lab Open Inititiative. Thanks to their efforts, I can start this exciting project(Along with my belief that we also have a possibility to beacome #NerdFarmer!). If you want to make your own PFC, you can absolutely fork this repsitory.(I hope that this repository is helpful!) 
 
