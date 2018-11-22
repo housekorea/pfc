@@ -152,7 +152,11 @@ If you are live in S.Korea, and you have a intereset in making a PFC in S.korea.
 Doesn't matter what kind of issue we are facing, I have a optimistic about "We can solving this issue, and developing our agriculture on S.korea! Absolutely, we can helping others on the global too".
 
 
-http://forum.openag.media.mit.edu/t/openag-in-south-korea/2801/16
+http://forum.openag.media.mit.edu/t/openag-in-south-korea/2801/01
 
 (Above, Url link is a S.Korea Thread to talking about the any issue or communication in the S.Korea)
 
+## 2018.11.22 Updates Recent PFC developments.
+![recent1](https://github.com/housekorea/pfc/blob/master/doc/201811_recnet.jpeg) 
+![recent2](https://github.com/housekorea/pfc/blob/master/doc/201811_recent1.jpeg)
+![recent3](https://github.com/housekorea/pfc/blob/master/doc/201811_recent2.png)
