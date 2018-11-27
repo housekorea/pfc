@@ -1,14 +1,14 @@
 # PFC(Personal Food Computer) by KgwangHee Han.
 
+<p align="center">
+  <img width="600" src="https://img.youtube.com/vi/ef_BVQALSWI/hqdefault.jpg">  
+ <a href='https://www.youtube.com/watch?v=ef_BVQALSWI&feature=youtu.be'><h3>Media Interview</h3></a>
+</p>
 
 <p align="center">
   <img width="400" src="https://github.com/housekorea/pfc/blob/master/doc/pfc_v2_diykit.jpeg">
   <h3 align="center">Recent PFC DIY KIT(V2)</h3>
 </p> 
-<p align="center">
-  <img width="400" src="https://github.com/housekorea/pfc/blob/master/doc/pfc_v3.jpg">  
-  <h3 align="center">Original PFC V1</h3>
-</p>
 
 This repository's purpose is to distribute others who have interest in building there own PFC. It was first developed by MIT Media Lab Open Inititiative. Thanks to their efforts, I can start this exciting project(Along with my belief that we also have a possibility to beacome #NerdFarmer!). If you want to make your own PFC, you can absolutely fork this repsitory.(I hope that this repository is helpful!) 
 
@@ -152,7 +152,11 @@ If you are live in S.Korea, and you have a intereset in making a PFC in S.korea.
 Doesn't matter what kind of issue we are facing, I have a optimistic about "We can solving this issue, and developing our agriculture on S.korea! Absolutely, we can helping others on the global too".
 
 
-http://forum.openag.media.mit.edu/t/openag-in-south-korea/2801/16
+http://forum.openag.media.mit.edu/t/openag-in-south-korea/2801/01
 
 (Above, Url link is a S.Korea Thread to talking about the any issue or communication in the S.Korea)
 
+## 2018.11.22 Updates Recent PFC developments.
+![recent1](https://github.com/housekorea/pfc/blob/master/doc/201811_recnet.jpeg) 
+![recent2](https://github.com/housekorea/pfc/blob/master/doc/201811_recent1.jpeg)
+![recent3](https://github.com/housekorea/pfc/blob/master/doc/201811_recent2.png)
