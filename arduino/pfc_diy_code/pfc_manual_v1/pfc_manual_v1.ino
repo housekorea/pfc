@@ -59,7 +59,7 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 
 
 
-int ch16_relay[16] = {26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41};// 릴레이 1번이 아두이노 디지털핀 26 ~ 릴레이 16번이 아두이노 디지털핀1
+int ch16_relay[16] = {10,11,12,13,5,2,3,6,7,8,9,46,38,39,40,41};// 릴레이 1번이 아두이노 디지털핀 26 ~ 릴레이 16번이 아두이노 디지털핀1
 // 1,3,5,7,9,11,13,15 | 26,28,30,32,34,36,38,40
 // 2,4,6,8,10,12,14,16 | 27,29,31,33,35,37,39,41
 
@@ -181,6 +181,16 @@ String s_reads;
 
 void loop() {
 
+
+
+  for(int i=0; i<13; i++)
+  {
+    digitalWrite(ch16_relay[i],HIGH);
+    delay(500);
+    digitalWrite(ch16_relay[i],LOW);
+    delay(100);
+  }
+
   if(Serial.available())
   {
     s_reads = Serial.readString();
@@ -189,8 +199,8 @@ void loop() {
     Serial.println(s_reads);
     execute_command(s_reads);
   }
-  
-  
+//  
+//  
 //Sensor Read List(Serial Command List)
 // ph
 // ec
@@ -209,8 +219,8 @@ void loop() {
 // fan_ventil
 // pump_air
 
-
-  
+//
+//  
   if(millis() - last_msec > 60000)
   {
     // 매 1분마다 아두이노의 경과 시간을 출력.(Serial 및 SD카드에 로그 기록)
@@ -219,12 +229,15 @@ void loop() {
 //    writeSD(log_data);=
     last_msec =millis();
   }
-
-  execute_time_interval();
+//
+//  execute_time_interval();
 }
 
 void execute_time_interval()
 {
+
+
+  
 //  Serial.println("Execute_time_interval : " + String(millis()));
 
   if(millis() >= led_next_time)
