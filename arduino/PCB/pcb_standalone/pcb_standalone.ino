@@ -27,23 +27,24 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 } eeprom_reset_struct;
 
 //SENSORS
-#define DHT_IN 7 // Air Temperature - 디지털 핀번호
-#define LDR_IN A0 // Light Density - 아날로그 핀번호
-#define DS18_IN 6 // Waterㄴ Temperature - 디지털 핀번호
-#define CO2_IN A1 // Co2 - 아날로그 핀번호
-#define EC_IN A2 // Elcectricity Conductivity - 아날로그 핀번호
-#define PH_IN A3 // PH - 아날로그 핀번호
+#define DHT_IN 25 // Air Temperature - 디지털 핀번호
+#define LDR_IN A1 // Light Density - 아날로그 핀번호
+#define DS18_IN 26 // Waterㄴ Temperature - 디지털 핀번호
+#define CO2_IN A0 // Co2 - 아날로그 핀번호
+#define EC_IN A3 // Elcectricity Conductivity - 아날로그 핀번호
+#define PH_IN A2 // PH - 아날로그 핀번호
 
 //Actuator
-#define PH_MINUS_PUMP 1 // 릴레이 제어번호
-#define PH_PLUS_PUMP 2 // 릴레이 제어번호
-#define WATER_PUMP 3 // 릴레이 제어번호
-#define SOL_A_PUMP 4 // 릴레이 제어번호
-#define SOL_B_PUMP 5 // 릴레이 제어번호
-#define LED 10 // 릴레이 제어번호
-#define AIR_FAN 11 // 릴레이 제어번호 - 내부팬
-#define VENTIL_FAN 12 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
-#define AIR_PUMP 13 // 릴레이 제어번호
+#define PH_MINUS_PUMP 5 // 릴레이 제어번호
+#define PH_PLUS_PUMP 4 // 릴레이 제어번호
+#define WATER_PUMP 2 // 릴레이 제어번호
+#define SOL_A_PUMP 0 // 릴레이 제어번호
+#define SOL_B_PUMP 1 // 릴레이 제어번호
+#define LED 9 // 릴레이 제어번호
+#define AIR_FAN 7 // 릴레이 제어번호 - 내부팬
+#define VENTIL_FAN 8 // 릴레이 제어번호 - 환기팬(외부와 기체교환)
+#define AIR_PUMP 6 // 릴레이 제어번호
+
 #define HUMIDIFIER_1 14 // 릴레이 제어번호
 #define HUMIDIFERR_2 15 // 릴레이 제어번호
 
@@ -60,8 +61,6 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 
 
 int ch16_relay[16] = {10,11,12,13,5,2,3,6,7,8,9,46,38,39,40,41};// 릴레이 1번이 아두이노 디지털핀 26 ~ 릴레이 16번이 아두이노 디지털핀1
-//int ch16_relay[16] = {26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41};// 릴레이 1번이 아두이노 디지털핀 26 ~ 릴레이 16번이 아두이노 디지털핀1
-
 // 1,3,5,7,9,11,13,15 | 26,28,30,32,34,36,38,40
 // 2,4,6,8,10,12,14,16 | 27,29,31,33,35,37,39,41
 
@@ -85,8 +84,8 @@ char auth[] = "__exitggfafjasdfieb0eifjie16e09eifie"; // PFC_TEST_SERIAL, 중복
 
 //Your WiFi credentials.
 //Set password to "" for open networks.
-char ssid[] = "ezfarm_si"; // Wi-Fi 정보
-char pass[] = "ezfarm#3414"; // Wi-Fi 비밀번호
+char ssid[] = "FabLab_2.4G"; // Wi-Fi 정보
+char pass[] = "innovationpark"; // Wi-Fi 비밀번호
 
 ESP8266 wifi(&ESP_SERIAL); // ESP8266 와이파이 설정
 
@@ -183,8 +182,10 @@ String s_reads;
 
 void loop() {
 
+  delay(5000);
+  execute_command("co2");
 
-
+//
 //  for(int i=0; i<13; i++)
 //  {
 //    digitalWrite(ch16_relay[i],HIGH);
@@ -220,7 +221,7 @@ void loop() {
 // fan_air
 // fan_ventil
 // pump_air
-// on_led / off_led
+
 //
 //  
   if(millis() - last_msec > 60000)
