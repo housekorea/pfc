@@ -43,10 +43,11 @@ struct config_reset_cnt_struct
 #define AIR_FAN 6
 #define VENTIL_FAN 7
 #define AIR_PUMP 5
+
 #define HUMIDIFIER_1 14
 #define HUMIDIFIER_2 15
 
-int ch16_relay[16] = {10,11,12,13,5,2,3,6,7,8,9,46};
+int ch16_relay[16] = {10,11,12,13,5,2,3,6,7,8,9,46,38,39,40,41};
 // 1,3,5,7,9,11,13,15 | 26,28,30,32,34,36,38,40
 // 2,4,6,8,10,12,14,16 | 27,29,31,33,35,37,39,41
 
@@ -66,13 +67,13 @@ LiquidCrystal lcd(12,13,8,9,10,11);
 
 //You should get Auth Token in the Blynk App.
 //Go to the Project Settings (nut icon).
-char auth[] = "20b5f95b1731475887e0796ed8a80480"; 
+char auth[] = "853983fce3974b528046908125161c50"; 
 
 //Your WiFi credentials.
 //Set password to "" for open networks.
-char ssid[] = "SNAP";
+char ssid[] = "FabLab_2.4G";
 //char ssid[] = "inno-park";
-char pass[] = "";
+char pass[] = "innovationpark";
 
 //char ssid[] = "lcp";
 //char pass[] = "travelshot";
@@ -128,11 +129,7 @@ BLYNK_APP_DISCONNECTED()
 void setup() {
   
 
-  for(int i=0; i<16; i++)
-  {
-    digitalWrite(ch16_relay[i],LOW);
-  }
-
+  
 //  lcd.begin(16,2);
 //  lcd.setCursor(0,0);
 //  lcd.print("[PFC]");
@@ -146,7 +143,7 @@ void setup() {
   delay(10);
   ESP_SERIAL.begin(ESP_BAUD);
   delay(10);
-  RESET_TIMEOUT = (unsigned long)720 *  (unsigned long)60 * (unsigned long)1000; 
+  RESET_TIMEOUT = (unsigned long)4320 *  (unsigned long)60 * (unsigned long)1000; //3days
   
   Serial.println(">>>>>>>>>>>>");
   Serial.println("[Arduino Mega] Start");
@@ -180,6 +177,10 @@ void setup() {
 
 
 
+//  for(int i=0; i<16; i++)
+//  {
+//    pinMode(ch16_relay[i],OUTPUT);
+//  }
 
 
   // Blynk Start(Automatic)
@@ -199,13 +200,12 @@ void setup() {
 
 
   // Blynk Interval Event Attach
-  bl_timer.setInterval(10000L, checkBlynk);
-  bl_timer.setInterval(5000L,sendMillis);
+  bl_timer.setInterval(5000L, checkBlynk);
+  bl_timer.setInterval(3000L,sendMillis);
   bl_timer.setInterval(30000L, sendDhtSensor);
 //  bl_timer.setInterval(60*1000L,sendEmailReport);
 
   Serial.println("[Setup] Blynk Timer setted");
-
   
 }
 
@@ -274,7 +274,7 @@ void loop() {
   
   if(millis() - last_msec > 60000)
   {
-    Serial.println("[Elapsed Time in Loop()] " +  String(millis() - last_msec / 1000));
+    Serial.println("[Elapsed Time in Loop()]" +  String(millis() - last_msec / 1000));
     last_msec =millis();
   }
 
@@ -860,7 +860,6 @@ void softwareReset( uint8_t prescaller) {
 
 
 //V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41
-//{10,11,12,13,5,2,3,6,7,8,9,46};
 BLYNK_WRITE(V26)
 {
   int pin_num = 10;
@@ -1002,8 +1001,7 @@ BLYNK_WRITE(V35)
   {
     digitalWrite(pin_num,HIGH);    
   }
-}
-BLYNK_WRITE(V36)
+}BLYNK_WRITE(V36)
 {
   int pin_num = 9;
   pinMode(pin_num,OUTPUT);
@@ -1030,62 +1028,61 @@ BLYNK_WRITE(V37)
   {
     digitalWrite(pin_num,HIGH);    
   }
+}BLYNK_WRITE(V38)
+{
+  int pin_num = 38;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,LOW);
+  }
+  else
+  {
+    digitalWrite(pin_num,HIGH);    
+  }
 }
-//BLYNK_WRITE(V38)
-//{
-//  int pin_num = 38;
-//  pinMode(pin_num,OUTPUT);
-//  int pin_val = param.asInt();
-//  if(pin_val == 1)
-//  {
-//    digitalWrite(pin_num,HIGH);
-//  }
-//  else
-//  {
-//    digitalWrite(pin_num,LOW);    
-//  }
-//}
-//BLYNK_WRITE(V39)
-//{
-//  int pin_num = 39;
-//  pinMode(pin_num,OUTPUT);
-//  int pin_val = param.asInt();
-//  if(pin_val == 1)
-//  {
-//    digitalWrite(pin_num,HIGH);
-//  }
-//  else
-//  {
-//    digitalWrite(pin_num,LOW);    
-//  }
-//}BLYNK_WRITE(V40)
-//{
-//  int pin_num = 40;
-//  pinMode(pin_num,OUTPUT);
-//  int pin_val = param.asInt();
-//  if(pin_val == 1)
-//  {
-//    digitalWrite(pin_num,HIGH);
-//  }
-//  else
-//  {
-//    digitalWrite(pin_num,LOW);    
-//  }
-//}
-//BLYNK_WRITE(V41)
-//{
-//  int pin_num = 41;
-//  pinMode(pin_num,OUTPUT);
-//  int pin_val = param.asInt();
-//  if(pin_val == 1)
-//  {
-//    digitalWrite(pin_num,HIGH);
-//  }
-//  else
-//  {
-//    digitalWrite(pin_num,LOW);    
-//  }
-//}
+BLYNK_WRITE(V39)
+{
+  int pin_num = 39;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,LOW);
+  }
+  else
+  {
+    digitalWrite(pin_num,HIGH);    
+  }
+}BLYNK_WRITE(V40)
+{
+  int pin_num = 40;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,LOW);
+  }
+  else
+  {
+    digitalWrite(pin_num,HIGH);    
+  }
+}
+BLYNK_WRITE(V41)
+{
+  int pin_num = 41;
+  pinMode(pin_num,OUTPUT);
+  int pin_val = param.asInt();
+  if(pin_val == 1)
+  {
+    digitalWrite(pin_num,LOW);
+  }
+  else
+  {
+    digitalWrite(pin_num,HIGH);    
+  }
+}
 
 
 void writeSD(String log_data)
@@ -1120,5 +1117,3 @@ void checkBlynk(){
     wdt_enable(WDTO_1S);
   }
 } 
-
-

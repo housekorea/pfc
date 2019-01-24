@@ -66,16 +66,14 @@ LiquidCrystal lcd(12,13,8,9,10,11);
 
 //You should get Auth Token in the Blynk App.
 //Go to the Project Settings (nut icon).
-char auth[] = "20b5f95b1731475887e0796ed8a80480"; 
+char auth[] = "853983fce3974b528046908125161c50"; 
 
 //Your WiFi credentials.
 //Set password to "" for open networks.
-char ssid[] = "SNAP";
+char ssid[] = "FabLab_2.4G";
 //char ssid[] = "inno-park";
-char pass[] = "";
+char pass[] = "innovationpark";
 
-//char ssid[] = "lcp";
-//char pass[] = "travelshot";
 ESP8266 wifi(&ESP_SERIAL);
 
 BlynkTimer bl_timer;
@@ -143,9 +141,9 @@ void setup() {
   arduino_smsec = millis();
 
   Serial.begin(9600);
-  delay(10);
+  delay(50);
   ESP_SERIAL.begin(ESP_BAUD);
-  delay(10);
+  delay(50);
   RESET_TIMEOUT = (unsigned long)720 *  (unsigned long)60 * (unsigned long)1000; 
   
   Serial.println(">>>>>>>>>>>>");
@@ -199,7 +197,7 @@ void setup() {
 
 
   // Blynk Interval Event Attach
-  bl_timer.setInterval(10000L, checkBlynk);
+  bl_timer.setInterval(60000L, checkBlynk);
   bl_timer.setInterval(5000L,sendMillis);
   bl_timer.setInterval(30000L, sendDhtSensor);
 //  bl_timer.setInterval(60*1000L,sendEmailReport);
@@ -212,6 +210,7 @@ void setup() {
 unsigned long last_msec = millis();
 unsigned int ReCnctFlag = 0;
 unsigned int ReCnctCount = 0;
+String s_reads;
 
 void loop() {
     bl_timer.run();
@@ -221,12 +220,15 @@ void loop() {
     }
     else if (ReCnctFlag == 0 ){
       ReCnctFlag = 1;
-      Serial.println("Starting reconnection timer in 30 seconds...");
-      bl_timer.setTimeout(30000L, [](){
+      Serial.println("Starting reconnection timer in 10 seconds...");
+      bl_timer.setTimeout(10000L, [](){
         ReCnctFlag = 0;
         ReCnctCount++;
-        Serial.print("Attempting reconne ction #");
+        Serial.print("Attempting reconnection #");
         Serial.println(ReCnctCount);
+        Serial.println("[ESP8266] Reset AT Command");
+        ESP_SERIAL.write("AT+RST\r\n");
+        delay(100);
         wifi.setDHCP(1,1,1);
         Blynk.config(wifi, auth, BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT);
         Blynk.connect();
@@ -267,16 +269,28 @@ void loop() {
     Serial.println(arduino_smsec);
     String log_data = String("[RESET START]") + String(millis());
 //    writeSD(log_data);
-    delay(100);
+    Serial.println("[ESP8266]Trying ESP reset by AT command");
+    ESP_SERIAL.write("AT+RST\r\n");
+    delay(1000);
     softwareReset(WDTO_60MS); 
   }
 
   
-  if(millis() - last_msec > 60000)
+  if(millis() - last_msec > 30000)
   {
     Serial.println("[Elapsed Time in Loop()] " +  String(millis() - last_msec / 1000));
     last_msec =millis();
+
   }
+
+//  if(ESP_SERIAL.available()){
+//    Serial.println("ESP8266 Saying");
+//    s_reads = ESP_SERIAL.readString();
+//    s_reads.trim();
+//
+//    Serial.println(s_reads);
+//    delay(100);
+//  }
 
 //  if(!Blynk.connected())
 //  {
@@ -1117,6 +1131,9 @@ void checkBlynk(){
 // Serial.println("[CheckBlynk()]" + String(millis()));
  if(!Blynk.connected()){
     Serial.println("[CheckBlynk()] Not connected to Blynk server"); 
+    Serial.println("[ESP8266] Trying ESP reset by checkBlynk() function");
+    ESP_SERIAL.write("AT+RST\r\n");
+    delay(500);
     wdt_enable(WDTO_1S);
   }
 } 

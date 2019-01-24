@@ -1,38 +1,21 @@
-// IoT 플랫폼은 Blynk 이용.
-// 아두이노,라즈베리파이 등 오픈소스 하드웨어를 IoT에 쉽게 결합할수 있도록 라이브러리와 스마트폰 API,앱 등을 제공
-#define BLYNK_PRINT Serial // Blynk 앱에서 출력하는 내용들은 "Serial" 로 출력함을 지정
-#define BLYNK_MAX_SENDBYTES 2048 //Blynk 내부에서 다루는 데이터의 처리 용량을 명시
-#define BLYNK_MAX_READBYTES  4096 // Blynk 내부에서 다루는 데이터의 처리 용량을 명시
-#define BLYNK_MSG_LIMIT 300 // 주어진 기간만큼 보낼 수 있는 메시지의 총량
+//Gihtub(https://github.com/housekorea/pfc) include below codes. 
+//NerdFarmers KwangHee Han.
+#include <PJON.h>
 #include <DHT.h> // DHT11 온습도 센서 라이브러리 추가
 #include <OneWire.h> // DS18BS20 수온센서 "OneWire" 라이브러리 추가
 #include <Wire.h> // I2C 통신용 라이브러리 추가
 #include <DallasTemperature.h>  // DS18B20 수온센서 "DallasTemperature" 라이브러리 추가
-#include <LiquidCrystal.h> // LCD 디스플레이용 라이브러리 추가
-#include <ESP8266_Lib.h> // Blynk에서 배포한 ESP8266 기본 라이브러리 추가
-#include <BlynkSimpleShieldEsp8266.h> // Blynk에서 배포한 BlynkSimpleShieldESP8266 라이브러리
 #include <avr/wdt.h>
-#include <EEPROM.h> // 아두이노 내부에 비휘발성 메모리를 입,출력하기 위한 라이브러리
-#include <EEPROMAnything.h> // EEPROM 입,출력을 용이하게 하기위한 함수
 #include <SPI.h> // Serial Peripheral Interface 를 위한 라이브러리
 #include <SD.h> // SD카드를 위한 입,출력 라이브러리 추가
 
-#define WRITESD_DEBUG 1 // SD 카드 출력을 지정하는 Flag. 1일 경우 SD카드에 로그 출력,0일 경우 SD카드에 로그 출력 X
-
-//EEPROM Settings
-#define EEPROM_RESET_ADDR 0x58 // Arduino RESET 횟수를 EEPROM에 저장하고, 저장하는 메모리주소가 "0x58"에 저장
-struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 데이터 구조를
-{
-  unsigned int reset_cnt;
-} eeprom_reset_struct;
-
 //SENSORS
-#define DHT_IN 7 // Air Temperature - 디지털 핀번호
-#define LDR_IN A0 // Light Density - 아날로그 핀번호
+#define DHT_IN 11 // Air Temperature - 디지털 핀번호
+#define LDR_IN A2 // Light Density - 아날로그 핀번호
 #define DS18_IN 6 // Waterㄴ Temperature - 디지털 핀번호
-#define CO2_IN A1 // Co2 - 아날로그 핀번호
-#define EC_IN A2 // Elcectricity Conductivity - 아날로그 핀번호
-#define PH_IN A3 // PH - 아날로그 핀번호
+#define CO2_IN A3 // Co2 - 아날로그 핀번호
+#define EC_IN A0 // Elcectricity Conductivity - 아날로그 핀번호
+#define PH_IN A1 // PH - 아날로그 핀번호
 
 //Actuator
 #define PH_MINUS_PUMP 1 // 릴레이 제어번호
@@ -59,83 +42,14 @@ struct config_reset_cnt_struct // EEPROM 에 데이터를 저장하기 위한 �
 
 
 
-//int ch16_relay[16] = {10,11,12,13,5,2,3,6,7,8,9,46,38,39,40,41};// 릴레이 1번이 아두이노 디지털핀 26 ~ 릴레이 16번이 아두이노 디지털핀1
 int ch16_relay[16] = {26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41};// 릴레이 1번이 아두이노 디지털핀 26 ~ 릴레이 16번이 아두이노 디지털핀1
-
 // 1,3,5,7,9,11,13,15 | 26,28,30,32,34,36,38,40
 // 2,4,6,8,10,12,14,16 | 27,29,31,33,35,37,39,41
 
-//LCD KEYPAD
-#define btnRIGHT
-#define btnUP
-#define btnDOWN
-#define btnLEFT
-#define btnSELECT
-#define btnNONE 
-LiquidCrystal lcd(12,13,8,9,10,11); 
-
-
-#define ESP_SERIAL Serial2 // 아두이노 메가의 경우 하드웨어 시리얼이 3개가 공급 가능하며, ESP8266과 통신을 위해 "Serial2"를 사용
-#define ESP_BAUD 115200 // Baud Rate - ESP8266 통신을 위해 권장되는  "115200"를 사용 
-
-
-//You should get Auth Token in the Blynk App.
-//Go to the Project Settings (nut icon).
-char auth[] = "__exitggfafjasdfieb0eifjie16e09eifie"; // PFC_TEST_SERIAL, 중복되거나 외부에 노출을 지양해야 하는 시리얼 코드, PFC 한 대당 1개의 시리얼코드가 부여됨
-
-//Your WiFi credentials.
-//Set password to "" for open networks.
-char ssid[] = "ezfarm_si"; // Wi-Fi 정보
-char pass[] = "ezfarm#3414"; // Wi-Fi 비밀번호
-
-ESP8266 wifi(&ESP_SERIAL); // ESP8266 와이파이 설정
-
-BlynkTimer bl_timer; // Blynk 타이머 선언
-int count_blynk_fail = 0;
-float discon_msec = 0.0;
-int last_connect_start = 0;
 
 //Software Reset 
 unsigned long RESET_TIMEOUT; // 주기적으로 아두이노를 리셋하는 주기(Interval)
 unsigned long arduino_smsec;
-WidgetLCD blynk_lcd(V21);
-
-//SD card
-int sd_card_pin = 53; // SD카드가 연결된 디지털 핀번호
-boolean is_sd_card_init = false;
-#define SD_LOG_FILE  "blynklog.log" // SD 카드내에 로그를 기록하는 파일명(File_path)
-File sd_file;
-
-
-
-BLYNK_CONNECTED() {
-  Serial.println("[Function Call]Called BLYNK_CONNECTED");
-  count_blynk_fail = (unsigned long)0;
-
-  // 아두이노메가 - 아날로그 핀(A*) / 디지털 핀(*)
-  // Blynk - 아날로그 핀 / 디지털 핀 / 버츄얼 핀(V*)
-  // Blynk 앱을 통해 아두이노의 아날로그,디지털 핀을 제어할 수 있지만, 
-
-  int virtual_relay[] = {V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41};
-  for(int i=0; i< (sizeof(virtual_relay) / sizeof(int)); i++)
-  {
-    Blynk.syncVirtual(virtual_relay[i]); // 명시한 Blynk Virtual Pin 의 값을 동기화(IoT Blynk 서버로부터 저장
-    delay(10);
-  }
-
-  String log_data = String("[BLYNK Connected]") + String(millis());
-  writeSD(log_data); // Blynk 접속사실을 SD 카드에 로그로 기록
-}
-
-BLYNK_APP_CONNECTED() // Blynk 스마트폰 앱이 Blynk IoT 서버 -> Arduino Mega 에 서로 연결될 경우 실행하는 콜백함수
-{
-  Serial.println("[BLYNK] BLYNK APP CONNECTED");
-}
-BLYNK_APP_DISCONNECTED()// Blynk 스마트폰 앱이 Blynk IoT 서버 -> Arduino Mega 에 연결이 끊겼 경우 실행하는 콜백함수
-{
-  Serial.println("[BLYNK] BLYNK APP DISCONNECTED");
-}
-
 
 
 // Setup for time interval code for Actuators
@@ -157,23 +71,51 @@ unsigned long air_pump_next_time = air_pump_interval;
 
 //unsigned long interval_time = millis();
 
+//PJON Settings
+PJON<ThroughSerial> bus(44);
+void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &packet_info) {
+  /* Make use of the payload before sending something, the buffer where payload points to is
+     overwritten when a new message is dispatched */
+  Serial.println("we'v got a message");
+  Serial.println(length);
+  Serial.println(payload[0]);
+
+  for(int i=0;i<length;i++)
+  {
+    Serial.print(char(payload[i]));
+  }
+  Serial.println();
+  
+  if(payload[0] == 'B') {
+//    digitalWrite(LED_BUILTIN, HIGH);
+//    delay(30);
+//    digitalWrite(LED_BUILTIN, LOW);
+//    bus.reply("A", 1);
+//    bus.reply("B", 1);
+//    bus.reply("C", 1);
+    delay(1000);
+    bus.reply("2239abcz", 8);
+    
+  }
+  
+};
+
+
 void setup() {
 
 
   arduino_smsec = millis(); // 아두이노가 동작된 시간(밀리세컨드) 저장
   analogReference(DEFAULT); // 아날로그 Input 기준전압 설정
   Serial.begin(9600);
-  for(int i=0; i < 16; i++)
-  {
-    pinMode(ch16_relay[i],OUTPUT);
-    digitalWrite(ch16_relay[i],HIGH);
-  }
+  Serial2.begin(9600);
 
-  // Default LED on
-  digitalWrite(ch16_relay[LED],LOW);
-  digitalWrite(ch16_relay[AIR_FAN],LOW);
-  digitalWrite(ch16_relay[VENTIL_FAN],LOW);
-  digitalWrite(ch16_relay[AIR_PUMP],LOW);
+
+  bus.strategy.set_serial(&Serial2);
+  bus.set_receiver(receiver_function);
+//  bus.send_repeatedly(45, "B", 1, 100000);
+
+  bus.begin();
+
 }
 
 unsigned long last_msec = millis();
@@ -181,28 +123,23 @@ unsigned int ReCnctFlag = 0;
 unsigned int ReCnctCount = 0;
 String s_reads;
 
+
+
 void loop() {
 
-
-
-//  for(int i=0; i<13; i++)
+//  if(Serial2.available())
 //  {
-//    digitalWrite(ch16_relay[i],HIGH);
-//    delay(500);
-//    digitalWrite(ch16_relay[i],LOW);
-//    delay(100);
+//    Serial.println("Serial2 avail");
+//    s_reads = Serial2.readString();
+//    s_reads.trim();
+//
+//    Serial.println(s_reads);
+////    execute_command(s_reads);
 //  }
 
-  if(Serial.available())
-  {
-    s_reads = Serial.readString();
-    s_reads.trim();
-
-    Serial.println(s_reads);
-    execute_command(s_reads);
-  }
-//  
-//  
+  bus.update();
+  uint16_t receive_num = bus.receive();
+//  Serial.println(receive_num);
 //Sensor Read List(Serial Command List)
 // ph
 // ec
@@ -211,6 +148,7 @@ void loop() {
 // air_hum
 // water_temp
 // ldr
+
 //Actuator Control List(Serial Command List)
 // pump_ph_plus
 // pump_ph_minus
@@ -220,26 +158,23 @@ void loop() {
 // fan_air
 // fan_ventil
 // pump_air
-// on_led / off_led
-//
-//  
-  if(millis() - last_msec > 60000)
-  {
-    // 매 1분마다 아두이노의 경과 시간을 출력.(Serial 및 SD카드에 로그 기록)
-    Serial.println("[Elapsed Time in Loop()] " +  String(millis() - last_msec / 1000));
+
+
+  
+//  if(millis() - last_msec > 30000)
+//  {
+//     매 30초 마다 아두이노의 경과 시간을 출력.(Serial 및 SD카드에 로그 기록)
+//    Serial.println("[Elapsed Time in Loop()] " +  String(millis() - last_msec / 1000));
 //    String log_data = String("[Elapsed_time]") + String(millis() - last_msec / 1000);
-//    writeSD(log_data);=
-    last_msec =millis();
-  }
-//
+//    writeSD(log_data);
+//    last_msec =millis();
+//  }
+
 //  execute_time_interval();
 }
 
 void execute_time_interval()
 {
-
-
-  
 //  Serial.println("Execute_time_interval : " + String(millis()));
 
   if(millis() >= led_next_time)
@@ -318,11 +253,7 @@ void execute_relay_order(int ord)
 {
   Serial.println("Execute relay order");
   digitalWrite(ch16_relay[ord], LOW);
-  delay(1500);
-  digitalWrite(ch16_relay[ord],HIGH);
-  delay(500);
-  digitalWrite(ch16_relay[ord], LOW);
-  delay(1500);
+  delay(3000);
   digitalWrite(ch16_relay[ord],HIGH);
   Serial.println("[ch16_relay test] order is " + String(ord));
 }
@@ -514,149 +445,7 @@ void execute_command(String cmd)
 }
 
 
-void LCD_display_connected()
-{
-   lcd.clear();
-   lcd.setCursor(0,0);
-   lcd.print("[PFC] Connected");
-   lcd.setCursor(1,1);
-   lcd.print("> ");
-   lcd.print( (millis() - last_connect_start)/1000);
-   lcd.print(" Sec.");  
-}
 
-void sendMillis(){
-  // Blynk Virtual Pin : V20 - 아두이노 구동 경과 시간
-  // Blynk Virtual Pin : V22 - 아두이노 EEPROM 에 저장되어 있는 리셋 횟수를 전송
-  unsigned long cur_msec = millis();
-  Blynk.virtualWrite(V20, cur_msec / 1000);
-  Blynk.virtualWrite(V22, eeprom_reset_struct.reset_cnt);
-}
-
-void sendProbeSensor() {
-  // Blynk Virtual Pin : V5 - DS18B20 수온 센서의 값 전송
-  // Blynk Virtual Pin : V6 - pH 센서 값 전송 
-  // Blynk Virtual Pin : V7 - EC 센서 값 전송
-  String log_data = String("[SendProbeSensor]") + String(millis()) +String("__START");
-  writeSD(log_data);
-    
-  float ph_val = getPH();
-  writeSD("getPH() complete.");
-  float ds18_val = getDS18B20();
-  writeSD("getDS18B20() complete.");
-  float ec_val = getEC(ds18_val);
-  writeSD("getEC() complete.");
-
-  Serial.print("DS18B20: " );
-  Serial.println(ds18_val);
-  Serial.print("PH: ");
-  Serial.println(ph_val);
-  Serial.print("EC: ");
-  Serial.println(ec_val);
-  Serial.println("==============");
-
-  Blynk.virtualWrite(V5, ds18_val);
-  Blynk.virtualWrite(V6, ph_val);
-  Blynk.virtualWrite(V7, ec_val);
-
-  // Blynk Virtual Pin : V50 - WebHook => pH,EC,DS18B20 센서 데이터를 원격 On-Premise 서버에 전송
-  // WebHook with Blynk => It will throw to the Data Lake server
-  Blynk.virtualWrite(V50, 
-    "http://210.92.91.225:5000/v1/" + String(auth) +"/insert/" + "?wt=" + String(ds18_val)
-    + "&ph=" + String(ph_val)
-    + "&ec=" + String(ec_val)
-  );
-  
-  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    + "?wt=" + String(ds18_val)
-    + "&ph=" + String(ph_val)
-    + "&ec=" + String(ec_val));
-
-    
-  
-  log_data = String("[SendProbeSensor]") + String(millis()) +String("__END");
-  writeSD(log_data);
-  //bl_timer.setTimeout(1000, LCD_display_connected);
-}
-
-void sendAirSensor() {
-  // Blynk Virtual Pin : V3 - 이산화탄소(Co2) 센서 값 전송
-  // Blynk Virtual Pin : V4 - 조도(Light Dependent Resistor) 센서 값 전송
-  String log_data = String("[SendAirSensor]") + String(millis()) +String("__START");
-  writeSD(log_data);
-
-
-  float co2_con = getCO2();
-  writeSD("getCo2() complete.");
-  unsigned int ldr_val = getLDR();
-  writeSD("geLDR() complete.");
-  Serial.print("Ligth Dependency Resistor : ");
-  Serial.println(ldr_val);
-  Serial.print("Co2 : ");
-  Serial.println(co2_con);
-  Blynk.virtualWrite(V3, co2_con);
-  Blynk.virtualWrite(V4, ldr_val);
-
-  // Blynk Virtual Pin : V51 - WebHook => Co2,LDR 센서 데이터를 원격 On-Premise 서버에 전송
-  // WebHook with Blynk => It will throw to the Data Lake server
-  Blynk.virtualWrite(V51, 
-    "http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    + "?co2=" + String(co2_con)
-    + "&ldr=" + String(ldr_val)
-  );
-  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/" 
-    + "?co2=" + String(co2_con)
-    + "&ldr=" + String(ldr_val));
-
-  log_data = String("[SendAirSensor]") + String(millis()) +String("__END");
-  writeSD(log_data);
-
-  bl_timer.setTimeout(3000L, sendProbeSensor); // Air Sensor 에 대한 전송이 완료된 후 3초 뒤에 ProbeSensor 전송 함수 호출
-}
-
-void sendDhtSensor() {
-  // Blynk Virtual Pin : V1 - 대기 습도(Air Humidity) 전송 
-  // Blynk Virtual Pin : V2 - 기온(Air Temperature) 전송 
-
-  //AIR(DHT) Humidity,Temperature
-  String log_data = String("[SendDhtSensor]") + String(millis()) +String("__START");
-  writeSD(log_data);
-
-
-  float *dht_data = getDHT();
-  writeSD("getDHT complete.");
-  Serial.print("Humidity: ");
-  Serial.println(dht_data[0]);
-  Serial.print("Temperature: ");
-  Serial.println(dht_data[1]);
-
-
-  Blynk.virtualWrite(V1, dht_data[0]);
-  Blynk.virtualWrite(V2, dht_data[1]);
-
-
-  // Blynk Virtual Pin : V52 - WebHook => DHT센서 데이터를 원격 On-Premise 서버에 전송
-
-  // WebHook with Blynk => It will throw to the Data Lake server
-  Blynk.virtualWrite(V52, 
-    "http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    + "?at=" + String(dht_data[1])
-    + "&ah=" + String(dht_data[0])
-  );
-  Serial.println("[WebHook]http://210.92.91.225:5000/v1/" 
-    + String(auth) +"/insert/"
-    + "?at=" + String(dht_data[1])
-    + "&ah=" + String(dht_data[0]));
-
-  log_data = String("[SendDhtSensor]") + String(millis()) + String("__END");
-  writeSD(log_data);
-
-  bl_timer.setTimeout(3000L, sendAirSensor);
-}
 
 float *getDHT()
 {
@@ -988,276 +777,4 @@ void softwareReset( uint8_t prescaller) {
 }
 
 
-//V26,V27,V28,V29,V30,V31,V32,V33,V34,V35,V36,V37,V38,V39,V40,V41
-BLYNK_WRITE(V26)
-{
-  int pin_num = 26;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
 
-BLYNK_WRITE(V27)
-{
-  int pin_num = 27;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V28)
-{
-  int pin_num = 28;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V29)
-{
-  int pin_num = 29;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V30)
-{
-  int pin_num = 30;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V31)
-{
-  int pin_num = 31;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V44)
-{
-  int pin_num = 44;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V32)
-{
-  int pin_num = 32;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V33)
-{
-  int pin_num = 33;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V34)
-{
-  int pin_num = 34;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V35)
-{
-  int pin_num = 35;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V36)
-{
-  int pin_num = 36;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V37)
-{
-  int pin_num = 37;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V38)
-{
-  int pin_num = 38;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V39)
-{
-  int pin_num = 39;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V40)
-{
-  int pin_num = 40;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-BLYNK_WRITE(V41)
-{
-  int pin_num = 41;
-  pinMode(pin_num,OUTPUT);
-  int pin_val = param.asInt();
-  if(pin_val == 1)
-  {
-    digitalWrite(pin_num,HIGH);
-  }
-  else
-  {
-    digitalWrite(pin_num,LOW);    
-  }
-}
-
-void writeSD(String log_data)
-{
-  if( ! WRITESD_DEBUG ) 
-  {
-    return; 
-  }
-  sd_file = SD.open(SD_LOG_FILE,FILE_WRITE);
-
-  if(sd_file)
-  {
-    sd_file.println(log_data);  
-    delay(10);
-    sd_file.close();
-  }
-  else
-  {
-    Serial.println("[SD CARD] Couldn't open SD Card");  
-  }
-}
-
-void checkBlynk(){  
-
-// Serial.println("[CheckBlynk()]" + String(millis()));
- if(!Blynk.connected()){
-    Serial.println("[CheckBlynk()] Not connected to Blynk server"); 
-    wdt_enable(WDTO_1S);
-  }
-  else
-  {
-//    Serial.println("[CheckBlynk()] Blynk connected"); 
-  }
-} 

@@ -4,7 +4,7 @@
 #include <ESP8266_Lib.h>
 #include <BlynkSimpleShieldEsp8266.h>
 
-#define ESP_SERIAL Serial2
+#define ESP_SERIAL Serial1
 #define ESP_BAUD 115200
 void setup() {
   // put your setup code here, to run once:
@@ -31,6 +31,8 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 //  Serial.println(ESP_SERIAL.available());
+  delay(2000);
+  ESP_SERIAL.write("AT+RST\r\n");
   
   while(Serial.available()){
     ESP_SERIAL.write(Serial.read());
