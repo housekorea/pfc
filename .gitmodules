@@ -1,0 +1,3 @@
+[submodule "arduino/COM/Robotdyn_mega2560_ESP8266/araduino/COM/Robotdyn_mega2560_ESP8266/esptool"]
+	path = arduino/COM/Robotdyn_mega2560_ESP8266/araduino/COM/Robotdyn_mega2560_ESP8266/esptool
+	url = https://github.com/espressif/esptool.git
